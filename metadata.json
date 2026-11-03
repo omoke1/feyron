@@ -1,0 +1,6 @@
+{
+  "name": "Cloudstudio — AI that actually ships",
+  "description": "Feyron builds AI agents, websites, platforms and integrations that take repetitive work off your team.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Feyron | AI productivity and technology</title>
+    <meta name="description" content="Feyron builds AI agents, websites, platforms and integrations that take repetitive work off your team." />
+    <meta name="theme-color" content="#D4F534" />
+    <link rel="icon" type="image/svg+xml" href="/site/assets/favicon.svg" />
+    <link rel="apple-touch-icon" href="/site/assets/apple-touch-icon.png" />
+    <meta property="og:title" content="Feyron | AI productivity and technology" />
+    <meta property="og:description" content="Feyron builds AI agents, websites, platforms and integrations that take repetitive work off your team." />
+    <meta property="og:type" content="website" />
+    <meta property="og:image" content="/site/assets/og.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <script>
+      (function () {
+        try {
+          var _origDefineProperty = Object.defineProperty;
+          Object.defineProperty = function (obj, prop, desc) {
+            if (obj === window && (prop === 'ethereum' || prop === 'solana')) {
+              var existing = Object.getOwnPropertyDescriptor(window, prop);
+              if (existing && !existing.configurable) {
+                return obj;
+              }
+            }
+            try {
+              return _origDefineProperty.call(Object, obj, prop, desc);
+            } catch (err) {
+              if (obj === window && (prop === 'ethereum' || prop === 'solana')) {
+                return obj;
+              }
+              throw err;
+            }
+          };
+        } catch (e) {}
+        try {
+          history.scrollRestoration = 'manual';
+          window.scrollTo(0, 0);
+        } catch (e) {}
+        document.documentElement.classList.add('cs-guide-locked');
+        setTimeout(function () {
+          if (!document.querySelector('.cs-guide-gate')) {
+            document.documentElement.classList.remove('cs-guide-locked');
+          }
+        }, 6500);
+        try {
+          var themeVersion = '2026-11-03.1';
+          window.__CS_THEME_VERSION = themeVersion;
+          if (localStorage.getItem('cs-theme-version') !== themeVersion) {
+            localStorage.removeItem('cs-theme');
+            localStorage.removeItem('cs-mascot-variant');
+            localStorage.setItem('cs-theme-version', themeVersion);
+          }
+          var q = new URLSearchParams(location.search).get('theme');
+          if (q === 'default' || q === 'yellow' || q === 'lime') {
+            localStorage.removeItem('cs-theme');
+            localStorage.setItem('cs-theme-version', themeVersion);
+            q = '';
+          } else if (q) {
+            localStorage.setItem('cs-theme', q);
+            localStorage.setItem('cs-theme-version', themeVersion);
+          }
+          var t = q || localStorage.getItem('cs-theme');
+          if (t) document.documentElement.setAttribute('data-theme', t);
+        } catch (e) {}
+        window.__resources = {
+          claudeLogo: '/site/assets/claude-logo.png',
+          envelope: '/site/assets/envelope.png',
+          pen: '/site/assets/pen.png',
+          invoice: '/site/assets/invoice.png'
+        };
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="cs-boot-veil" style="position:fixed;inset:0;z-index:2147482790;background:var(--bg,#D4F534)"></div>
+    <script>
+      window.setTimeout(function () {
+        var v = document.getElementById('cs-boot-veil');
+        if (v) v.remove();
+      }, 5000);
+    </script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

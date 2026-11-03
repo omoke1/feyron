@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>HQ — Case study — Cloudstudio</title>
+
+<meta name="description" content="HQ turns a whole infrastructure into a colony on Mars: every project in production is a habitat dome, every repository a greenhouse, every Stripe account an ice extractor. One built volume, one real thing.">
+<link rel="canonical" href="https://cloudstudio.es/work/hq">
+<link rel="icon" type="image/svg+xml" href="/site/assets/favicon.svg">
+<meta property="og:type" content="article">
+<meta property="og:title" content="HQ — Case study — Cloudstudio">
+<meta property="og:description" content="Infrastructure as a colony on Mars. Nothing is decoration: if there is no data behind a building, the building doesn't exist.">
+<meta property="og:image" content="https://cloudstudio.es/site/assets/work/hq/hero.webp">
+<style>
+@font-face { font-family:'Bricolage Grotesque'; font-style:normal; font-weight:100 900; font-stretch:100%; font-display:swap; src:url("/site/fonts/bricolage-grotesque-latin.woff2") format('woff2'); }
+@font-face { font-family:'Geist Mono'; font-style:normal; font-weight:100 900; font-display:swap; src:url("/site/fonts/geist-mono-latin.woff2") format('woff2'); }
+:root{
+  /* Sampled off the colony itself: night sky, regolith, and the three colours
+     the world uses to say alive / warning / down. */
+  --paper:#17100d; --paper-rgb:23,16,13;
+  --ink:#f4ebe4; --ink-rgb:244,235,228;
+  --body:#c3ada1;
+  --rust:#8b4630; --rust-lit:#a45c3c;
+  --cyan:#2ef2d0; --cyan-rgb:46,242,208;
+  --magenta:#ff5cd2;
+  --strobe:#ffffff;
+  --yellow:#fff48d; --yellow-rgb:255,244,141;
+  --hair:rgba(244,235,228,.14); --grid:rgba(244,235,228,.038);
+  --sans:'Bricolage Grotesque',ui-sans-serif,system-ui,sans-serif;
+  --mono:'Geist Mono',ui-monospace,monospace;
+  --ease-out:cubic-bezier(.16,1,.3,1); --ease-back:cubic-bezier(.34,1.56,.64,1);
+  --iso:92px;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--paper);
+  /* The colony's paving grid, barely there — the same lattice the roads run on. */
+  background-image:
+    repeating-linear-gradient(30deg,var(--grid) 0 1px,transparent 1px var(--iso)),
+    repeating-linear-gradient(-30deg,var(--grid) 0 1px,transparent 1px var(--iso));
+  color:var(--ink);font-family:var(--sans);overflow-x:hidden;-webkit-font-smoothing:antialiased;
+}
+img,video{max-width:100%;height:auto;display:block;}
+a{color:inherit;}
+::selection{background:var(--cyan);color:#0b1a20;}
+.mono{font-family:var(--mono);letter-spacing:.16em;text-transform:uppercase;}
+.wrap{max-width:1240px;margin:0 auto;padding:0 clamp(20px,5vw,52px);}
+
+.grain{position:fixed;inset:0;z-index:90;pointer-events:none;opacity:.05;mix-blend-mode:overlay;background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="140" height="140"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch"/></filter><rect width="140" height="140" filter="url(%23n)"/></svg>');}
+
+/* bar */
+.bar{position:fixed;top:0;left:0;right:0;z-index:80;display:flex;align-items:center;justify-content:space-between;padding:18px clamp(20px,4vw,48px);}
+/* Sobre papel claro la barra se funde con multiply; sobre esta noche hay que
+   ponerle sombra propia o el contenido le pasa por debajo y se lee doble. */
+.bar::before{content:'';position:absolute;inset:0;z-index:-1;background:linear-gradient(180deg,rgba(var(--paper-rgb),.94) 0%,rgba(var(--paper-rgb),.72) 55%,rgba(var(--paper-rgb),0) 100%);pointer-events:none;}
+.bar__logo{font-weight:800;font-size:21px;letter-spacing:-.03em;text-decoration:none;color:var(--ink);}
+.bar__right{display:flex;align-items:center;gap:16px;}
+.bar__back{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;text-decoration:none;color:var(--ink);opacity:.55;transition:opacity .2s ease;}
+.bar__back:hover{opacity:1;}
+.bar__pill{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;border:1.5px solid rgba(var(--ink-rgb),.5);color:var(--ink);padding:7px 14px;border-radius:100px;white-space:nowrap;}
+
+/* hero */
+.hero{position:relative;min-height:100svh;display:flex;flex-direction:column;justify-content:center;padding:clamp(110px,14vh,160px) 0 0;overflow:hidden;}
+.hero__center{position:relative;z-index:3;text-align:center;padding:0 clamp(20px,5vw,52px);}
+.eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--body);display:inline-flex;align-items:center;gap:9px;margin-bottom:clamp(20px,3vw,30px);}
+.eyebrow i{width:7px;height:7px;border-radius:50%;background:var(--cyan);box-shadow:0 0 0 0 rgba(var(--cyan-rgb),.6);animation:beat 2.6s infinite;}
+@keyframes beat{0%{box-shadow:0 0 0 0 rgba(var(--cyan-rgb),.55)}70%{box-shadow:0 0 0 11px rgba(var(--cyan-rgb),0)}100%{box-shadow:0 0 0 0 rgba(var(--cyan-rgb),0)}}
+.hero h1{font-weight:800;letter-spacing:-.055em;line-height:.88;font-size:clamp(3.4rem,15vw,11.5rem);}
+.hero h1 .l{display:block;overflow:hidden;padding-bottom:.09em;margin-bottom:-.09em;}
+.hero h1 .l i{font-style:normal;display:block;transform:translateY(102%);animation:rise 1.15s var(--ease-out) forwards;}
+.hero h1 .l:nth-child(2) i{animation-delay:.1s;}
+@keyframes rise{to{transform:none}}
+.hero__sub{max-width:46ch;margin:clamp(22px,3.4vw,34px) auto 0;font-size:clamp(1rem,1.55vw,1.28rem);line-height:1.6;color:var(--body);opacity:0;animation:fade .8s var(--ease-out) .55s forwards;}
+.hero__sub b{color:var(--ink);font-weight:700;}
+@keyframes fade{to{opacity:1}}
+.hero__actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:clamp(26px,3.6vw,38px);opacity:0;animation:fade .8s var(--ease-out) .72s forwards;}
+.btn{display:inline-flex;align-items:center;gap:9px;font-family:var(--mono);font-size:11px;letter-spacing:.13em;text-transform:uppercase;text-decoration:none;padding:14px 22px;border-radius:100px;transition:transform .25s var(--ease-back),background .25s ease,color .25s ease;}
+.btn:hover{transform:translateY(-2px);}
+.btn--green{background:var(--cyan);color:#0b1a20;}
+.btn--hair{border:1px solid var(--hair);color:var(--ink);}
+.btn--hair:hover{background:rgba(var(--ink-rgb),.07);}
+.hero__meta{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--hair);margin-top:clamp(44px,7vh,90px);}
+.hero__meta>div{padding:18px 0 20px;}
+.hero__meta>div+div{border-left:1px solid var(--hair);padding-left:20px;}
+.hero__meta dt{font-family:var(--mono);font-size:9.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--body);opacity:.75;margin-bottom:7px;}
+.hero__meta dd{font-size:.94rem;line-height:1.4;}
+
+/* the tour video, front and centre */
+.reel{position:relative;margin:clamp(34px,6vh,72px) 0 0;}
+.reel__frame{position:relative;border:1px solid var(--hair);border-radius:6px;overflow:hidden;background:#0d0908;}
+.reel video{width:100%;display:block;}
+.reel__cap{display:flex;justify-content:space-between;gap:16px;font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--body);opacity:.65;margin-top:12px;}
+
+/* marquee */
+.marq{border-top:1px solid var(--hair);border-bottom:1px solid var(--hair);overflow:hidden;padding:15px 0;margin-top:clamp(54px,9vh,110px);}
+.marq__track{display:flex;gap:34px;white-space:nowrap;width:max-content;animation:slide 34s linear infinite;font-family:var(--mono);font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--body);}
+.marq__track .st{color:var(--cyan);}
+@keyframes slide{to{transform:translateX(-50%)}}
+
+/* sections */
+.sec{padding:clamp(70px,11vh,140px) 0;}
+.two{display:grid;grid-template-columns:.85fr 1.15fr;gap:clamp(28px,5vw,72px);align-items:start;}
+.kicker{font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--cyan);margin-bottom:16px;}
+.state{font-weight:800;letter-spacing:-.04em;line-height:1.02;font-size:clamp(1.9rem,5vw,3.5rem);}
+.state em{font-style:normal;color:var(--rust-lit);}
+.body p{font-size:clamp(1rem,1.35vw,1.12rem);line-height:1.72;color:var(--body);}
+.body p+p{margin-top:1.1em;}
+.body em{font-style:normal;color:var(--ink);}
+
+/* pull */
+.pull{padding:clamp(60px,10vh,130px) clamp(20px,5vw,52px);text-align:center;}
+.pull p{max-width:19ch;margin:0 auto;font-weight:800;letter-spacing:-.045em;line-height:1.04;font-size:clamp(2rem,6.4vw,4.7rem);}
+.pull .w{display:inline-block;opacity:0;transform:translateY(16px);transition:opacity .55s var(--ease-out),transform .55s var(--ease-out);}
+.pull .w.on{opacity:1;transform:none;}
+.pull .w--g{color:var(--cyan);}
+
+/* the sol log */
+.sols{display:grid;gap:clamp(58px,9vh,120px);}
+.sol{display:grid;grid-template-columns:auto 1fr;gap:clamp(18px,3vw,44px);}
+.sol__no{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--body);opacity:.55;padding-top:.6em;white-space:nowrap;}
+.sol h3{font-weight:800;letter-spacing:-.035em;line-height:1.06;font-size:clamp(1.5rem,3.4vw,2.4rem);margin-bottom:14px;}
+.sol p{font-size:clamp(.98rem,1.3vw,1.08rem);line-height:1.72;color:var(--body);max-width:62ch;}
+.plate{margin-top:clamp(24px,4vw,44px);opacity:0;transform:translateY(30px);transition:opacity 1s var(--ease-out),transform 1s var(--ease-out);}
+.plate.is-in{opacity:1;transform:none;}
+.plate img{border-radius:4px;}
+.plate figcaption{font-family:var(--mono);font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--body);opacity:.55;margin-top:11px;}
+
+/* state legend — the world's own language, as a strip */
+.legend{display:grid;grid-template-columns:repeat(4,1fr);border:1px solid var(--hair);border-radius:6px;overflow:hidden;margin-top:clamp(26px,4vw,44px);}
+.legend div{padding:20px;}
+.legend div+div{border-left:1px solid var(--hair);}
+.legend b{display:flex;align-items:center;gap:9px;font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;font-weight:500;margin-bottom:9px;}
+.legend i{width:9px;height:9px;border-radius:50%;flex:none;}
+.legend span{font-size:.85rem;line-height:1.5;color:var(--body);}
+
+/* under the hood */
+.craft__grid{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--hair);}
+.craft__cell{padding:clamp(26px,3.4vw,42px) clamp(20px,2.4vw,34px) clamp(26px,3.4vw,42px) 0;}
+.craft__cell+.craft__cell{border-left:1px solid var(--hair);padding-left:clamp(20px,2.4vw,34px);}
+.craft__cell h4{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--cyan);margin-bottom:14px;}
+.craft__cell p{font-size:.95rem;line-height:1.66;color:var(--body);}
+.craft__cell code{font-family:var(--mono);font-size:.86em;color:var(--ink);}
+
+/* close — the house frame */
+.close{background:#0e0e0c;color:#f6f4ec;padding:clamp(76px,12vh,150px) clamp(20px,5vw,52px);text-align:center;margin-top:clamp(60px,9vh,110px);}
+.close h2{font-weight:800;letter-spacing:-.045em;line-height:1;font-size:clamp(2.2rem,7vw,5rem);margin-bottom:22px;}
+.close p{max-width:52ch;margin:0 auto;font-size:clamp(.98rem,1.4vw,1.12rem);line-height:1.68;color:rgba(246,244,236,.62);}
+.close__actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:clamp(30px,4vw,44px);}
+.btn--accent{background:var(--yellow);color:#0e0e0c;border:none;cursor:pointer;}
+.btn--ghosty{border:1px solid rgba(246,244,236,.24);color:#f6f4ec;}
+.btn--ghosty:hover{background:rgba(246,244,236,.08);}
+.close__next{display:inline-block;margin-top:clamp(46px,7vw,80px);text-decoration:none;color:inherit;}
+.close__next-k{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;opacity:.45;margin-bottom:12px;}
+.close__next-n{font-weight:800;letter-spacing:-.04em;font-size:clamp(1.7rem,4.6vw,3rem);line-height:1;transition:color .3s ease;}
+.close__next-n i{font-style:normal;display:inline-block;transition:transform .4s var(--ease-back);}
+.close__next:hover .close__next-n{color:var(--yellow);}
+.close__next:hover .close__next-n i{transform:translateX(9px);}
+.close__foot{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;font-family:var(--mono);font-size:10px;letter-spacing:.15em;text-transform:uppercase;color:rgba(246,244,236,.4);margin-top:clamp(50px,8vw,86px);}
+
+.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s var(--ease-out),transform .9s var(--ease-out);}
+.reveal.is-in{opacity:1;transform:none;}
+
+@media(max-width:860px){
+  .two{grid-template-columns:1fr;gap:22px;}
+  .hero__meta{grid-template-columns:repeat(2,1fr);}
+  .hero__meta>div:nth-child(3){border-left:0;}
+  .hero__meta>div{border-top:1px solid var(--hair);}
+  .hero__meta>div:nth-child(-n+2){border-top:0;}
+  .sol{grid-template-columns:1fr;gap:10px;}
+  .sol__no{padding-top:0;}
+  .legend{grid-template-columns:1fr;}
+  .legend div+div{border-left:0;border-top:1px solid var(--hair);}
+  .craft__grid{grid-template-columns:1fr;}
+  .craft__cell{border-left:0;border-top:1px solid var(--hair);padding-left:0;}
+  .craft__cell:first-child{border-top:0;}
+  .craft__cell+.craft__cell{border-left:0;padding-left:0;}
+}
+@media(prefers-reduced-motion:reduce){
+  .hero h1 .l i{animation:none;transform:none;}
+  .hero__sub,.hero__actions{animation:none;opacity:1;}
+  .reveal,.plate{transition:none;opacity:1;transform:none;}
+  .marq__track{animation:none;}
+  .eyebrow i{animation:none;}
+}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+
+<header class="bar">
+  <a class="bar__logo" href="/">cloudstudio*</a>
+  <span class="bar__right">
+    <a class="bar__back" href="/#work">← Work</a>
+    <span class="bar__pill">Case study</span>
+  </span>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="hero">
+  <div class="hero__center">
+    <p class="eyebrow"><i></i>Case study · Cloudstudio internal</p>
+    <h1><span class="l"><i>HQ</i></span></h1>
+    <p class="hero__sub">Every project in production, every repository and every Stripe account, as <b>a colony on Mars</b> you can walk around. When something falls over, you see it from the other side of the valley.</p>
+    <div class="hero__actions">
+      <a class="btn btn--green" href="#log">Read the log
+        <svg style="width:.85em;height:.85em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12l7 7 7-7"/></svg></a>
+      <a class="btn btn--hair" href="/#work">All work</a>
+    </div>
+  </div>
+
+  <div class="wrap">
+    <figure class="reel">
+      <div class="reel__frame">
+        <video src="/site/assets/work/hq/video/tour.mp4" poster="/site/assets/work/hq/poster.webp" autoplay muted loop playsinline aria-label="A flight over the HQ colony"></video>
+      </div>
+      <figcaption class="reel__cap"><span>Sol 46 · flyover</span><span>41 modules · 9 warnings · 2 down</span></figcaption>
+    </figure>
+
+    <dl class="hero__meta">
+      <div><dt>Client</dt><dd>Cloudstudio — internal</dd></div>
+      <div><dt>Deliverable</dt><dd>Real-time infrastructure monitor</dd></div>
+      <div><dt>Role</dt><dd>Concept, design &amp; engineering</dd></div>
+      <div><dt>Year</dt><dd>2026 · Valencia</dd></div>
+    </dl>
+  </div>
+</section>
+
+<!-- ============ MARQUEE ============ -->
+<div class="marq" aria-hidden="true"><div class="marq__track" data-marq></div></div>
+
+<!-- ============ THE COMMISSION ============ -->
+<section class="sec">
+  <div class="wrap two">
+    <div class="reveal">
+      <p class="kicker">( The brief )</p>
+      <h2 class="state">Nobody reads<br><em>a dashboard.</em></h2>
+    </div>
+    <div class="body reveal">
+      <p>Ten sites in production, fourteen public repositories, a Stripe account, certificates expiring on their own schedule. All of it visible, in theory, across five browser tabs nobody opened until something broke.</p>
+      <p>The problem was never the data — it was that a table of green ticks carries no weight. You skim it. So HQ throws the table away and gives the estate a <em>place</em>: a valley on Mars where every single thing you own stands up as a building, at the size its numbers earn. You don't check on it. You look out of the window.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PULL ============ -->
+<section class="pull">
+  <p data-words>If there's no data behind a building, the <em>building doesn't exist</em>.</p>
+</section>
+
+<!-- ============ THE LOG ============ -->
+<section class="sec" id="log" style="padding-top:0">
+  <div class="wrap sols">
+
+    <article class="sol">
+      <span class="sol__no">Sol 001</span>
+      <div>
+        <h3>One built volume, one real thing.</h3>
+        <p>The rule that makes the whole thing work, and the one that was hardest to keep. No building is ever invented to fill a gap. A habitat dome is a project answering HTTP right now; a greenhouse is a repository; an ice extractor is a Stripe account. Few things means a small colony — and it grows on its own as you ship, without anyone laying out a map. The only volumes with nothing behind them are landscape, and the world says so out loud: matte rust, never data.</p>
+        <figure class="plate">
+          <img src="/site/assets/work/hq/avenue.webp" width="2000" height="1123" alt="The colony's central avenue, with habitat domes and greenhouses along a pressurised pipeline" loading="lazy">
+          <figcaption>Production, Clients, Labs, Infrastructure — one sector per area, laid out from the data</figcaption>
+        </figure>
+      </div>
+    </article>
+
+    <article class="sol">
+      <span class="sol__no">Sol 007</span>
+      <div>
+        <h3>Colour before text.</h3>
+        <p>A state has to land before you read a word of it. Cyan holds steady when a thing answers. Magenta pulses when something wants attention — a certificate with nineteen days left, four pull requests waiting. A downed service strobes white and its hull goes dark, and it never dims to nothing, because a module that blinks to black disappears at exactly the moment you need it most.</p>
+        <div class="legend reveal">
+          <div><b><i style="background:#2ef2d0"></i>Alive</b><span>Answers, and there's nothing pending.</span></div>
+          <div><b><i style="background:#ff5cd2"></i>Warning</b><span>Certificate about to expire, issues open, work uncommitted.</span></div>
+          <div><b><i style="background:#fff"></i>Down</b><span>Refused the connection, or the domain no longer resolves.</span></div>
+          <div><b><i style="background:#8b4630"></i>Matte rust</b><span>Landscape. It never states a fact.</span></div>
+        </div>
+      </div>
+    </article>
+
+    <article class="sol">
+      <span class="sol__no">Sol 014</span>
+      <div>
+        <h3>A vocabulary, written down before it was built.</h3>
+        <p>Twenty-seven pieces, each with what it would actually be for on Mars and what it stands for here. Writing that list first is what stopped the world drifting into decoration: three pieces are still not placed, and they're documented as unplaced, because the data behind them doesn't exist. A refinery that "turns HTTP responses into state" is a lovely metaphor and a fact nobody can measure.</p>
+        <figure class="plate">
+          <img src="/site/assets/work/hq/catalog.webp" width="2000" height="1250" alt="The colony inventory page: a grid of cards, each showing a low-poly piece with what it means" loading="lazy">
+          <figcaption>The inventory — the vocabulary, and the audit trail for it</figcaption>
+        </figure>
+      </div>
+    </article>
+
+    <article class="sol">
+      <span class="sol__no">Sol 023</span>
+      <div>
+        <h3>The work that hasn't shipped.</h3>
+        <p>An open-pit quarry, out past the last plot, where the crew cuts the raw material the colony is built from: the commits still sitting on the machine. Three benches, a haul road with kerbs, a braced drill rig whose bit turns and sinks. The crew has jobs, not one animation — two cut the face, one shovels, one pushes a cart up the road and stops at each end to load and tip. Dust comes off on the frame the pick lands, not before.</p>
+        <figure class="plate">
+          <img src="/site/assets/work/hq/quarry.webp" width="2000" height="1123" alt="An open-pit quarry with terraced benches, a drill rig and astronauts working the face" loading="lazy">
+          <figcaption>Local commits, cut by hand</figcaption>
+        </figure>
+      </div>
+    </article>
+
+    <article class="sol">
+      <span class="sol__no">Sol 031</span>
+      <div>
+        <h3>Where the agents come back to.</h3>
+        <p>A pressurised hangar on the civic avenue, and the only building that reports on the work itself rather than on a thing you own: who is out on the surface and what they're doing. When there's nothing wired in, it says so — the panel reads "pending: the MCP that wires the agents in" instead of pretending. A world that lies once about being busy stops being worth looking at.</p>
+        <figure class="plate">
+          <img src="/site/assets/work/hq/hangar.webp" width="2000" height="1123" alt="The rover hangar panel listing which agents are working and on what" loading="lazy">
+          <figcaption>The hangar reports the queue, or reports that there isn't one</figcaption>
+        </figure>
+      </div>
+    </article>
+
+    <article class="sol">
+      <span class="sol__no">Sol 038</span>
+      <div>
+        <h3>Something to measure the rest against.</h3>
+        <p>A cargo ship stands out past the base on its own sintered pad, thirty-three metres of it — six legs in tripods, engine bells under the skirt, scorch thrown radially across the ground. It's the one thing in the valley that carries no data at all, and it earns its place by doing the job nothing else can: giving everything else a size. Without it a habitat dome is an abstract shape. Next to it, it's a building you could walk into.</p>
+        <figure class="plate">
+          <img src="/site/assets/work/hq/ship.webp" width="2000" height="1123" alt="A cargo ship standing on its landing legs on a sintered pad, with two astronauts beside it for scale" loading="lazy">
+          <figcaption>Landscape, and the reason the rest reads as architecture</figcaption>
+        </figure>
+      </div>
+    </article>
+
+    <article class="sol">
+      <span class="sol__no">Sol 046</span>
+      <div>
+        <h3>Money that arrives while you're watching.</h3>
+        <p>A charge lands and the ice extractor it belongs to puts up a tag with the amount. Click it and the colony throws a small party — a burst of colour over the module — and the charge is marked collected and never asks again. A refund is not a sale, so it never becomes a pin: it goes into the ledger, where accounting belongs, and stays out of the sky, where alarms belong.</p>
+        <figure class="plate">
+          <img src="/site/assets/work/hq/money.webp" width="2000" height="1123" alt="The Treasury sector, with ice extractors representing Stripe accounts" loading="lazy">
+          <figcaption>Treasury — one extractor per account</figcaption>
+        </figure>
+      </div>
+    </article>
+
+  </div>
+</section>
+
+<!-- ============ UNDER THE HOOD ============ -->
+<section class="sec" style="padding-top:0">
+  <div class="wrap">
+    <p class="kicker reveal">( Under the hood )</p>
+    <div class="craft__grid">
+      <div class="craft__cell reveal">
+        <h4>Rhythms, measured</h4>
+        <p>Production every 60 s, local repos every 5 min, GitHub every 15, Stripe every hour, certificates every twelve. Those numbers were measured, not guessed: the limit that actually binds on Stripe isn't the hundred requests a second, it's the monthly read allowance. Polling every five minutes burned <code>432 %</code> of it.</p>
+      </div>
+      <div class="craft__cell reveal">
+        <h4>Geometry that stays cheap</h4>
+        <p>Every building is baked down to vertex colours and merged by material, keeping only the parts that have to move or change state. A hundred modules land in comfortable territory — and the mining crew, the rover and the drones animate on top without the frame budget noticing.</p>
+      </div>
+      <div class="craft__cell reveal">
+        <h4>Nothing leaves the machine</h4>
+        <p>No key lives in the repository. GitHub goes through the <code>gh</code> session you already have, Stripe through the CLI's keychain, production through real HTTP requests to your own domains. The snapshot is gitignored on purpose: it holds local paths, identities and revenue.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CLOSE ============ -->
+<section class="close">
+  <h2 class="reveal">Look out of the window.</h2>
+  <p class="reveal">We design and build products where the interface carries the idea — 3D, motion, and the boring parts underneath. Tell us what you want to launch.</p>
+  <div class="close__actions reveal">
+    <a class="btn btn--accent" data-call href="mailto:hello@cloudstudio.es">Book a call
+      <svg style="width:.9em;height:.9em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15M13 6l6 6-6 6"/></svg></a>
+    <a class="btn btn--ghosty" href="https://github.com/cloudstudio" target="_blank" rel="noopener">github.com/cloudstudio ↗</a>
+  </div>
+  <a class="close__next reveal" href="/work/agents">
+    <span class="close__next-k">Next case study</span>
+    <span class="close__next-n">Agents <i>→</i></span>
+  </a>
+
+  <div class="close__foot">
+    <span>cloudstudio.es</span><span>·</span><span>Est. 2008 · Valencia</span><span>·</span><span>hello@cloudstudio.es</span>
+  </div>
+</section>
+
+<script>
+/* reveals — plates and blocks */
+(function(){
+  var io=new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting){var el=en.target;setTimeout(function(){el.classList.add("is-in");},(el.dataset.d||0)*1);io.unobserve(el);}});},{threshold:.15});
+  document.querySelectorAll(".reveal,.plate").forEach(function(el,i){el.dataset.d=(i%3)*100;io.observe(el);});
+})();
+
+/* pull quote — word by word */
+(function(){
+  var p=document.querySelector("[data-words]");if(!p)return;
+  var frag=document.createDocumentFragment();
+  p.childNodes.forEach(function(node){
+    if(node.nodeType===3){
+      node.textContent.split(/(\s+)/).forEach(function(tk){
+        if(!tk.trim()){frag.appendChild(document.createTextNode(tk));return;}
+        var s=document.createElement("span");s.className="w";s.textContent=tk;frag.appendChild(s);
+      });
+    }else if(node.nodeType===1){
+      node.textContent.split(/(\s+)/).forEach(function(tk){
+        if(!tk.trim()){frag.appendChild(document.createTextNode(tk));return;}
+        var s=document.createElement("span");s.className="w w--g";s.textContent=tk;frag.appendChild(s);
+      });
+    }
+  });
+  p.textContent="";p.appendChild(frag);
+  var ws=p.querySelectorAll(".w");
+  new IntersectionObserver(function(es,io){
+    if(!es[0].isIntersecting)return;io.disconnect();
+    ws.forEach(function(w,i){setTimeout(function(){w.classList.add("on");},220+i*95);});
+  },{threshold:.5}).observe(p);
+})();
+
+/* marquee — the world's own rules */
+(function(){
+  var t=document.querySelector("[data-marq]");if(!t)return;
+  var chunk="";
+  for(var i=0;i<5;i++){chunk+="<span>One volume, one real thing</span><span class='st'>◆</span><span>Local</span><span class='st'>◆</span><span>No keys in the repo</span><span class='st'>◆</span><span>Nothing built to fill space</span><span class='st'>◆</span>";}
+  t.innerHTML=chunk+chunk;
+})();
+
+/* the flyover: freeze it when the visitor asked for less motion */
+(function(){
+  if(!matchMedia("(prefers-reduced-motion: reduce)").matches)return;
+  document.querySelectorAll("video").forEach(function(v){v.removeAttribute("autoplay");v.pause();});
+})();
+
+/* booking modal hook (mailto fallback if booking.js absent) */
+(function(){
+  var call=document.querySelector("[data-call]");
+  if(call)call.addEventListener("click",function(e){
+    if(!window.openBooking)return;
+    e.preventDefault();
+    window.openBooking({source:"case-hq",lang:"en"});
+  });
+})();
+</script>
+<script defer src="/site/js/booking.js?v=1784102540"></script>
+<script>
+(function(){
+  var nativeFetch = window.fetch.bind(window);
+  window.fetch = function(input, init) {
+    var u = typeof input === "string" ? input : (input && input.url) || "";
+    if (u.indexOf("/bookings/slots") !== -1) {
+      return Promise.resolve(new Response(JSON.stringify({ taken: ["10:40", "14:00", "16:20"] }), { status: 200, headers: { "Content-Type": "application/json" } }));
+    }
+    if (u.indexOf("/bookings") !== -1 && init && init.method === "POST") {
+      return Promise.resolve(new Response(JSON.stringify({ ok: true, success: true }), { status: 200, headers: { "Content-Type": "application/json" } }));
+    }
+    return nativeFetch(input, init);
+  };
+  document.addEventListener("click", function(e) {
+    var a = e.target && e.target.closest ? e.target.closest("a") : null;
+    if (!a) return;
+    var href = a.getAttribute("href") || "";
+    if (href === "/" || href === "/#work" || href === "#work") {
+      if (window.parent && window.parent !== window) {
+        e.preventDefault();
+        window.parent.postMessage({ type: "CS_CLOSE_SUBPAGE", scrollWork: href.indexOf("work") !== -1 }, "*");
+      }
+    } else if (href.indexOf("/work/") === 0) {
+      if (window.parent && window.parent !== window) {
+        e.preventDefault();
+        window.parent.postMessage({ type: "CS_OPEN_SUBPAGE", path: href }, "*");
+      }
+    }
+  });
+  window.addEventListener("keydown", function(e) {
+    if (e.key === "Escape" && window.parent && window.parent !== window) {
+      window.parent.postMessage({ type: "CS_CLOSE_SUBPAGE" }, "*");
+    }
+  });
+})();
+</script></body>
+</html>
