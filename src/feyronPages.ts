@@ -48,7 +48,7 @@ export const FEYRON_PAGES: Record<string, FeyronPageData> = {
           },
           {
             title: 'Websites and platforms.',
-            text: 'Business websites, online stores, booking systems, portals, web apps, SaaS products and marketplaces, built around how you operate.',
+            text: 'Business websites, real estate platforms, school portals, church hubs, online stores, booking systems, web apps and marketplaces — all built with automation around how you operate.',
             linkText: 'Explore websites and platforms →',
             linkHref: '/websites-platforms',
           },
@@ -57,6 +57,28 @@ export const FEYRON_PAGES: Record<string, FeyronPageData> = {
             text: 'API, CRM and WhatsApp connections, payment checkout and payouts, and stablecoin payments through licensed providers.',
             linkText: 'Explore integrations and payments →',
             linkHref: '/integrations-payments',
+          },
+        ],
+      },
+      {
+        kicker: 'Sector websites + built-in automation',
+        heading: 'Websites that do the work, not just look good',
+        bullets: [
+          {
+            title: 'Real estate platforms.',
+            text: 'Property listings and search paired with automated WhatsApp/email lead qualification, instant inspection booking, and buyer/tenant intake.',
+          },
+          {
+            title: 'School & educational portals.',
+            text: 'School website and student/parent portal with online admission registration, fee payment and auto-receipts, grade notifications, and parent broadcasts.',
+          },
+          {
+            title: 'Church & faith hubs.',
+            text: 'Church website and sermon hub with online tithes/offerings, automated first-timer welcome messages, event registration, and member updates.',
+          },
+          {
+            title: 'Commercial & professional sites.',
+            text: 'Online stores, clinics, and service portals with automated appointment booking, invoicing, inventory sync, and client onboarding.',
           },
         ],
       },
@@ -177,14 +199,39 @@ export const FEYRON_PAGES: Record<string, FeyronPageData> = {
     title: 'Websites & Platforms',
     metaTitle: 'Websites and platforms | Feyron',
     metaDescription:
-      'Business websites, online stores, portals, web apps and custom platforms built around how you operate.',
+      'Business websites, real estate platforms, school portals, church hubs, online stores and custom software with built-in automation.',
     kicker: 'Division 02 · Websites & Platforms',
     headline: 'Software built around how you operate.',
     subheading:
-      'From a clear business website to a full platform, we design and build what you need, with a fixed scope and a launch date.',
+      'From a clear business website to a full sector platform, we design and build what you need — with built-in automation, a fixed scope and a launch date.',
     sections: [
       {
-        kicker: 'What we build',
+        kicker: 'Sector websites with built-in automation',
+        heading: 'Websites and portals that run the admin for you',
+        body: [
+          'A website should not just sit there like a static brochure. Every website and portal we build comes wired with practical automation for your sector:',
+        ],
+        bullets: [
+          {
+            title: 'Real estate platforms + automation.',
+            text: 'Property showcase and search paired with automated WhatsApp and email lead qualification, instant inspection booking, digital buyer or tenant intake, and automated agent follow-ups.',
+          },
+          {
+            title: 'School & educational portals + automation.',
+            text: 'School website and student/parent portal with automated online admissions, digital fee payment and instant receipt generation, automated result notifications, and parent broadcasts.',
+          },
+          {
+            title: 'Church & faith organisation platforms + automation.',
+            text: 'Church website and media/sermon hub with online tithe, offering and project giving, automated first-timer welcome follow-ups, event registration, and scheduled WhatsApp/SMS updates.',
+          },
+          {
+            title: 'Commercial, clinic & service platforms + automation.',
+            text: 'Online stores, clinic appointment systems and professional service portals with automated booking reminders, invoice generation, inventory sync and client onboarding.',
+          },
+        ],
+      },
+      {
+        kicker: 'Core capabilities',
         heading: 'Websites, portals and custom applications',
         bullets: [
           {
@@ -224,7 +271,7 @@ export const FEYRON_PAGES: Record<string, FeyronPageData> = {
         kicker: 'Add an agent',
         heading: 'An option, never a requirement',
         body: [
-          'If you want one, we can add an agent to your site or platform to answer enquiries, take bookings or process documents. It is an option, never a requirement.',
+          'If you want one, we can add an AI agent to your site or platform to answer enquiries, take bookings or process documents. It is an option, never a requirement.',
         ],
       },
     ],
@@ -396,6 +443,18 @@ export const FEYRON_PAGES: Record<string, FeyronPageData> = {
           {
             title: 'Logistics and field operations.',
             text: 'Dispatch, status updates and reporting.',
+          },
+          {
+            title: 'Real estate & property firms.',
+            text: 'Property platforms with automated WhatsApp/email lead qualification, inspection scheduling, and digital buyer or tenant intake.',
+          },
+          {
+            title: 'Schools & educational institutions.',
+            text: 'School websites and student/parent portals with automated admission workflows, fee payments and instant receipts, result alerts and parent broadcasts.',
+          },
+          {
+            title: 'Churches & faith organisations.',
+            text: 'Church hubs with online tithe and offering collections, automated visitor follow-ups, event registration and member communications.',
           },
           {
             title: 'Startups and technology companies.',

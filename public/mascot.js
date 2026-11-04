@@ -521,7 +521,7 @@
     squashVel: 0,
     restScale: 1,
     mascotVariant: (function () {
-      try { return window.localStorage.getItem("cs-mascot-variant") || "original"; } catch (e) { return "original"; }
+      try { return window.localStorage.getItem("cs-mascot-variant") || "pixel"; } catch (e) { return "pixel"; }
     })(),
     chatOpen: false,
     chatBusy: false,
@@ -2017,31 +2017,113 @@
    *  or ← → keys); persisted in localStorage "cs-mascot-variant".
    * ------------------------------------------------------------------ */
 
-  var MASCOT_VARIANTS = ["original", "denso", "anillos", "espiral", "pixel", "nube", "orbital", "erizo"];
+  var MASCOT_VARIANTS = ["pixel", "denso", "nube", "erizo", "original", "anillos", "espiral", "orbital"];
 
   // On-screen character names (site speaks English)
   var MASCOT_NAMES = {
-    original: "Dot",
+    pixel: "Bit",
     denso: "Fuzz",
+    nube: "Wobble",
+    erizo: "Spore",
+    original: "Dot",
     anillos: "Echo",
     espiral: "Vortex",
-    pixel: "Bit",
-    nube: "Puff",
     orbital: "Halo",
-    erizo: "Spike",
   };
 
-  // Driving style, shown under the name at the gate — matches each
-  // character's exit transition and tour personality.
+  // Driving style & specialty shown under the name at the gate
   var MASCOT_TAGS = {
-    original: "the quick tour",
-    denso: "the caffeinated sprint",
-    anillos: "cites every source",
-    espiral: "the hypnotic spiral",
-    pixel: "the pixel-perfect demo",
-    nube: "the gentle stroll",
-    orbital: "the orbital overview",
-    erizo: "the paranoid inspection",
+    pixel: "AI Automation Specialist · workflows & triage",
+    denso: "Payments & Integrations · checkout, stablecoins & APIs",
+    nube: "Websites & Sector Portals · real estate, schools & churches",
+    erizo: "Operations & Responsible AI · guardrails & approvals",
+    original: "Documents & Invoicing · extraction & filing",
+    anillos: "Knowledge & Support · grounded answers with sources",
+    espiral: "Data Sync & Pipelines · CRM, WhatsApp & ERP",
+    orbital: "Care Plans & Monitoring · uptime & monthly reports",
+  };
+
+  var MASCOT_PERSONAS = {
+    pixel: {
+      role: "AI Automation Specialist",
+      quip: "Bit online! If a human has to copy-paste it twice, we automate it.",
+      hero: [
+        { text: "I'm Bit — Feyron's AI Automation Specialist.", hold: 420 },
+        { text: "If your team has to copy-paste something twice, I automate it.", hold: 480 }
+      ],
+      greeting: "Hi! I'm **Bit**, Feyron's AI Automation Specialist. Ask me about automating customer enquiries, WhatsApp/email triage, document reading, or starting with a workflow audit — or pick a topic below.",
+      topPills: ["audit", "faq_need_agent", "faq_replace", "services"]
+    },
+    denso: {
+      role: "Payments & Integrations Specialist",
+      quip: "Fuzz here! Every tool synced, every payment reconciled.",
+      hero: [
+        { text: "I'm Fuzz — Feyron's Payments & Integrations Specialist.", hold: 420 },
+        { text: "Your tools should talk automatically, and every payment should reconcile itself.", hold: 480 }
+      ],
+      greeting: "Hi! I'm **Fuzz**, Feyron's Payments & Integrations Specialist. Ask me about card/bank checkouts, stablecoin rails via licensed providers, or connecting WhatsApp, CRMs and accounting tools.",
+      topPills: ["payments", "faq_tools", "pricing", "services"]
+    },
+    nube: {
+      role: "Websites & Sector Portals Specialist",
+      quip: "Wobble here! Websites that actually run your daily admin.",
+      hero: [
+        { text: "I'm Wobble — Feyron's Websites & Sector Portals Specialist.", hold: 420 },
+        { text: "A great website shouldn't just sit there — it should book inspections, register students, and follow up automatically.", hold: 480 }
+      ],
+      greeting: "Hi! I'm **Wobble**, Feyron's Websites & Sector Portals Specialist. Ask me about real estate platforms, school portals, church hubs, or business websites with built-in automation!",
+      topPills: ["faq_websites", "faq_noai", "faq_timeline", "services"]
+    },
+    erizo: {
+      role: "Operations & Responsible AI Architect",
+      quip: "Spore on duty! Agents prepare, people decide.",
+      hero: [
+        { text: "I'm Spore — Feyron's Responsible AI & Systems Architect.", hold: 420 },
+        { text: "Agents prepare, people decide. Every system we ship has an off-switch and a clear audit trail.", hold: 480 }
+      ],
+      greeting: "Hi! I'm **Spore**, Feyron's Responsible AI & Systems Architect. Ask me about human-in-the-loop approvals, data privacy, spending limits, off-switches, or how we scope projects.",
+      topPills: ["safety", "faq_permission", "faq_wrong", "faq_data"]
+    },
+    original: {
+      role: "Documents & Invoicing Specialist",
+      quip: "Dot ready! Invoices, forms and applications sorted.",
+      hero: [
+        { text: "I'm Dot — Feyron's Documents & Invoicing Specialist.", hold: 420 },
+        { text: "I read messy invoices, forms and applications so your team doesn't have to retype them.", hold: 480 }
+      ],
+      greeting: "Hi! I'm **Dot**, Feyron's Documents & Invoicing Specialist. Ask me about document extraction, automated invoicing, sector websites, or workflow audits.",
+      topPills: ["services", "audit", "faq_websites", "pricing"]
+    },
+    anillos: {
+      role: "Knowledge & Support Specialist",
+      quip: "Echo online! Answers grounded in your real documents.",
+      hero: [
+        { text: "I'm Echo — Feyron's Knowledge & Support Specialist.", hold: 420 },
+        { text: "I search your company policies and docs to draft accurate answers with exact sources.", hold: 480 }
+      ],
+      greeting: "Hi! I'm **Echo**, Feyron's Knowledge & Support Specialist. Ask me about internal knowledge assistants, customer support triage, or sector portals.",
+      topPills: ["services", "faq_permission", "faq_websites", "safety"]
+    },
+    espiral: {
+      role: "Data Sync & Pipelines Specialist",
+      quip: "Vortex spinning! Zero manual retyping across tools.",
+      hero: [
+        { text: "I'm Vortex — Feyron's Data Sync & Pipelines Specialist.", hold: 420 },
+        { text: "Information entered once should show up everywhere it belongs — automatically.", hold: 480 }
+      ],
+      greeting: "Hi! I'm **Vortex**, Feyron's Data Sync & Pipelines Specialist. Ask me how we connect WhatsApp, email, spreadsheets, CRMs and payment systems without replacing your tools.",
+      topPills: ["faq_tools", "payments", "faq_websites", "process"]
+    },
+    orbital: {
+      role: "Care Plans & Monitoring Specialist",
+      quip: "Halo in orbit! Watching uptime, metrics and savings.",
+      hero: [
+        { text: "I'm Halo — Feyron's Care Plans & Monitoring Specialist.", hold: 420 },
+        { text: "We stay after launch to watch uptime, fix edge cases, and report what your system saves you.", hold: 480 }
+      ],
+      greeting: "Hi! I'm **Halo**, Feyron's Care Plans & Monitoring Specialist. Ask me about our 5-step delivery process, post-launch care plans, timelines, or pricing.",
+      topPills: ["process", "faq_timeline", "pricing", "faq_ownership"]
+    }
   };
 
   // Each driver brings its own world: picking a mascot retunes the page
@@ -2131,6 +2213,14 @@
     try { window.localStorage.setItem("cs-mascot-variant", variant); } catch (e) {}
     var guideName = document.querySelector("[data-guide-name]");
     if (guideName) guideName.textContent = MASCOT_NAMES[variant] || "it";
+    var chatTitle = document.querySelector(".cs-chat__title");
+    if (chatTitle) {
+      var pInfo = MASCOT_PERSONAS[variant] || MASCOT_PERSONAS.pixel;
+      chatTitle.textContent = (MASCOT_NAMES[variant] || "Feyron") + " · " + pInfo.role;
+    }
+    if (chatPanel()) {
+      try { renderBasePills(); } catch (e) {}
+    }
     applyMascotTheme(variant);
     themeWaveFrom(mascotCenter());
     refreshGateChoice();
@@ -3396,10 +3486,8 @@
     await gwait(360);
 
     lookAt(function () { return pointOn(headline, 0.4, 0.4); });
-    await saySequence([
-      { text: "That headline isn't a metaphor.", hold: 380 },
-      { text: "I'm the office demo — built to prove it.", hold: 480 },
-    ]);
+    var activePersona = MASCOT_PERSONAS[state.mascotVariant] || MASCOT_PERSONAS.pixel;
+    await saySequence(activePersona.hero);
 
     if (organism) {
       lookAt(function () { return pointOn(organism, 0.5, 0.5); });
@@ -3635,8 +3723,9 @@
       sfx("flip");
       cycleMascotVariant(1);
       // mid-tour the script owns the bubble — recolor silently
-      if (!guide.running && !state.chatOpen && Math.random() < 0.7) {
-        say(NAV_PET_QUIPS[Math.floor(Math.random() * NAV_PET_QUIPS.length)], 1400);
+      if (!guide.running && !state.chatOpen) {
+        var pNow = MASCOT_PERSONAS[state.mascotVariant];
+        say(pNow ? pNow.quip : NAV_PET_QUIPS[Math.floor(Math.random() * NAV_PET_QUIPS.length)], 2400);
       }
     });
   }
@@ -3744,14 +3833,14 @@
   }
 
   var WORKER_LINES = {
-    original: "I do invoices — 1,200 a day. I never sleep. I never unionize.",
-    denso: "I answer tickets. Under two seconds, all night long.",
-    anillos: "I answer questions — always with sources.",
-    espiral: "I move 10K documents a night. Quietly.",
-    pixel: "I run every test. EVERY test.",
-    nube: "I read everything. I judge fairly. Mostly.",
-    orbital: "I watch the dashboards so nobody has to.",
-    erizo: "I'm the guardrails. Professionally paranoid.",
+    pixel: "I automate repetitive workflows — enquiries, triage, and follow-ups.",
+    denso: "I connect payment checkouts, stablecoin rails, and sync your tools.",
+    nube: "I build real estate, school, church, and business platforms with automation built in.",
+    erizo: "I enforce the guardrails: human approvals, spending limits, and off-switches.",
+    original: "I read invoices, forms, and applications — extracted and matched.",
+    anillos: "I answer questions from your company docs — always citing exact sources.",
+    espiral: "I sync records across WhatsApp, email, CRMs, and spreadsheets automatically.",
+    orbital: "I monitor live systems 24/7 and send monthly reports on time saved.",
   };
 
   async function beatWorkforce() {
@@ -4377,6 +4466,9 @@
    * ------------------------------------------------------------------ */
 
   var CHAT_PILLS = [
+    { id: "faq_websites", label: "What types of websites & portals do you build?" },
+    { id: "faq_permission", label: "Will an agent message customers without approval?" },
+    { id: "faq_data", label: "How is our data handled?" },
     { id: "faq_replace", label: "Will this replace my team?" },
     { id: "faq_tools", label: "Do you replace existing tools?" },
     { id: "faq_wrong", label: "What if an agent makes a mistake?" },
@@ -4403,6 +4495,18 @@
   ];
 
   var CHAT_BRAIN = {
+    faq_websites: {
+      related: ["services", "faq_noai", "quote"],
+      variants: [
+        "**What types of websites and platforms do you build?**\n\nWe build websites and portals with **built-in automation** tailored to your industry:\n- **Real estate platforms** — property listings & search + automated WhatsApp/email lead qualification, instant inspection booking, and buyer/tenant intake\n- **School & educational portals** — student/parent portals + automated admission registration, fee payment & auto-receipts, result notifications, and parent broadcasts\n- **Church & ministry hubs** — sermon/media hubs + online tithes & offerings, automated first-timer welcome follow-ups, event registration, and member updates\n- **Commercial & service platforms** — online stores, clinic booking systems, and client portals with automated reminders, invoicing, and inventory sync.",
+      ],
+    },
+    faq_permission: {
+      related: ["safety", "process", "quote"],
+      variants: [
+        "**Will an agent talk to my customers without my permission?**\n\nNot unless you ask for that. Most clients start in approval mode, where the agent drafts the reply and a person on your team approves it before it is sent.",
+      ],
+    },
     faq_replace: {
       related: ["faq_tools", "safety", "quote"],
       variants: [
@@ -4520,6 +4624,7 @@
 
   function matchFaqQuery(str) {
     var q = String(str || "").toLowerCase();
+    if (/real estate|property|school|student|parent|admission|church|tithe|offering|ministry|sermon|clinic|hospital|store|ecommerce|portal|type of website|types of website|kind of website/.test(q)) return "faq_websites";
     if (/permission|approval|customer/.test(q)) return "faq_permission";    if (/replace|job|staff|fire|employee|people|layoff|redundant/.test(q)) return "faq_replace";
     if (/tool|whatsapp|crm|spreadsheet|excel|email|existing|stack/.test(q)) return "faq_tools";
     if (/wrong|mistake|error|hallucinat|fail|bug|incorrect/.test(q)) return "faq_wrong";
@@ -4596,7 +4701,7 @@
     panel.innerHTML =
       '<div class="cs-chat__head">' +
       '<span class="cs-chat__dot"></span>' +
-      '<span class="cs-chat__title">Feyron — live assistant</span>' +
+      '<span class="cs-chat__title">' + (MASCOT_NAMES[state.mascotVariant] || "Bit") + " · " + ((MASCOT_PERSONAS[state.mascotVariant] || MASCOT_PERSONAS.pixel).role) + '</span>' +
       '<button type="button" class="cs-chat__close" aria-label="Close chat">×</button>' +
       "</div>" +
       '<div class="cs-chat__log" role="log" aria-live="polite" data-lenis-prevent></div>' +
@@ -4667,9 +4772,14 @@
     panel.classList.add("is-open");
     var veil = document.querySelector(".cs-chat-veil");
     if (veil) veil.classList.add("is-open");
-    if (!state.chatGreeted) {
+    var pChat = MASCOT_PERSONAS[state.mascotVariant] || MASCOT_PERSONAS.pixel;
+    var tNode = panel.querySelector(".cs-chat__title");
+    if (tNode) tNode.textContent = (MASCOT_NAMES[state.mascotVariant] || "Bit") + " · " + pChat.role;
+    renderBasePills();
+    if (!state.chatGreeted || state.chatGreetedBy !== state.mascotVariant) {
       state.chatGreeted = true;
-      chatBubble("site", "Hi! I'm Feyron's live assistant. Ask me anything about our AI agents, platforms, safety controls, or pricing — or pick a question below.");
+      state.chatGreetedBy = state.mascotVariant;
+      chatBubble("site", pChat.greeting);
     }
     window.setTimeout(function () {
       var input = panel.querySelector(".cs-chat__input");
@@ -4729,7 +4839,18 @@
   }
 
   function renderBasePills() {
-    renderPills(CHAT_PILLS.map(function (item) {
+    var pInfo = MASCOT_PERSONAS[state.mascotVariant] || MASCOT_PERSONAS.pixel;
+    var priority = (pInfo && pInfo.topPills) || [];
+    var ordered = [];
+    priority.forEach(function (pid) {
+      for (var i = 0; i < CHAT_PILLS.length; i += 1) {
+        if (CHAT_PILLS[i].id === pid) { ordered.push(CHAT_PILLS[i]); break; }
+      }
+    });
+    CHAT_PILLS.forEach(function (item) {
+      if (priority.indexOf(item.id) === -1) ordered.push(item);
+    });
+    renderPills(ordered.map(function (item) {
       return { label: item.label, pick: function () {
         if (item.id === "quote") startQuoteFlow();
         else sendChat({ pill: item.id }, item.label);
@@ -5067,7 +5188,9 @@
         if (state.gate) return; // the gate owns the first start
         if (guide.running) { abortGuide(); return; }
         if (playChip.classList.contains("is-game")) {
-          window.location.href = "/play";
+          if (window.__csGame && typeof window.__csGame.open === "function") {
+            window.__csGame.open({ beat: window.__csGameBeat || null });
+          }
           return;
         }
         window.scrollTo(0, 0);
@@ -5076,7 +5199,9 @@
         runGuide();
         return;
       }
-      window.location.href = "/play";
+      if (window.__csGame && typeof window.__csGame.open === "function") {
+        window.__csGame.open({ beat: window.__csGameBeat || null });
+      }
     });
     // desktop reads "game ↗" from the start; mobile switches when the tour ends
     if (!window.matchMedia("(max-width: 640px)").matches) {

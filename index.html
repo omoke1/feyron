@@ -38,6 +38,11 @@
           history.scrollRestoration = 'manual';
           window.scrollTo(0, 0);
         } catch (e) {}
+        try {
+          if (location.pathname.replace(/\/+$/, '') === '/play') {
+            window.__csGameOnly = true;
+          }
+        } catch (e) {}
         document.documentElement.classList.add('cs-guide-locked');
         setTimeout(function () {
           if (!document.querySelector('.cs-guide-gate')) {
@@ -45,7 +50,7 @@
           }
         }, 6500);
         try {
-          var themeVersion = '2026-11-03.1';
+          var themeVersion = '2026-11-04.1';
           window.__CS_THEME_VERSION = themeVersion;
           if (localStorage.getItem('cs-theme-version') !== themeVersion) {
             localStorage.removeItem('cs-theme');
