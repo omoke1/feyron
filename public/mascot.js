@@ -2035,7 +2035,7 @@
   var MASCOT_TAGS = {
     pixel: "AI Automation Specialist · workflows & triage",
     denso: "Payments & Integrations · checkout, stablecoins & APIs",
-    nube: "Websites & Sector Portals · real estate, schools & churches",
+    nube: "Websites, Apps & Management Systems · built for any industry",
     erizo: "Operations & Responsible AI · guardrails & approvals",
     original: "Documents & Invoicing · extraction & filing",
     anillos: "Knowledge & Support · grounded answers with sources",
@@ -2065,13 +2065,13 @@
       topPills: ["payments", "faq_tools", "pricing", "services"]
     },
     nube: {
-      role: "Websites & Sector Portals Specialist",
-      quip: "Wobble here! Websites that actually run your daily admin.",
+      role: "Websites, Apps & Management Systems",
+      quip: "Wobble here! Websites, management systems and custom platforms.",
       hero: [
-        { text: "I'm Wobble — Feyron's Websites & Sector Portals Specialist.", hold: 420 },
-        { text: "A great website shouldn't just sit there — it should book inspections, register students, and follow up automatically.", hold: 480 }
+        { text: "I'm Wobble — Feyron's Websites, Apps & Platforms Specialist.", hold: 420 },
+        { text: "From clean business websites to full management systems, portals and custom web apps — we build around how your business runs.", hold: 480 }
       ],
-      greeting: "Hi! I'm **Wobble**, Feyron's Websites & Sector Portals Specialist. Ask me about real estate platforms, school portals, church hubs, or business websites with built-in automation!",
+      greeting: "Hi! I'm **Wobble**, Feyron's Websites, Apps & Platforms Specialist. Ask me about business websites, full management systems (for schools, real estate, churches, clinics, logistics and more), online stores, or custom web apps!",
       topPills: ["faq_websites", "faq_noai", "faq_timeline", "services"]
     },
     erizo: {
@@ -4466,7 +4466,7 @@
    * ------------------------------------------------------------------ */
 
   var CHAT_PILLS = [
-    { id: "faq_websites", label: "What types of websites & portals do you build?" },
+    { id: "faq_websites", label: "What websites, management systems & platforms do you build?" },
     { id: "faq_permission", label: "Will an agent message customers without approval?" },
     { id: "faq_data", label: "How is our data handled?" },
     { id: "faq_replace", label: "Will this replace my team?" },
@@ -4498,7 +4498,7 @@
     faq_websites: {
       related: ["services", "faq_noai", "quote"],
       variants: [
-        "**What types of websites and platforms do you build?**\n\nWe build websites and portals with **built-in automation** tailored to your industry:\n- **Real estate platforms** — property listings & search + automated WhatsApp/email lead qualification, instant inspection booking, and buyer/tenant intake\n- **School & educational portals** — student/parent portals + automated admission registration, fee payment & auto-receipts, result notifications, and parent broadcasts\n- **Church & ministry hubs** — sermon/media hubs + online tithes & offerings, automated first-timer welcome follow-ups, event registration, and member updates\n- **Commercial & service platforms** — online stores, clinic booking systems, and client portals with automated reminders, invoicing, and inventory sync.",
+        "**What websites, management systems and platforms do you build?**\n\nWe do not limit ourselves to static websites or a single industry. We build everything from clean business websites and online stores to complete **management systems, customer portals, web apps and SaaS platforms** for **any sector**, with built-in automation:\n- **Real estate & property systems** — property websites, listing & tenant management platforms, automated WhatsApp/email lead qualification, inspection scheduling and digital intake\n- **School & education management systems** — full school management software, student/parent/staff portals and websites with online admissions, grading, fee payments, auto-receipts and broadcasts\n- **Church & organisation systems** — member & ministry management platforms, sermon hubs and websites with online tithes/offerings, automated first-timer welcome follow-ups and event registration\n- **Commerce, clinics, logistics & custom SaaS** — online stores, clinic booking systems, dispatch dashboards, internal tools and custom software built around how you operate.",
       ],
     },
     faq_permission: {

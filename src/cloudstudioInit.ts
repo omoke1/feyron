@@ -390,25 +390,26 @@ function setupMainMobileMenu() {
         <div class="cs-mobile-menu-body">
           <div class="cs-mobile-nav-group">
             <span class="cs-mobile-nav-kicker">Navigation</span>
-            <a href="#work" class="cs-mobile-link" data-mobile-nav>Work</a>
-            <a href="#how" class="cs-mobile-link" data-mobile-nav>How we work</a>
-            <a href="#faq" class="cs-mobile-link" data-mobile-nav>FAQ</a>
+            <a href="#top" class="cs-mobile-link" data-mobile-nav>Home</a>
+            <a href="/solutions" class="cs-mobile-link" data-mobile-nav>Solutions</a>
+            <a href="/products" class="cs-mobile-link" data-mobile-nav>Products</a>
+            <a href="/about" class="cs-mobile-link" data-mobile-nav>About</a>
+            <a href="/contact" class="cs-mobile-link" data-mobile-nav>Contact</a>
           </div>
           <div class="cs-mobile-nav-group">
-            <span class="cs-mobile-nav-kicker">Explore</span>
-            <a href="/solutions" class="cs-mobile-link" data-mobile-nav>Solutions</a>
+            <span class="cs-mobile-nav-kicker">More</span>
+            <a href="/how-we-work" class="cs-mobile-link" data-mobile-nav>How we work</a>
             <a href="/who-we-serve" class="cs-mobile-link" data-mobile-nav>Who we serve</a>
-            <a href="/products" class="cs-mobile-link" data-mobile-nav>Products</a>
             <a href="/responsible-ai" class="cs-mobile-link" data-mobile-nav>Responsible AI</a>
-            <a href="/about" class="cs-mobile-link" data-mobile-nav>About</a>
+            <a href="#faq" class="cs-mobile-link" data-mobile-nav>FAQ</a>
           </div>
           <div class="cs-mobile-nav-actions">
-            <a href="#contact" data-lead="" class="cs-mobile-cta" data-mobile-nav>Talk to our team</a>
+            <a href="#contact" data-lead="" class="cs-mobile-cta" data-mobile-nav>Let's talk</a>
             <a href="mailto:hello@feyron.co" class="cs-mobile-contact-line">hello@feyron.co · Lagos, Nigeria</a>
           </div>
           <div class="cs-mobile-nav-footer">
-            <a href="/privacy" class="cs-mobile-sublink" data-mobile-nav>Privacy policy</a>
-            <a href="/terms" class="cs-mobile-sublink" data-mobile-nav>Terms of service</a>
+            <a href="/privacy" class="cs-mobile-sublink" data-mobile-nav>Privacy Policy</a>
+            <a href="/terms" class="cs-mobile-sublink" data-mobile-nav>Terms of Service</a>
           </div>
         </div>
       </div>

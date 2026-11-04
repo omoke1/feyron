@@ -48,7 +48,7 @@ export const FEYRON_PAGES: Record<string, FeyronPageData> = {
           },
           {
             title: 'Websites and platforms.',
-            text: 'Business websites, real estate platforms, school portals, church hubs, online stores, booking systems, web apps and marketplaces — all built with automation around how you operate.',
+            text: 'Business websites, online stores, booking systems, full management systems, web apps and SaaS marketplaces — built around how you operate, with built-in automation.',
             linkText: 'Explore websites and platforms →',
             linkHref: '/websites-platforms',
           },
@@ -61,24 +61,27 @@ export const FEYRON_PAGES: Record<string, FeyronPageData> = {
         ],
       },
       {
-        kicker: 'Sector websites + built-in automation',
-        heading: 'Websites that do the work, not just look good',
+        kicker: 'Websites, management systems & automation across any industry',
+        heading: 'From business websites to full management systems — never limited to just a site',
+        body: [
+          'Whether you need a business website, a complete management system, a customer portal, or AI workflows wired into your existing tools, we build software for any sector. A few examples:',
+        ],
         bullets: [
           {
-            title: 'Real estate platforms.',
-            text: 'Property listings and search paired with automated WhatsApp/email lead qualification, instant inspection booking, and buyer/tenant intake.',
+            title: 'Real estate & property systems.',
+            text: 'Property websites, full listing and tenant management systems, automated WhatsApp/email lead qualification, instant inspection booking, and buyer/tenant intake.',
           },
           {
-            title: 'School & educational portals.',
-            text: 'School website and student/parent portal with online admission registration, fee payment and auto-receipts, grade notifications, and parent broadcasts.',
+            title: 'School & education management systems.',
+            text: 'Complete school management software, student/parent/staff portals and websites with online admissions, grading, fee payment and auto-receipts, and parent broadcasts.',
           },
           {
-            title: 'Church & faith hubs.',
-            text: 'Church website and sermon hub with online tithes/offerings, automated first-timer welcome messages, event registration, and member updates.',
+            title: 'Church & organisation systems.',
+            text: 'Member and ministry management systems, sermon hubs and websites with online tithes/offerings, automated first-timer welcome messages, event registration, and broadcasts.',
           },
           {
-            title: 'Commercial & professional sites.',
-            text: 'Online stores, clinics, and service portals with automated appointment booking, invoicing, inventory sync, and client onboarding.',
+            title: 'Commerce, clinics, logistics & custom SaaS.',
+            text: 'Online stores, clinic and appointment systems, logistics dispatch dashboards, internal tools, and custom web applications for any business.',
           },
         ],
       },
@@ -199,40 +202,15 @@ export const FEYRON_PAGES: Record<string, FeyronPageData> = {
     title: 'Websites & Platforms',
     metaTitle: 'Websites and platforms | Feyron',
     metaDescription:
-      'Business websites, real estate platforms, school portals, church hubs, online stores and custom software with built-in automation.',
+      'Business websites, online stores, full management systems, portals, web apps and custom software built around how you operate.',
     kicker: 'Division 02 · Websites & Platforms',
     headline: 'Software built around how you operate.',
     subheading:
-      'From a clear business website to a full sector platform, we design and build what you need — with built-in automation, a fixed scope and a launch date.',
+      'From a clear business website to a complete management system or custom SaaS platform, we design and build what you need — for any industry, with a fixed scope and a launch date.',
     sections: [
       {
-        kicker: 'Sector websites with built-in automation',
-        heading: 'Websites and portals that run the admin for you',
-        body: [
-          'A website should not just sit there like a static brochure. Every website and portal we build comes wired with practical automation for your sector:',
-        ],
-        bullets: [
-          {
-            title: 'Real estate platforms + automation.',
-            text: 'Property showcase and search paired with automated WhatsApp and email lead qualification, instant inspection booking, digital buyer or tenant intake, and automated agent follow-ups.',
-          },
-          {
-            title: 'School & educational portals + automation.',
-            text: 'School website and student/parent portal with automated online admissions, digital fee payment and instant receipt generation, automated result notifications, and parent broadcasts.',
-          },
-          {
-            title: 'Church & faith organisation platforms + automation.',
-            text: 'Church website and media/sermon hub with online tithe, offering and project giving, automated first-timer welcome follow-ups, event registration, and scheduled WhatsApp/SMS updates.',
-          },
-          {
-            title: 'Commercial, clinic & service platforms + automation.',
-            text: 'Online stores, clinic appointment systems and professional service portals with automated booking reminders, invoice generation, inventory sync and client onboarding.',
-          },
-        ],
-      },
-      {
         kicker: 'Core capabilities',
-        heading: 'Websites, portals and custom applications',
+        heading: 'Websites, management systems, portals and custom applications',
         bullets: [
           {
             title: 'Business websites.',
@@ -247,8 +225,8 @@ export const FEYRON_PAGES: Record<string, FeyronPageData> = {
             text: 'Let customers book, pay, upload documents and check progress without calling you.',
           },
           {
-            title: 'Web apps and dashboards.',
-            text: 'Management systems, reports and internal tools built around your process.',
+            title: 'Web apps, dashboards and management systems.',
+            text: 'End-to-end management systems, internal tools, and operational dashboards built around your daily process.',
           },
           {
             title: 'SaaS products and marketplaces.',
@@ -256,7 +234,32 @@ export const FEYRON_PAGES: Record<string, FeyronPageData> = {
           },
           {
             title: 'Redesigns.',
-            text: 'Make an existing site clearer, faster and easier to manage.',
+            text: 'Make an existing site or platform clearer, faster and easier to manage.',
+          },
+        ],
+      },
+      {
+        kicker: 'Industry platforms, management systems & websites',
+        heading: 'Built for any industry — from a clean website to a full management system',
+        body: [
+          'We do not limit ourselves to static brochure websites or a fixed list of sectors. Whether you need a website, a complete management system, a portal, or built-in AI automation, we tailor the software to your industry:',
+        ],
+        bullets: [
+          {
+            title: 'Real estate & property management systems.',
+            text: 'Property websites, full listing and tenant management systems, automated WhatsApp and email lead qualification, instant inspection booking, digital buyer or tenant intake, and automated follow-ups.',
+          },
+          {
+            title: 'School & educational management systems.',
+            text: 'Complete school management software, student/parent/staff portals and school websites — with online admissions, grading and report cards, digital fee payments with instant receipts, and parent broadcasts.',
+          },
+          {
+            title: 'Church & organisation management systems.',
+            text: 'Member and ministry management platforms, sermon/media hubs and websites — with online tithe, offering and project giving, automated first-timer welcome follow-ups, event registration, and WhatsApp/SMS broadcasts.',
+          },
+          {
+            title: 'Commerce, healthcare, logistics & custom platforms.',
+            text: 'Online stores, clinic and hospital management systems, logistics and dispatch portals, professional service platforms, and custom web apps for any workflow.',
           },
         ],
       },
@@ -446,15 +449,15 @@ export const FEYRON_PAGES: Record<string, FeyronPageData> = {
           },
           {
             title: 'Real estate & property firms.',
-            text: 'Property platforms with automated WhatsApp/email lead qualification, inspection scheduling, and digital buyer or tenant intake.',
+            text: 'Property websites, full listing and tenant management systems, automated WhatsApp/email lead qualification, inspection scheduling, and digital buyer or tenant intake.',
           },
           {
             title: 'Schools & educational institutions.',
-            text: 'School websites and student/parent portals with automated admission workflows, fee payments and instant receipts, result alerts and parent broadcasts.',
+            text: 'Complete school management systems, student/parent/staff portals and websites with automated admission workflows, grading, fee payments and instant receipts, and parent broadcasts.',
           },
           {
             title: 'Churches & faith organisations.',
-            text: 'Church hubs with online tithe and offering collections, automated visitor follow-ups, event registration and member communications.',
+            text: 'Member and ministry management systems, church hubs and websites with online tithe and offering collections, automated visitor follow-ups, event registration and member communications.',
           },
           {
             title: 'Startups and technology companies.',

@@ -56,7 +56,7 @@ export default function App() {
   const [contactInfo, setContactInfo] = useState('');
   const [contactCompany, setContactCompany] = useState('');
   const [contactTime, setContactTime] = useState('');
-  const [contactInterest, setContactInterest] = useState('AI automation');
+  const [contactInterest, setContactInterest] = useState('AI Automation');
   const [contactStatus, setContactStatus] = useState<'idle' | 'sent' | 'error'>('idle');
 
   const navigateToPath = (pathname: string, hash?: string) => {
@@ -66,12 +66,12 @@ export default function App() {
       window.history.pushState({}, '', '/' + (hash || ''));
       setSubpageSrc(null);
       setFeyronPage(null);
-      document.title = 'Feyron | AI productivity and technology';
+      document.title = 'Feyron | AI Productivity & Technology';
       const metaDesc = document.querySelector('meta[name="description"]');
       if (metaDesc) {
         metaDesc.setAttribute(
           'content',
-          'Feyron builds AI agents, websites, platforms and integrations that take repetitive work off your team.'
+          'Feyron builds AI agents, websites, software platforms and integrations that help businesses and individuals work more productively.'
         );
       }
       if (hash) {
@@ -159,7 +159,7 @@ export default function App() {
       setSubpageSrc(normalizeSubpagePath(window.location.pathname));
       const p = resolveFeyronPage(window.location.pathname);
       setFeyronPage(p);
-      document.title = p ? p.metaTitle : 'Feyron | AI productivity and technology';
+      document.title = p ? p.metaTitle : 'Feyron | AI Productivity & Technology';
     };
 
     const onKeyDown = (e: KeyboardEvent) => {
@@ -278,34 +278,11 @@ export default function App() {
                 className="cs-mobile-link"
                 onClick={() => {
                   setMobileNavOpen(false);
-                  navigateToPath('/', '#work');
+                  navigateToPath('/');
                 }}
               >
-                Work
+                Home
               </button>
-              <button
-                type="button"
-                className="cs-mobile-link"
-                onClick={() => {
-                  setMobileNavOpen(false);
-                  navigateToPath('/', '#how');
-                }}
-              >
-                How we work
-              </button>
-              <button
-                type="button"
-                className="cs-mobile-link"
-                onClick={() => {
-                  setMobileNavOpen(false);
-                  navigateToPath('/', '#faq');
-                }}
-              >
-                FAQ
-              </button>
-            </div>
-            <div className="cs-mobile-nav-group">
-              <span className="cs-mobile-nav-kicker">Explore</span>
               <button
                 type="button"
                 className="cs-mobile-link"
@@ -315,16 +292,6 @@ export default function App() {
                 }}
               >
                 Solutions
-              </button>
-              <button
-                type="button"
-                className="cs-mobile-link"
-                onClick={() => {
-                  setMobileNavOpen(false);
-                  navigateToPath('/who-we-serve');
-                }}
-              >
-                Who we serve
               </button>
               <button
                 type="button"
@@ -341,6 +308,49 @@ export default function App() {
                 className="cs-mobile-link"
                 onClick={() => {
                   setMobileNavOpen(false);
+                  navigateToPath('/about');
+                }}
+              >
+                About
+              </button>
+              <button
+                type="button"
+                className="cs-mobile-link"
+                onClick={() => {
+                  setMobileNavOpen(false);
+                  navigateToPath('/contact');
+                }}
+              >
+                Contact
+              </button>
+            </div>
+            <div className="cs-mobile-nav-group">
+              <span className="cs-mobile-nav-kicker">More</span>
+              <button
+                type="button"
+                className="cs-mobile-link"
+                onClick={() => {
+                  setMobileNavOpen(false);
+                  navigateToPath('/how-we-work');
+                }}
+              >
+                How we work
+              </button>
+              <button
+                type="button"
+                className="cs-mobile-link"
+                onClick={() => {
+                  setMobileNavOpen(false);
+                  navigateToPath('/who-we-serve');
+                }}
+              >
+                Who we serve
+              </button>
+              <button
+                type="button"
+                className="cs-mobile-link"
+                onClick={() => {
+                  setMobileNavOpen(false);
                   navigateToPath('/responsible-ai');
                 }}
               >
@@ -351,10 +361,10 @@ export default function App() {
                 className="cs-mobile-link"
                 onClick={() => {
                   setMobileNavOpen(false);
-                  navigateToPath('/about');
+                  navigateToPath('/', '#faq');
                 }}
               >
-                About
+                FAQ
               </button>
             </div>
             <div className="cs-mobile-nav-actions">
@@ -366,7 +376,7 @@ export default function App() {
                   handleCtaAction('contact');
                 }}
               >
-                Talk to our team
+                Let&apos;s talk
               </button>
               <a href="mailto:hello@feyron.co" className="cs-mobile-contact-line">
                 hello@feyron.co · Lagos, Nigeria
@@ -633,7 +643,7 @@ export default function App() {
         <div className="cs-nav-desktop" style={{ display: 'flex', alignItems: 'center', gap: 'clamp(14px, 2.2vw, 32px)', flexWrap: 'wrap' }}>
           <button
             type="button"
-            onClick={() => navigateToPath('/', '#work')}
+            onClick={() => navigateToPath('/')}
             style={{
               cursor: 'pointer',
               background: 'none',
@@ -645,11 +655,11 @@ export default function App() {
               color: 'var(--ink, #1E1E1E)',
             }}
           >
-            Work
+            Home
           </button>
           <button
             type="button"
-            onClick={() => navigateToPath('/', '#how')}
+            onClick={() => navigateToPath('/solutions')}
             style={{
               cursor: 'pointer',
               background: 'none',
@@ -661,11 +671,11 @@ export default function App() {
               color: 'var(--ink, #1E1E1E)',
             }}
           >
-            How we work
+            Solutions
           </button>
           <button
             type="button"
-            onClick={() => navigateToPath('/', '#faq')}
+            onClick={() => navigateToPath('/products')}
             style={{
               cursor: 'pointer',
               background: 'none',
@@ -677,7 +687,39 @@ export default function App() {
               color: 'var(--ink, #1E1E1E)',
             }}
           >
-            FAQ
+            Products
+          </button>
+          <button
+            type="button"
+            onClick={() => navigateToPath('/about')}
+            style={{
+              cursor: 'pointer',
+              background: 'none',
+              border: 'none',
+              padding: '6px 0',
+              fontFamily: 'inherit',
+              fontWeight: 600,
+              fontSize: '15px',
+              color: 'var(--ink, #1E1E1E)',
+            }}
+          >
+            About
+          </button>
+          <button
+            type="button"
+            onClick={() => navigateToPath('/contact')}
+            style={{
+              cursor: 'pointer',
+              background: 'none',
+              border: 'none',
+              padding: '6px 0',
+              fontFamily: 'inherit',
+              fontWeight: 600,
+              fontSize: '15px',
+              color: 'var(--ink, #1E1E1E)',
+            }}
+          >
+            Contact
           </button>
           <button
             type="button"
@@ -694,7 +736,7 @@ export default function App() {
               borderRadius: '100px',
             }}
           >
-            Talk to our team
+            Let&apos;s talk
           </button>
         </div>
 
@@ -772,7 +814,7 @@ export default function App() {
             </p>
           )}
 
-          {feyronPage.primaryCta && !feyronPage.isContactPage && !feyronPage.isProductsPage && (
+          {feyronPage.primaryCta && !feyronPage.isContactPage && (
             <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', marginTop: '32px' }}>
               <button
                 type="button"
@@ -806,7 +848,7 @@ export default function App() {
                   borderRadius: '100px',
                 }}
               >
-                See what we build
+                Explore what we build
               </button>
             </div>
           )}
@@ -847,11 +889,14 @@ export default function App() {
                     marginBottom: '10px',
                   }}
                 >
-                  ✓ Message received
+                  ✓ Enquiry received
                 </div>
-                <h2 style={{ margin: '0 0 12px', fontSize: 'clamp(1.6rem, 3vw, 2.4rem)', fontWeight: 700 }}>
-                  Thank you. We have your note and will reply within [one working day].
+                <h2 style={{ margin: '0 0 10px', fontSize: 'clamp(1.6rem, 3vw, 2.4rem)', fontWeight: 700 }}>
+                  Thanks for reaching out.
                 </h2>
+                <p style={{ margin: '0 0 18px', fontSize: '16px', lineHeight: 1.55, fontWeight: 500, color: '#2c301c' }}>
+                  Your enquiry has been received. We&apos;ll review the details and get back to you.
+                </p>
                 <button
                   type="button"
                   onClick={() => {
@@ -863,7 +908,7 @@ export default function App() {
                   }}
                   style={{
                     cursor: 'pointer',
-                    marginTop: '16px',
+                    marginTop: '8px',
                     fontFamily: 'inherit',
                     fontWeight: 700,
                     fontSize: '14.5px',
@@ -874,7 +919,7 @@ export default function App() {
                     borderRadius: '100px',
                   }}
                 >
-                  Send another note
+                  Send another enquiry
                 </button>
               </div>
             ) : (
@@ -894,7 +939,7 @@ export default function App() {
                 >
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14.5px', fontWeight: 600 }}>
                     <span style={{ fontFamily: "'Geist Mono', monospace", fontSize: '11px', textTransform: 'uppercase', letterSpacing: '.1em', opacity: 0.7 }}>
-                      Direct Email:
+                      Prefer email?
                     </span>
                     <a
                       href="mailto:hello@feyron.co"
@@ -920,7 +965,7 @@ export default function App() {
                   }}
                 >
                   <label style={{ display: 'grid', gap: '7px', fontWeight: 700, fontSize: '14.5px' }}>
-                    Your name
+                    Full name
                     <input
                       type="text"
                       value={contactName}
@@ -938,12 +983,12 @@ export default function App() {
                     />
                   </label>
                   <label style={{ display: 'grid', gap: '7px', fontWeight: 700, fontSize: '14.5px' }}>
-                    Email or WhatsApp number
+                    Work email
                     <input
-                      type="text"
+                      type="email"
                       value={contactInfo}
                       onChange={(e) => setContactInfo(e.target.value)}
-                      placeholder="Email or WhatsApp number"
+                      placeholder="Your email address"
                       required
                       style={{
                         padding: '13px 15px',
@@ -965,12 +1010,12 @@ export default function App() {
                   }}
                 >
                   <label style={{ display: 'grid', gap: '7px', fontWeight: 700, fontSize: '14.5px' }}>
-                    Company (optional)
+                    Company or organisation
                     <input
                       type="text"
                       value={contactCompany}
                       onChange={(e) => setContactCompany(e.target.value)}
-                      placeholder="Company (optional)"
+                      placeholder="Company name (optional)"
                       style={{
                         padding: '13px 15px',
                         borderRadius: '12px',
@@ -983,7 +1028,7 @@ export default function App() {
                   </label>
 
                   <label style={{ display: 'grid', gap: '7px', fontWeight: 700, fontSize: '14.5px' }}>
-                    I am interested in:
+                    What do you need help with?
                     <select
                       value={contactInterest}
                       onChange={(e) => setContactInterest(e.target.value)}
@@ -996,21 +1041,24 @@ export default function App() {
                         fontSize: '15px',
                       }}
                     >
-                      <option value="AI automation">AI automation</option>
-                      <option value="Websites and platforms">Websites and platforms</option>
-                      <option value="Integrations and payments">Integrations and payments</option>
+                      <option value="AI Automation">AI Automation</option>
+                      <option value="Website Development">Website Development</option>
+                      <option value="Software & Platform Development">Software &amp; Platform Development</option>
+                      <option value="API & Systems Integration">API &amp; Systems Integration</option>
+                      <option value="Payment & Fintech Integration">Payment &amp; Fintech Integration</option>
+                      <option value="Product Development">Product Development</option>
                       <option value="Not sure yet">Not sure yet</option>
                     </select>
                   </label>
                 </div>
 
                 <label style={{ display: 'grid', gap: '7px', fontWeight: 700, fontSize: '14.5px' }}>
-                  What takes the most time each week?
+                  Tell us about your project
                   <textarea
                     rows={4}
                     value={contactTime}
                     onChange={(e) => setContactTime(e.target.value)}
-                    placeholder="Tell us about the manual work, enquiries, documents or tools involved."
+                    placeholder="What are you trying to build, improve or solve?"
                     required
                     style={{
                       padding: '13px 15px',
@@ -1055,7 +1103,7 @@ export default function App() {
                       borderRadius: '100px',
                     }}
                   >
-                    Send to Feyron
+                    Send enquiry
                   </button>
                 </div>
               </form>
@@ -1238,8 +1286,8 @@ export default function App() {
               </div>
             )}
 
-            {/* Early access email form on /products */}
-            {feyronPage.isProductsPage && (
+            {/* Early access email form on /products exploration section */}
+            {feyronPage.isProductsPage && sec.kicker === "What we're exploring" && (
               <div style={{ marginTop: '22px' }}>
                 {productJoined ? (
                   <div
@@ -1409,25 +1457,27 @@ export default function App() {
               letterSpacing: '.06em',
             }}
           >
-            <div style={{ lineHeight: 1.7 }}>
+            <div style={{ lineHeight: 1.7, maxWidth: '420px' }}>
               <strong style={{ color: 'var(--accent, #D4F534)', fontSize: '13px' }}>
-                Feyron. AI Productivity &amp; Technology.
+                Feyron · Technology that moves work forward.
               </strong>
               <br />
-              <span style={{ color: '#cfcfc4' }}>Technology that moves work forward.</span>
+              <span style={{ color: '#cfcfc4' }}>
+                We build AI agents, digital platforms and connected systems that help people and businesses work better.
+              </span>
             </div>
             <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
               {[
+                { slug: '', label: 'Home' },
                 { slug: 'solutions', label: 'Solutions' },
+                { slug: 'products', label: 'Products' },
+                { slug: 'about', label: 'About' },
+                { slug: 'contact', label: 'Contact' },
                 { slug: 'how-we-work', label: 'How we work' },
                 { slug: 'who-we-serve', label: 'Who we serve' },
-                { slug: 'products', label: 'Products' },
                 { slug: 'responsible-ai', label: 'Responsible AI' },
-                { slug: 'about', label: 'About' },
-                { slug: '#faq', label: 'FAQ' },
-                { slug: 'contact', label: 'Contact' },
-                { slug: 'privacy', label: 'Privacy policy' },
-                { slug: 'terms', label: 'Terms' },
+                { slug: 'privacy', label: 'Privacy Policy' },
+                { slug: 'terms', label: 'Terms of Service' },
               ].map((l) => (
                 <button
                   key={l.slug}
