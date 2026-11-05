@@ -13,6 +13,34 @@ declare global {
   }
 }
 
+const FEYRON_MARK_PATH =
+  'M14.5,0.0H85.5A14.5,14.5 0 0 1 100.0,14.5V85.5A14.5,14.5 0 0 1 85.5,100.0H14.5A14.5,14.5 0 0 1 0.0,85.5V14.5A14.5,14.5 0 0 1 14.5,0.0Z M21.2,16.2H33.1A8.2,8.2 0 0 1 41.3,24.4V59.4A8.2,8.2 0 0 1 33.1,67.6H21.2A8.2,8.2 0 0 1 13.0,59.4V24.4A8.2,8.2 0 0 1 21.2,16.2Z M66.9,16.2H78.8A8.2,8.2 0 0 1 87.0,24.4V59.4A8.2,8.2 0 0 1 78.8,67.6H66.9A8.2,8.2 0 0 1 58.7,59.4V24.4A8.2,8.2 0 0 1 66.9,16.2Z M45.1,76.0H54.9A4.9,4.9 0 0 1 59.8,80.9V80.9A4.9,4.9 0 0 1 54.9,85.8H45.1A4.9,4.9 0 0 1 40.2,80.9V80.9A4.9,4.9 0 0 1 45.1,76.0Z';
+
+function FeyronLogo({ size = 26, fontSize = 22 }: { size?: number; fontSize?: number }) {
+  return (
+    <span
+      style={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '10px',
+        fontWeight: 800,
+        fontSize: `${fontSize}px`,
+        letterSpacing: '-.035em',
+        lineHeight: 1,
+      }}
+    >
+      <svg
+        viewBox="0 0 100 100"
+        style={{ width: `${size}px`, height: `${size}px`, flexShrink: 0, display: 'block' }}
+        aria-hidden="true"
+      >
+        <path fill="currentColor" fillRule="evenodd" clipRule="evenodd" d={FEYRON_MARK_PATH} />
+      </svg>
+      <span>Feyron</span>
+    </span>
+  );
+}
+
 const VALID_WORK_SLUGS = new Set([
   'agents',
   'moneyincheck',
@@ -260,7 +288,9 @@ export default function App() {
         />
         <div className="cs-mobile-menu-panel">
           <div className="cs-mobile-menu-header">
-            <span className="cs-mobile-menu-brand">Feyron</span>
+            <span className="cs-mobile-menu-brand" style={{ display: 'inline-flex', alignItems: 'center', gap: '9px' }}>
+              <FeyronLogo size={24} fontSize={20} />
+            </span>
             <button
               type="button"
               className="cs-mobile-menu-close"
@@ -451,9 +481,11 @@ export default function App() {
                 letterSpacing: '-.03em',
                 color: 'var(--ink, #1E1E1E)',
                 fontFamily: 'inherit',
+                display: 'inline-flex',
+                alignItems: 'center',
               }}
             >
-              Feyron
+              <FeyronLogo size={28} fontSize={22} />
             </button>
             <button
               type="button"
@@ -617,9 +649,11 @@ export default function App() {
               letterSpacing: '-.03em',
               color: 'var(--ink, #1E1E1E)',
               fontFamily: 'inherit',
+              display: 'inline-flex',
+              alignItems: 'center',
             }}
           >
-            Feyron
+            <FeyronLogo size={28} fontSize={22} />
           </button>
           <button
             type="button"
@@ -1352,7 +1386,7 @@ export default function App() {
                   style={{
                     cursor: 'pointer',
                     background: 'var(--ink, #1E1E1E)',
-                    color: 'var(--accent, #D4F534)',
+                    color: 'var(--accent, #FEB47B)',
                     border: 'none',
                     borderRadius: '100px',
                     padding: '13px 26px',
@@ -1367,6 +1401,161 @@ export default function App() {
             )}
           </section>
         ))}
+
+        {/* Official Feyron Brand & Visual Identity Showcase on /about */}
+        {feyronPage.slug === 'about' && (
+          <section
+            style={{
+              background: '#1E1E1E',
+              color: '#fff',
+              border: '2.5px solid var(--ink, #1E1E1E)',
+              borderRadius: '24px',
+              padding: 'clamp(24px, 3.8vw, 46px)',
+              boxShadow: '8px 8px 0 rgba(30,30,30,0.9)',
+            }}
+          >
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                fontFamily: "'Geist Mono', monospace",
+                fontSize: '11.5px',
+                letterSpacing: '.16em',
+                textTransform: 'uppercase',
+                color: '#FEB47B',
+                marginBottom: '12px',
+              }}
+            >
+              <svg viewBox="0 0 100 100" style={{ width: '15px', height: '15px' }} aria-hidden="true">
+                <path fill="currentColor" fillRule="evenodd" clipRule="evenodd" d={FEYRON_MARK_PATH} />
+              </svg>
+              <span>05 · Brand &amp; Visual Identity</span>
+            </div>
+            <h2
+              style={{
+                margin: '0 0 12px',
+                fontWeight: 800,
+                fontSize: 'clamp(1.65rem, 3.2vw, 2.5rem)',
+                lineHeight: 1.05,
+                letterSpacing: '-.025em',
+                color: '#fff',
+              }}
+            >
+              Designed for clarity across software, devices and culture
+            </h2>
+            <p
+              style={{
+                margin: '0 0 28px',
+                fontSize: '16px',
+                lineHeight: 1.6,
+                color: '#d4d4cc',
+                maxWidth: '72ch',
+              }}
+            >
+              The Feyron mark represents an intelligent, connected interface — engineered with clean geometry, warm high-contrast palettes and human-first simplicity across every product we ship.
+            </p>
+
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+                gap: '18px',
+              }}
+            >
+              <div
+                style={{
+                  borderRadius: '18px',
+                  overflow: 'hidden',
+                  border: '1.5px solid rgba(255,255,255,0.14)',
+                  background: '#141414',
+                }}
+              >
+                <img
+                  src="/site/assets/brand/project_120.png"
+                  alt="Feyron — The engine behind smarter business execution"
+                  loading="lazy"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                />
+              </div>
+              <div
+                style={{
+                  borderRadius: '18px',
+                  overflow: 'hidden',
+                  border: '1.5px solid rgba(255,255,255,0.14)',
+                  background: '#141414',
+                }}
+              >
+                <img
+                  src="/site/assets/brand/mission_vision.png"
+                  alt="Feyron Mission & Vision"
+                  loading="lazy"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                />
+              </div>
+              <div
+                style={{
+                  borderRadius: '18px',
+                  overflow: 'hidden',
+                  border: '1.5px solid rgba(255,255,255,0.14)',
+                  background: '#141414',
+                }}
+              >
+                <img
+                  src="/site/assets/brand/jpg1.jpg"
+                  alt="Feyron hardware and connected system interface"
+                  loading="lazy"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                />
+              </div>
+              <div
+                style={{
+                  borderRadius: '18px',
+                  overflow: 'hidden',
+                  border: '1.5px solid rgba(255,255,255,0.14)',
+                  background: '#141414',
+                }}
+              >
+                <img
+                  src="/site/assets/brand/phone_mockup.png"
+                  alt="Feyron OS mobile mockup"
+                  loading="lazy"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                />
+              </div>
+              <div
+                style={{
+                  borderRadius: '18px',
+                  overflow: 'hidden',
+                  border: '1.5px solid rgba(255,255,255,0.14)',
+                  background: '#141414',
+                }}
+              >
+                <img
+                  src="/site/assets/brand/colour_palette.png"
+                  alt="Feyron Official Brand Colour Palette"
+                  loading="lazy"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                />
+              </div>
+              <div
+                style={{
+                  borderRadius: '18px',
+                  overflow: 'hidden',
+                  border: '1.5px solid rgba(255,255,255,0.14)',
+                  background: '#141414',
+                }}
+              >
+                <img
+                  src="/site/assets/brand/jpg2.jpg"
+                  alt="Feyron studio apparel"
+                  loading="lazy"
+                  style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                />
+              </div>
+            </div>
+          </section>
+        )}
 
         {/* Closing Banner */}
         {(feyronPage.closingLine || (!feyronPage.isContactPage && !feyronPage.isProductsPage)) && (
@@ -1458,8 +1647,20 @@ export default function App() {
             }}
           >
             <div style={{ lineHeight: 1.7, maxWidth: '420px' }}>
-              <strong style={{ color: 'var(--accent, #D4F534)', fontSize: '13px' }}>
-                Feyron · Technology that moves work forward.
+              <strong
+                style={{
+                  color: 'var(--accent, #FEB47B)',
+                  fontSize: '14px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '9px',
+                  marginBottom: '4px',
+                }}
+              >
+                <svg viewBox="0 0 100 100" style={{ width: '20px', height: '20px', flexShrink: 0 }} aria-hidden="true">
+                  <path fill="currentColor" fillRule="evenodd" clipRule="evenodd" d={FEYRON_MARK_PATH} />
+                </svg>
+                <span>Feyron · Technology that moves work forward.</span>
               </strong>
               <br />
               <span style={{ color: '#cfcfc4' }}>

@@ -382,7 +382,7 @@ function setupMainMobileMenu() {
       <div class="cs-mobile-menu-backdrop" data-close-mobile-menu></div>
       <div class="cs-mobile-menu-panel">
         <div class="cs-mobile-menu-header">
-          <span class="cs-mobile-menu-brand">Feyron</span>
+          <span class="cs-mobile-menu-brand" style="display:inline-flex;align-items:center;gap:10px"><svg width="26" height="26" viewBox="0 0 100 100" aria-hidden="true" style="display:block;flex-shrink:0"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M14.5,0.0H85.5A14.5,14.5 0 0 1 100.0,14.5V85.5A14.5,14.5 0 0 1 85.5,100.0H14.5A14.5,14.5 0 0 1 0.0,85.5V14.5A14.5,14.5 0 0 1 14.5,0.0Z M21.2,16.2H33.1A8.2,8.2 0 0 1 41.3,24.4V59.4A8.2,8.2 0 0 1 33.1,67.6H21.2A8.2,8.2 0 0 1 13.0,59.4V24.4A8.2,8.2 0 0 1 21.2,16.2Z M66.9,16.2H78.8A8.2,8.2 0 0 1 87.0,24.4V59.4A8.2,8.2 0 0 1 78.8,67.6H66.9A8.2,8.2 0 0 1 58.7,59.4V24.4A8.2,8.2 0 0 1 66.9,16.2Z M45.1,76.0H54.9A4.9,4.9 0 0 1 59.8,80.9V80.9A4.9,4.9 0 0 1 54.9,85.8H45.1A4.9,4.9 0 0 1 40.2,80.9V80.9A4.9,4.9 0 0 1 45.1,76.0Z"/></svg><span>Feyron</span></span>
           <button type="button" class="cs-mobile-menu-close" aria-label="Close navigation" data-close-mobile-menu>
             ✕
           </button>

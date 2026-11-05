@@ -1895,9 +1895,10 @@
     wrap.innerHTML =
       '<div class="cs-guide-confirm__card cs-lead-modal__card" role="dialog" aria-modal="true" aria-label="Talk to our team">' +
       '<button type="button" class="cs-lead-modal__close" aria-label="Close">×</button>' +
+      '<div style="display:inline-flex;align-items:center;gap:9px;margin-bottom:10px;color:var(--accent,#FEB47B);font-weight:700;font-size:16px;letter-spacing:-.02em"><svg width="22" height="22" viewBox="0 0 100 100" aria-hidden="true" style="display:block;flex-shrink:0"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M14.5,0.0H85.5A14.5,14.5 0 0 1 100.0,14.5V85.5A14.5,14.5 0 0 1 85.5,100.0H14.5A14.5,14.5 0 0 1 0.0,85.5V14.5A14.5,14.5 0 0 1 14.5,0.0Z M21.2,16.2H33.1A8.2,8.2 0 0 1 41.3,24.4V59.4A8.2,8.2 0 0 1 33.1,67.6H21.2A8.2,8.2 0 0 1 13.0,59.4V24.4A8.2,8.2 0 0 1 21.2,16.2Z M66.9,16.2H78.8A8.2,8.2 0 0 1 87.0,24.4V59.4A8.2,8.2 0 0 1 78.8,67.6H66.9A8.2,8.2 0 0 1 58.7,59.4V24.4A8.2,8.2 0 0 1 66.9,16.2Z M45.1,76.0H54.9A4.9,4.9 0 0 1 59.8,80.9V80.9A4.9,4.9 0 0 1 54.9,85.8H45.1A4.9,4.9 0 0 1 40.2,80.9V80.9A4.9,4.9 0 0 1 45.1,76.0Z"/></svg><span>Feyron</span></div>' +
       "<h3>Tell us about the work that slows you down.</h3>" +
       "<p>A short note is enough. We reply with questions, or with an idea for how to fix it.</p>" +
-      '<p style="margin:-6px 0 16px;font-size:13px;color:#cfcfc4">Prefer direct email? Write to <a href="mailto:hello@feyron.co" style="color:var(--accent,#D4F534);text-decoration:underline;text-underline-offset:2px">hello@feyron.co</a></p>' +
+      '<p style="margin:-6px 0 16px;font-size:13px;color:#cfcfc4">Prefer direct email? Write to <a href="mailto:hello@feyron.co" style="color:var(--accent,#FEB47B);text-decoration:underline;text-underline-offset:2px">hello@feyron.co</a></p>' +
       '<form class="cs-lead-modal__form" novalidate>' +
       '<input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" class="cs-lead-modal__hp">' +
       '<div class="cs-lead-modal__row">' +
@@ -2129,14 +2130,14 @@
   // Each driver brings its own world: picking a mascot retunes the page
   // to its paired tone (null = the default yellow).
   var MASCOT_THEMES = {
-    original: null,          // amarillo — la casa
-    denso: "electrico",      // periwinkle serio
-    anillos: "hielo",        // dos tonos, tech
-    espiral: "cielo",        // azul cielo
-    pixel: "menta",          // verde gameboy
-    nube: "rosa",            // algodón de azúcar
-    orbital: "melocoton",    // atardecer
-    erizo: "coral",          // rojo pastel con carácter
+    pixel: "melocoton",      // 01 Warm Sunset Gold (#FEB47B)
+    denso: "menta",          // 03 Vibrant Emerald (#4ADE80)
+    nube: "rosa",            // 02 Aurora Purple (#C084FC)
+    erizo: "electrico",      // Periwinkle (#818CF8)
+    original: null,          // Warm Sunset Gold / Classic
+    anillos: "hielo",        // Ice Blue
+    espiral: "cielo",        // Sky Blue
+    orbital: "coral",        // Warm Coral
   };
 
   function applyMascotTheme(variant) {
@@ -2146,23 +2147,19 @@
       if (theme) {
         rootEl.setAttribute("data-theme", theme);
         window.localStorage.setItem("cs-theme", theme);
-        window.localStorage.setItem("cs-theme-version", window.__CS_THEME_VERSION || "2026-07-03.2");
+        window.localStorage.setItem("cs-theme-version", window.__CS_THEME_VERSION || "2026-11-05.1");
       } else {
         rootEl.removeAttribute("data-theme");
         window.localStorage.removeItem("cs-theme");
-        window.localStorage.setItem("cs-theme-version", window.__CS_THEME_VERSION || "2026-07-03.2");
+        window.localStorage.setItem("cs-theme-version", window.__CS_THEME_VERSION || "2026-11-05.1");
       }
     } catch (e) {}
     // recompute the colors that JS captured at boot
     __tokStyle = window.getComputedStyle(rootEl);
-    INK_DARK = __tok("--ink", "#0e0e0c");
-    INK_LIGHT = __tok("--accent", "#D4F534");
-    INK_LIGHT_RGB = __tok("--accent-rgb", "212,245,52");
-    // keep the browser chrome tint in sync with the active world.
-    // iOS Safari ignores setAttribute on an existing theme-color meta,
-    // so we replace the node outright; html background covers the
-    // bar-sampling mode and the overscroll areas.
-    var bgNow = __tok("--bg", "#D4F534");
+    INK_DARK = __tok("--ink", "#1E1E1E");
+    INK_LIGHT = __tok("--accent", "#FEB47B");
+    INK_LIGHT_RGB = __tok("--accent-rgb", "254,180,123");
+    var bgNow = __tok("--bg", "#FEB47B");
     var metaTheme = document.querySelector('meta[name="theme-color"]');
     if (metaTheme) metaTheme.remove();
     metaTheme = document.createElement("meta");
@@ -2171,17 +2168,17 @@
     document.head.appendChild(metaTheme);
     document.documentElement.style.backgroundColor = bgNow;
     document.body.style.backgroundColor = bgNow;
-    // the favicon is the driver's portrait — retint and reshape it too
-    // (mascot-svg.js; node replaced outright so browsers notice the swap)
-    if (window.CSMascotSVG) {
+    // Keep the browser favicon as the official Feyron logo mark tinted with the active brand color
+    try {
+      var favSvg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 120"><rect width="120" height="120" rx="26" fill="#1E1E1E"/><g transform="translate(18, 18) scale(0.84)"><rect x="0" y="0" width="100" height="100" rx="14.5" fill="' + bgNow + '"/><rect x="13" y="16.2" width="28.3" height="51.4" rx="8.2" fill="#1E1E1E"/><rect x="58.7" y="16.2" width="28.3" height="51.4" rx="8.2" fill="#1E1E1E"/><rect x="40.2" y="76" width="19.6" height="9.8" rx="4.9" fill="#1E1E1E"/></g></svg>';
       var favLink = document.querySelector('link[rel="icon"]');
       if (favLink) favLink.remove();
       favLink = document.createElement("link");
       favLink.rel = "icon";
       favLink.type = "image/svg+xml";
-      favLink.href = window.CSMascotSVG.dataURI(variant, { bg: bgNow, eyeScale: 1.25 });
+      favLink.href = "data:image/svg+xml;utf8," + encodeURIComponent(favSvg);
       document.head.appendChild(favLink);
-    }
+    } catch (e) {}
     if (typeof window.__csRefreshTokens === "function") window.__csRefreshTokens();
     if (typeof window.__csRecolorOrganisms === "function") window.__csRecolorOrganisms();
     // the nav tint is painted by the scroll handler with a captured color —
@@ -4251,7 +4248,7 @@
     }).join("");
     gate.innerHTML =
       '<div class="cs-guide-gate__bar">' +
-      '<span class="cs-guide-gate__logo">Feyron</span>' +
+      '<span class="cs-guide-gate__logo" style="display:inline-flex;align-items:center;gap:9px"><svg width="24" height="24" viewBox="0 0 100 100" aria-hidden="true" style="display:block;flex-shrink:0"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M14.5,0.0H85.5A14.5,14.5 0 0 1 100.0,14.5V85.5A14.5,14.5 0 0 1 85.5,100.0H14.5A14.5,14.5 0 0 1 0.0,85.5V14.5A14.5,14.5 0 0 1 14.5,0.0Z M21.2,16.2H33.1A8.2,8.2 0 0 1 41.3,24.4V59.4A8.2,8.2 0 0 1 33.1,67.6H21.2A8.2,8.2 0 0 1 13.0,59.4V24.4A8.2,8.2 0 0 1 21.2,16.2Z M66.9,16.2H78.8A8.2,8.2 0 0 1 87.0,24.4V59.4A8.2,8.2 0 0 1 78.8,67.6H66.9A8.2,8.2 0 0 1 58.7,59.4V24.4A8.2,8.2 0 0 1 66.9,16.2Z M45.1,76.0H54.9A4.9,4.9 0 0 1 59.8,80.9V80.9A4.9,4.9 0 0 1 54.9,85.8H45.1A4.9,4.9 0 0 1 40.2,80.9V80.9A4.9,4.9 0 0 1 45.1,76.0Z"/></svg><span>Feyron</span></span>' +
       '<span class="cs-guide-gate__live"><button type="button" class="cs-sound-toggle" data-sound-toggle aria-pressed="false">sound: off</button><i></i><em>Live session</em></span>' +
       "</div>" +
       '<div class="cs-guide-choice">' +
@@ -4700,7 +4697,7 @@
     panel.className = "cs-chat";
     panel.innerHTML =
       '<div class="cs-chat__head">' +
-      '<span class="cs-chat__dot"></span>' +
+      '<svg width="18" height="18" viewBox="0 0 100 100" aria-hidden="true" style="display:block;flex-shrink:0;color:var(--accent,#FEB47B)"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M14.5,0.0H85.5A14.5,14.5 0 0 1 100.0,14.5V85.5A14.5,14.5 0 0 1 85.5,100.0H14.5A14.5,14.5 0 0 1 0.0,85.5V14.5A14.5,14.5 0 0 1 14.5,0.0Z M21.2,16.2H33.1A8.2,8.2 0 0 1 41.3,24.4V59.4A8.2,8.2 0 0 1 33.1,67.6H21.2A8.2,8.2 0 0 1 13.0,59.4V24.4A8.2,8.2 0 0 1 21.2,16.2Z M66.9,16.2H78.8A8.2,8.2 0 0 1 87.0,24.4V59.4A8.2,8.2 0 0 1 78.8,67.6H66.9A8.2,8.2 0 0 1 58.7,59.4V24.4A8.2,8.2 0 0 1 66.9,16.2Z M45.1,76.0H54.9A4.9,4.9 0 0 1 59.8,80.9V80.9A4.9,4.9 0 0 1 54.9,85.8H45.1A4.9,4.9 0 0 1 40.2,80.9V80.9A4.9,4.9 0 0 1 45.1,76.0Z"/></svg>' +
       '<span class="cs-chat__title">' + (MASCOT_NAMES[state.mascotVariant] || "Bit") + " · " + ((MASCOT_PERSONAS[state.mascotVariant] || MASCOT_PERSONAS.pixel).role) + '</span>' +
       '<button type="button" class="cs-chat__close" aria-label="Close chat">×</button>' +
       "</div>" +

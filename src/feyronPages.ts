@@ -596,52 +596,57 @@ export const FEYRON_PAGES: Record<string, FeyronPageData> = {
   about: {
     slug: 'about',
     title: 'About',
-    metaTitle: 'About Feyron',
+    metaTitle: 'About Feyron | AI Productivity & Technology',
     metaDescription:
-      'Feyron is an AI productivity and technology company building practical software for businesses and professionals.',
+      'Feyron is an AI productivity and technology company helping businesses work smarter and achieve more through intelligent automation, software platforms and connected digital systems.',
     kicker: 'About Feyron',
-    headline: 'Building better ways to work.',
+    headline: 'The engine behind smarter business execution.',
     subheading:
-      'Many of the systems people rely on every day are still fragmented, repetitive and harder than they need to be. Feyron is an AI productivity and technology company that builds practical software, AI agents and connected systems to change that.',
+      'Feyron is an AI productivity and technology company helping businesses work smarter and achieve more. We build intelligent tools and digital solutions that automate repetitive tasks, simplify operations, and improve how modern teams run.',
     sections: [
       {
-        kicker: 'Who we are',
-        heading: 'Practical software and connected systems',
+        kicker: '01 · About Brand',
+        heading: 'Technology that feels clear, reliable, and impactful',
         body: [
-          'We bring together AI, software development, automation and modern payment and data infrastructure. We start with how the work really happens, then build what helps.',
-          'We start in Nigeria and work with clients internationally. Alongside client projects, we are developing our own products from the problems we see repeat across businesses.',
-          'Our vision: To build intelligent technology that makes work and everyday life more productive.',
-          'Our mission: To develop practical software, AI solutions and connected digital systems that simplify complex processes and create real value.',
+          'Feyron is an AI productivity and technology company helping businesses work smarter and achieve more. We build intelligent tools and digital solutions that automate repetitive tasks, simplify operations, and improve how modern teams run.',
+          'Our focus is simple: create technology that feels clear, reliable, and genuinely useful — helping businesses save time, work efficiently, and grow with confidence.',
+          'Started in Lagos, Nigeria and working with organisations locally and internationally, we combine client engineering with our own growing suite of AI productivity products.',
         ],
       },
       {
-        kicker: 'What we believe',
-        heading: 'Principles behind our work',
+        kicker: '02 · Mission & Vision',
+        heading: 'Where we are headed',
         bullets: [
-          { text: 'Technology should solve real problems.' },
+          {
+            title: 'Our Mission',
+            text: 'To simplify work through intelligent technology — helping businesses eliminate repetitive tasks, operate efficiently, and focus on meaningful progress.',
+          },
+          {
+            title: 'Our Vision',
+            text: 'To become a leading global technology company building intelligent systems that redefine how businesses and individuals work, grow, and achieve more.',
+          },
+        ],
+      },
+      {
+        kicker: '03 · What we believe',
+        heading: 'Principles behind every system we ship',
+        bullets: [
+          { text: 'Technology should solve real operational problems.' },
           { text: 'AI should be useful, accessible and practical.' },
           { text: 'Good software simplifies. It does not complicate.' },
-          { text: 'Connected systems create better experiences.' },
-          { text: 'Progress should be measured, not claimed.' },
-          { text: 'The best products are built around the people who use them.' },
+          { text: 'Connected systems create better customer and team experiences.' },
+          { text: 'Progress should be measured in hours saved and outcomes delivered.' },
+          { text: 'The best systems keep people in control of every critical decision.' },
         ],
       },
       {
-        kicker: 'How we are different',
-        heading: 'How we operate',
+        kicker: '04 · How we operate',
+        heading: 'Built around real work, not hype',
         bullets: [
-          { text: 'We start with the work, not a tool.' },
-          { text: 'We use AI only where it helps, and ordinary software where that is more reliable.' },
-          { text: 'We sell clear packages with a clear scope.' },
-          { text: 'We stay after launch.' },
-          { text: 'We keep a person in control.' },
-        ],
-      },
-      {
-        kicker: 'Team',
-        heading: 'Founder and team',
-        body: [
-          '[Add real names, roles and short bios when ready. Do not use stock photos or invented profiles.]',
+          { text: 'We start with the workflow, not a pre-packaged tool.' },
+          { text: 'We use AI where reasoning helps, and deterministic software where strict rules matter.' },
+          { text: 'We work in clear phases with transparent scope and pricing.' },
+          { text: 'We stay after launch to monitor, refine and support your team.' },
         ],
       },
     ],
