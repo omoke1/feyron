@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 750">
+    <defs>
+      <linearGradient id="bg3" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#191326"/>
+        <stop offset="60%" stop-color="#1E1E1E"/>
+        <stop offset="100%" stop-color="#121e24"/>
+      </linearGradient>
+    </defs>
+    <rect width="1200" height="750" fill="url(#bg3)"/>
+    <rect x="130" y="95" width="940" height="515" rx="24" fill="#181622" stroke="rgba(192,132,252,0.38)" stroke-width="2"/>
+    <text x="180" y="155" fill="#C084FC" font-family="monospace" font-size="13" font-weight="700" letter-spacing="2">SWEEPIFY · 3-AGENT CROSS-CHAIN USDC TREASURY</text>
+    <text x="180" y="208" fill="#FFFFFF" font-family="sans-serif" font-size="38" font-weight="800">Autonomous Treasury &amp; Liquidation Guard</text>
+    <rect x="180" y="250" width="265" height="280" rx="18" fill="#221e30" stroke="#C084FC" stroke-width="1.8"/>
+    <text x="206" y="292" fill="#C084FC" font-family="monospace" font-size="12">AGENT 01 · SCOUT</text>
+    <text x="206" y="330" fill="#FFFFFF" font-family="sans-serif" font-size="22" font-weight="800">Yield &amp; Rate Scanner</text>
+    <text x="206" y="368" fill="#cfc7dc" font-family="monospace" font-size="13">Monitors cross-chain APY</text>
+    <text x="206" y="392" fill="#cfc7dc" font-family="monospace" font-size="13">&amp; idle treasury balances</text>
+    <rect x="468" y="250" width="265" height="280" rx="18" fill="#221e30" stroke="#FEB47B" stroke-width="1.8"/>
+    <text x="494" y="292" fill="#FEB47B" font-family="monospace" font-size="12">AGENT 02 · ROUTER</text>
+    <text x="494" y="330" fill="#FFFFFF" font-family="sans-serif" font-size="22" font-weight="800">Circle CCTP Bridge</text>
+    <text x="494" y="368" fill="#cfc7dc" font-family="monospace" font-size="13">Moves native USDC across</text>
+    <text x="494" y="392" fill="#cfc7dc" font-family="monospace" font-size="13">chains with zero slippage</text>
+    <rect x="756" y="250" width="265" height="280" rx="18" fill="#221e30" stroke="#4ADE80" stroke-width="1.8"/>
+    <text x="782" y="292" fill="#4ADE80" font-family="monospace" font-size="12">AGENT 03 · GUARD</text>
+    <text x="782" y="330" fill="#FFFFFF" font-family="sans-serif" font-size="22" font-weight="800">Margin Protection</text>
+    <text x="782" y="368" fill="#cfc7dc" font-family="monospace" font-size="13">Auto-tops positions before</text>
+    <text x="782" y="392" fill="#cfc7dc" font-family="monospace" font-size="13">liquidation thresholds hit</text>
+  </svg>

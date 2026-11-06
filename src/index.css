@@ -13,6 +13,7 @@ html, body {
 @media (max-width: 768px) {
   #cs-nav {
     display: flex !important;
+    flex-direction: row !important;
     justify-content: space-between !important;
     align-items: center !important;
     padding: 14px 18px !important;
@@ -23,7 +24,11 @@ html, body {
   #cs-nav .cs-nav-logo {
     position: static !important;
     transform: none !important;
-    display: block !important;
+    display: inline-flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 10px !important;
+    white-space: nowrap !important;
     z-index: 10 !important;
   }
   #cs-nav .cs-nav-desktop {
@@ -32,8 +37,11 @@ html, body {
   #cs-nav .cs-nav-desktop a {
     display: none !important;
   }
-  .cs-nav-burger {
+  .cs-nav-burger,
+  #cs-nav > button#cs-nav-burger {
     display: inline-flex !important;
+    margin-left: auto !important;
+    flex-shrink: 0 !important;
   }
 }
 

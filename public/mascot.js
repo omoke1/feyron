@@ -195,7 +195,7 @@
     return sound.ctx;
   }
   function sfx(name) {
-    if (!sound.enabled) return;
+    if (!sound.enabled || window.__feyronIntroActive) return;
     var ctx = soundCtx();
     if (!ctx) return;
     var t = ctx.currentTime;
@@ -435,6 +435,7 @@
   }
   (function () {
     function unlock() {
+      if (window.__feyronIntroActive) return;
       if (sound.enabled) {
         soundCtx();
         startMusic();
@@ -2348,6 +2349,10 @@
       var cx = cv.width / 2;
       var cy = cv.height / 2 + 2;
       var radius = cv.width * 0.3;
+      if (v === "erizo") {
+        drawFeyronBot(c2, cx, cy, radius * 1.05, "rgb(" + inkRgb + ")", active ? 2.2 : 0, active ? 1.2 : 0, 1, active, 0.6);
+        return;
+      }
       var dots = mascotDots(v, cx, cy, radius, 0.6, 1);
       for (var i = 0; i < dots.length; i += 1) {
         var d = dots[i];
@@ -2488,16 +2493,29 @@
         });
       }
     } else if (variant === "erizo") {
-      sphereDots(dots, cx, cy, radius, t, breathSpeed, 140, 1, 0.78);
-      for (i = 0; i < 24; i += 1) {
-        a = (i / 24) * TAU + Math.sin(t * 0.7) * 0.06;
-        for (k = 0; k < 3; k += 1) {
-          r = radius * (0.88 + 0.14 * k) * (1 + Math.sin(t * breathSpeed + i) * breathAmp);
+      // Feyron Logo Socket/Bot dot field (rounded square chassis with vertical eye & mouth cutouts)
+      var fStep = radius * 0.15;
+      var fHalf = radius * 0.96;
+      var fBreath = 1 + Math.sin(t * breathSpeed) * breathAmp;
+      for (var fy = -fHalf; fy <= fHalf; fy += fStep) {
+        for (var fx = -fHalf; fx <= fHalf; fx += fStep) {
+          var nx = fx / fHalf; // -1..1
+          var ny = fy / fHalf; // -1..1
+          // rounded corner check (rx ~ 0.29 in normalized -1..1 coords)
+          var cr = 0.29;
+          var qx = Math.max(0, Math.abs(nx) - (1 - cr));
+          var qy = Math.max(0, Math.abs(ny) - (1 - cr));
+          if (qx * qx + qy * qy > cr * cr) continue;
+          // cutout for left & right vertical pill eyes: x in [0.17..0.74], y in [-0.68..0.35]
+          if (Math.abs(nx) >= 0.17 && Math.abs(nx) <= 0.74 && ny >= -0.68 && ny <= 0.35) continue;
+          // cutout for bottom horizontal mouth pill: x in [-0.22..0.22], y in [0.50..0.74]
+          if (Math.abs(nx) <= 0.22 && ny >= 0.50 && ny <= 0.74) continue;
           dots.push({
-            gx: cx + Math.cos(a) * r,
-            gy: cy + Math.sin(a) * r,
-            r: 1.7 - k * 0.45,
-            alpha: 0.75 - k * 0.2,
+            gx: cx + fx * fBreath,
+            gy: cy + fy * fBreath,
+            r: fStep * 0.42,
+            alpha: 0.88,
+            square: true,
           });
         }
       }
@@ -2579,39 +2597,64 @@
 
     // --- dot field (variant-pluggable; see /mascotas.html casting page) ---
     var breathSpeed = state.eyesOpen ? 1.6 : 0.9;
-    var dots = mascotDots(state.mascotVariant, cx, cy, radius, t, breathSpeed);
-    var gazeAngle = mood === "eat" ? gazeAngleFrom(cx, cy) : 0;
-    var chomp = mood === "eat" ? (Math.sin(state.tick * 0.25) + 1) / 2 : 0;
-    for (var i = 0; i < dots.length; i += 1) {
-      var d = dots[i];
-      if (mood === "eat") {
-        var dotAngle = Math.atan2(d.gy - cy, d.gx - cx);
-        var diff = Math.abs(normalizeAngle(dotAngle - gazeAngle));
-        if (diff < 0.55 * chomp) continue; // open mouth: skip dots in the wedge
+    if (state.mascotVariant === "erizo") {
+      // Spore uses the official Feyron Socket/Bot Logo geometry
+      var nowF = performance.now();
+      var openF = 0;
+      if (state.eyesOpen) {
+        var untilB = state.blinkAt - nowF;
+        if (untilB < 130 && untilB > -130) openF = Math.abs(untilB) / 130;
+        else openF = 1;
+        if (untilB <= -130) state.blinkAt = nowF + 2600 + Math.random() * 3600;
       }
-      ctx.fillStyle = "rgba(" + ink + "," + d.alpha.toFixed(3) + ")";
-      if (d.square) {
-        ctx.fillRect(d.gx - d.r, d.gy - d.r, d.r * 2, d.r * 2);
+      var cF = mascotCenter();
+      var tF = currentGazePoint();
+      var dxF = tF.x - cF.x;
+      var dyF = tF.y - cF.y;
+      var distF = Math.max(1, Math.sqrt(dxF * dxF + dyF * dyF));
+      var lxF = (dxF / distF) * Math.min(1, distF / 240) * radius * 0.16;
+      var lyF = (dyF / distF) * Math.min(1, distF / 240) * radius * 0.16;
+      if (state.eyeSpinUntil && nowF < state.eyeSpinUntil) {
+        var spF = nowF * 0.012;
+        lxF = Math.cos(spF) * radius * 0.15;
+        lyF = Math.sin(spF) * radius * 0.15;
+      }
+      drawFeyronBot(ctx, cx, cy, radius, solidInk, lxF, lyF, openF, state.eyesOpen, t, mood);
+    } else {
+      var dots = mascotDots(state.mascotVariant, cx, cy, radius, t, breathSpeed);
+      var gazeAngle = mood === "eat" ? gazeAngleFrom(cx, cy) : 0;
+      var chomp = mood === "eat" ? (Math.sin(state.tick * 0.25) + 1) / 2 : 0;
+      for (var i = 0; i < dots.length; i += 1) {
+        var d = dots[i];
+        if (mood === "eat") {
+          var dotAngle = Math.atan2(d.gy - cy, d.gx - cx);
+          var diff = Math.abs(normalizeAngle(dotAngle - gazeAngle));
+          if (diff < 0.55 * chomp) continue; // open mouth: skip dots in the wedge
+        }
+        ctx.fillStyle = "rgba(" + ink + "," + d.alpha.toFixed(3) + ")";
+        if (d.square) {
+          ctx.fillRect(d.gx - d.r, d.gy - d.r, d.r * 2, d.r * 2);
+        } else {
+          ctx.beginPath();
+          ctx.arc(d.gx, d.gy, d.r, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      // --- core ---
+      ctx.fillStyle = solidInk;
+      var coreR = Math.max(8, radius * 0.16 + Math.sin(t * 2) * 1.1);
+      if (state.mascotVariant === "pixel") {
+        ctx.fillRect(cx - coreR, cy - coreR, coreR * 2, coreR * 2);
       } else {
         ctx.beginPath();
-        ctx.arc(d.gx, d.gy, d.r, 0, Math.PI * 2);
+        ctx.arc(cx, cy, coreR, 0, Math.PI * 2);
         ctx.fill();
       }
-    }
 
-    // --- core ---
-    ctx.fillStyle = solidInk;
-    var coreR = Math.max(8, radius * 0.16 + Math.sin(t * 2) * 1.1);
-    if (state.mascotVariant === "pixel") {
-      ctx.fillRect(cx - coreR, cy - coreR, coreR * 2, coreR * 2);
-    } else {
-      ctx.beginPath();
-      ctx.arc(cx, cy, coreR, 0, Math.PI * 2);
-      ctx.fill();
+      // --- eyes ---
+      drawEyes(ctx, cx, cy, radius, solidInk);
     }
-
-    // --- eyes ---
-    drawEyes(ctx, cx, cy, radius, solidInk);
 
     // --- scan mood: radar sweep ---
     if (mood === "scan") {
@@ -2626,6 +2669,72 @@
       ctx.lineTo(cx + Math.cos(sweep) * radius * 1.5, cy + Math.sin(sweep) * radius * 1.5);
       ctx.stroke();
     }
+
+    ctx.restore();
+  }
+
+  function fillRoundRect(ctx, x, y, w, h, r) {
+    var rr = Math.max(0, Math.min(r, Math.min(w, h) / 2));
+    ctx.beginPath();
+    ctx.moveTo(x + rr, y);
+    ctx.lineTo(x + w - rr, y);
+    ctx.quadraticCurveTo(x + w, y, x + w, y + rr);
+    ctx.lineTo(x + w, y + h - rr);
+    ctx.quadraticCurveTo(x + w, y + h, x + w - rr, y + h);
+    ctx.lineTo(x + rr, y + h);
+    ctx.quadraticCurveTo(x, y + h, x, y + h - rr);
+    ctx.lineTo(x, y + rr);
+    ctx.quadraticCurveTo(x, y, x + rr, y);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  function drawFeyronBot(ctx, cx, cy, radius, solidInk, lookX, lookY, openness, showPupils, t, mood) {
+    var breath = 1 + Math.sin((t || 0) * 1.6) * 0.028;
+    var S = radius * 1.92 * breath;
+    var x0 = cx - S / 2;
+    var y0 = cy - S / 2;
+    var discColor = "#fdfbf2";
+
+    ctx.save();
+    // 1. Official Feyron Rounded Square Chassis (rx = 14.5% of S)
+    ctx.fillStyle = solidInk;
+    fillRoundRect(ctx, x0, y0, S, S, S * 0.155);
+
+    // 2. Two Vertical Rounded-Pill Eyes (exact Feyron Logo proportions: w=28.3%, h=51.4%, rx=8.2%)
+    var eyeW = S * 0.275;
+    var fullEyeH = S * 0.495;
+    var openK = typeof openness === "number" ? Math.max(0.08, openness) : 1;
+    var eyeH = fullEyeH * openK;
+    var eyeRx = Math.min(eyeW * 0.32, eyeH * 0.48);
+    var eyeCenterY = cy - S * 0.08 + (lookY || 0) * 0.35;
+
+    [-1, 1].forEach(function (side) {
+      var eyeCenterX = cx + side * S * 0.228 + (lookX || 0) * 0.38;
+      var ex = eyeCenterX - eyeW / 2;
+      var ey = eyeCenterY - eyeH / 2;
+      ctx.fillStyle = discColor;
+      fillRoundRect(ctx, ex, ey, eyeW, eyeH, eyeRx);
+
+      // Subtle gaze-tracking pupil capsule inside the vertical Feyron eye when awake
+      if (showPupils && openK > 0.28) {
+        var pw = eyeW * 0.46;
+        var ph = Math.min(eyeH * 0.44, fullEyeH * 0.22);
+        var px = eyeCenterX + (lookX || 0) * 0.32 - pw / 2;
+        var py = eyeCenterY + (lookY || 0) * 0.32 - ph / 2;
+        ctx.fillStyle = INK_DARK;
+        fillRoundRect(ctx, px, py, pw, ph, pw * 0.48);
+      }
+    });
+
+    // 3. Official Feyron Bottom Horizontal Pill Mouth (w=19.6%, h=9.8%, rx=4.9% at y=76%..85.8%)
+    var chompMul = mood === "eat" ? 1 + 0.55 * ((Math.sin(state.tick * 0.25) + 1) / 2) : 1;
+    var mouthW = S * 0.215 * chompMul;
+    var mouthH = S * 0.102 * chompMul;
+    var mx = cx - mouthW / 2 + (lookX || 0) * 0.2;
+    var my = y0 + S * 0.755 - (mouthH - S * 0.102) * 0.5 + (lookY || 0) * 0.15;
+    ctx.fillStyle = discColor;
+    fillRoundRect(ctx, mx, my, mouthW, mouthH, mouthH * 0.5);
 
     ctx.restore();
   }
@@ -3737,14 +3846,6 @@
     // the nav sits on the theme background — always dark ink, never the
     // light-ink mode the big mascot uses over dark sections
     var ink = "14,14,12";
-    var dots = mascotDots(state.mascotVariant, cx, cy, radius, t, 1.4);
-    for (var i = 0; i < dots.length; i += 1) {
-      var d = dots[i];
-      ctx2.fillStyle = "rgba(" + ink + "," + d.alpha.toFixed(3) + ")";
-      if (d.square) ctx2.fillRect(d.gx - d.r, d.gy - d.r, d.r * 2, d.r * 2);
-      else { ctx2.beginPath(); ctx2.arc(d.gx, d.gy, d.r, 0, Math.PI * 2); ctx2.fill(); }
-    }
-    // tiny eyes: follow the big mascot, blink on their own clock
     var now = performance.now();
     if (now > cv.__blinkAt) { cv.__blink = 1; cv.__blinkAt = now + 2400 + Math.random() * 3200; }
     if (cv.__blink > 0) cv.__blink = Math.max(0, cv.__blink - 0.14);
@@ -3757,6 +3858,17 @@
     var dx = big.x - cv.__cx, dy = big.y - cv.__cy;
     var dist = Math.max(1, Math.sqrt(dx * dx + dy * dy));
     var lx = (dx / dist) * 1.6, ly = (dy / dist) * 1.6;
+    if (state.mascotVariant === "erizo") {
+      drawFeyronBot(ctx2, cx, cy, radius * 0.96, INK_DARK, lx, ly, Math.max(0.12, 1 - cv.__blink * 0.9), true, t);
+      return;
+    }
+    var dots = mascotDots(state.mascotVariant, cx, cy, radius, t, 1.4);
+    for (var i = 0; i < dots.length; i += 1) {
+      var d = dots[i];
+      ctx2.fillStyle = "rgba(" + ink + "," + d.alpha.toFixed(3) + ")";
+      if (d.square) ctx2.fillRect(d.gx - d.r, d.gy - d.r, d.r * 2, d.r * 2);
+      else { ctx2.beginPath(); ctx2.arc(d.gx, d.gy, d.r, 0, Math.PI * 2); ctx2.fill(); }
+    }
     var eyeR = 4.4;
     var eyeH = Math.max(0.6, eyeR * (1 - cv.__blink * 0.9));
     [-1, 1].forEach(function (side) {
@@ -3987,10 +4099,10 @@
     await gwait(1100);
 
     var quips = [
-      "Our agent orchestrator. Meta.",
-      "Claude inside macOS. Private.",
-      "Paints your dog. LoRA LoRA!",
-      "Fills staffing gaps. With AI.",
+      "Froodi — autonomous agentic workflows.",
+      "Qreva — stablecoin & instant payments.",
+      "Sweepify — cross-chain USDC treasury.",
+      "FlowPay — automated payment links.",
     ];
 
     for (var i = 0; i < rows.length; i += 1) {
@@ -5155,6 +5267,7 @@
     // sound already enabled from a previous visit: music starts on first gesture
     if (sound.enabled) {
       var onceMusic = function () {
+        if (window.__feyronIntroActive) return;
         startMusic();
         window.removeEventListener("pointerdown", onceMusic);
         window.removeEventListener("keydown", onceMusic);

@@ -3,485 +3,134 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Money in Check — Case study — Cloudstudio</title>
-
-<meta name="description" content="How Cloudstudio designed and built the launch site for Money in Check — Óscar Pérez's debut novel. A scroll-driven editorial experience told, like the book, as a game of chess.">
-<link rel="canonical" href="https://cloudstudio.es/work/moneyincheck">
+<title>Qreva — Feyron Case Study</title>
+<meta name="description" content="Qreva: Stablecoin Integration & Instant Payment Settlement Platform — designed and engineered by Feyron.">
 <link rel="icon" type="image/svg+xml" href="/site/assets/favicon.svg">
-<meta property="og:type" content="article">
-<meta property="og:title" content="Money in Check — Case study — Cloudstudio">
-<meta property="og:description" content="A scroll-driven editorial site for a novel about the invisible rules of wealth — the case study, told as a game of chess.">
-<meta property="og:image" content="https://cloudstudio.es/site/assets/work/moneyincheck/hero.webp">
 <style>
-@font-face { font-family:'Bricolage Grotesque'; font-style:normal; font-weight:100 900; font-stretch:100%; font-display:swap; src:url("/site/fonts/bricolage-grotesque-latin.woff2") format('woff2'); }
-@font-face { font-family:'Geist Mono'; font-style:normal; font-weight:100 900; font-display:swap; src:url("/site/fonts/geist-mono-latin.woff2") format('woff2'); }
+@font-face { font-family:"Bricolage Grotesque"; font-style:normal; font-weight:100 900; font-stretch:100%; font-display:swap; src:url("/site/fonts/bricolage-grotesque-latin.woff2") format("woff2"); }
+@font-face { font-family:"Geist Mono"; font-style:normal; font-weight:100 900; font-display:swap; src:url("/site/fonts/geist-mono-latin.woff2") format("woff2"); }
 :root{
-  --paper:#ecebe8; --ink:#12110f; --ink-rgb:18,17,15;
-  --green:#17724c; --green-deep:#0e5c3c;
-  --yellow:#fff48d; --yellow-rgb:255,244,141;
-  --hair:rgba(18,17,15,.14); --grid:rgba(18,17,15,.055);
-  --serif:'Didot','Bodoni 72','Playfair Display',Georgia,'Times New Roman',serif;
-  --sans:'Bricolage Grotesque',sans-serif;
-  --mono:'Geist Mono',ui-monospace,monospace;
-  --ease-out:cubic-bezier(.16,1,.3,1); --ease-back:cubic-bezier(.34,1.56,.64,1);
-  --cell:clamp(88px,11vw,150px);
+  --paper:#E7E7E7; --card:#ffffff; --ink:#1E1E1E; --ink-rgb:30,30,30;
+  --accent:#4ADE80;
+  --hair:rgba(30,30,30,.15);
+  --sans:"Bricolage Grotesque",system-ui,sans-serif;
+  --mono:"Geist Mono",ui-monospace,monospace;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;}
-body{
-  background:var(--paper) ;
-  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);
-  background-size:var(--cell) var(--cell);
-  color:var(--ink);font-family:var(--sans);overflow-x:hidden;-webkit-font-smoothing:antialiased;
-}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);overflow-x:hidden;-webkit-font-smoothing:antialiased;}
 img{max-width:100%;height:auto;display:block;}
 a{color:inherit;}
-::selection{background:var(--green);color:var(--paper);}
-.mono{font-family:var(--mono);letter-spacing:.16em;text-transform:uppercase;}
-.wrap{max-width:1240px;margin:0 auto;padding:0 clamp(20px,5vw,52px);}
-
-/* house grain */
-.grain{position:fixed;inset:0;z-index:90;pointer-events:none;opacity:.04;mix-blend-mode:overlay;background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="140" height="140"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch"/></filter><rect width="140" height="140" filter="url(%23n)"/></svg>');}
-
-/* bar */
-.bar{position:fixed;top:0;left:0;right:0;z-index:80;display:flex;align-items:center;justify-content:space-between;padding:18px clamp(20px,4vw,48px);mix-blend-mode:multiply;}
-.bar__logo{font-weight:800;font-size:21px;letter-spacing:-.03em;text-decoration:none;color:var(--ink);}
-.bar__right{display:flex;align-items:center;gap:16px;}
-.bar__back{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;text-decoration:none;color:var(--ink);opacity:.55;transition:opacity .2s ease;}
-.bar__back:hover{opacity:1;}
-.bar__pill{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;border:1.5px solid rgba(var(--ink-rgb),.75);color:var(--ink);padding:7px 14px;border-radius:100px;white-space:nowrap;}
-
-/* scattered notation */
-.note{position:absolute;top:var(--t);left:var(--l);font-family:var(--mono);font-size:clamp(11px,1.1vw,14px);letter-spacing:.04em;opacity:.28;transform:translateY(var(--y,0)) rotate(var(--r,0deg));will-change:transform;pointer-events:none;white-space:nowrap;}
-.note--g{color:var(--green);opacity:.5;}
-
-/* the book's ink illustrations, wandering through the margins */
-.illo{position:absolute;top:var(--t);left:var(--l);mix-blend-mode:multiply;pointer-events:none;transform:translateY(var(--y,0)) rotate(var(--r,0deg));will-change:transform;}
-.illo-flow{mix-blend-mode:multiply;pointer-events:none;}
-.queue{padding-top:clamp(36px,6vw,80px);}
-.queue img,.queue video{display:block;width:min(1100px,94vw);margin:0 auto;mix-blend-mode:multiply;}
-/* the doodle videos carry a ~#e7e7e7 stage: lift it to pure white so
-   multiply dissolves it into the paper (ink barely moves) */
-video.illo,video.illo-flow,.queue video{filter:brightness(1.105);}
-
-/* ============ HERO ============ */
-.hero{position:relative;min-height:100svh;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden;padding-top:90px;}
-.hero__center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 clamp(18px,4vw,44px);}
-.eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;opacity:.55;display:inline-flex;align-items:center;gap:10px;margin-bottom:clamp(18px,3svh,30px);}
-.eyebrow i{width:7px;height:7px;border-radius:50%;background:var(--green);animation:blink 1.6s step-end infinite;}
-@keyframes blink{0%,100%{opacity:1;}50%{opacity:.2;}}
-.hero h1{font-family:var(--serif);font-weight:400;font-size:clamp(4.2rem,16.5vw,15rem);line-height:.83;letter-spacing:.005em;color:var(--green);}
-.hero h1 .l{display:block;overflow:hidden;padding:0 .06em;}
-.hero h1 .l i{display:inline-block;font-style:normal;transform:translateY(108%);animation:rise 1.1s var(--ease-out) forwards;}
-.hero h1 .l:nth-child(2) i{animation-delay:.12s;}
-@keyframes rise{to{transform:translateY(0);}}
-.hero__sub{margin-top:clamp(20px,3.4svh,34px);font-family:var(--serif);font-style:italic;font-size:clamp(1.05rem,2.3vw,1.55rem);line-height:1.45;max-width:44ch;opacity:0;animation:fade 1s var(--ease-out) .55s forwards;}
-.hero__sub b{font-style:normal;font-weight:700;}
-@keyframes fade{to{opacity:.92;}}
-.hero__actions{margin-top:clamp(22px,3.6svh,38px);display:flex;gap:12px;flex-wrap:wrap;justify-content:center;opacity:0;animation:fade 1s var(--ease-out) .75s forwards;}
-.btn{display:inline-flex;align-items:center;gap:9px;text-decoration:none;font-weight:700;font-size:15px;padding:14px 26px;border-radius:100px;transition:transform .4s var(--ease-back);}
-.btn:hover{transform:scale(1.05) rotate(-.6deg);}
-.btn--green{background:var(--green);color:var(--paper);}
-.btn--hair{background:transparent;color:var(--ink);border:1.5px solid rgba(var(--ink-rgb),.4);}
-.hero__meta{border-top:1.5px solid rgba(var(--ink-rgb),.55);display:grid;grid-template-columns:repeat(4,1fr);margin-top:clamp(30px,5svh,54px);}
-.hero__meta>div{padding:clamp(14px,2vw,22px) clamp(18px,3vw,44px);border-left:1px solid var(--hair);}
-.hero__meta>div:first-child{border-left:0;}
-.hero__meta dt{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;opacity:.45;margin-bottom:6px;}
-.hero__meta dd{font-size:clamp(12.5px,1.15vw,14.5px);font-weight:700;letter-spacing:-.01em;line-height:1.3;}
-
-/* ============ MARQUEE ============ */
-.marq{background:var(--green);color:var(--paper);overflow:hidden;padding:15px 0;}
-.marq__track{display:flex;align-items:center;white-space:nowrap;font-family:var(--serif);font-style:italic;font-size:clamp(1.15rem,2.4vw,1.85rem);letter-spacing:.01em;animation:marq 30s linear infinite;}
-.marq__track span{padding:0 .55em;}
-.marq__track .st{color:var(--yellow);font-style:normal;font-size:.72em;}
-@keyframes marq{from{transform:translateX(0);}to{transform:translateX(-50%);}}
-
-/* ============ EDITORIAL BLOCKS ============ */
-.sec{position:relative;padding:clamp(70px,10vw,150px) 0;}
-.kicker{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--green);margin-bottom:clamp(16px,2.4vw,26px);}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:clamp(28px,6vw,90px);align-items:start;}
-.state{font-family:var(--serif);font-weight:400;font-size:clamp(2.1rem,4.8vw,3.6rem);letter-spacing:-.005em;line-height:1.02;}
-.state em{font-style:italic;color:var(--green);}
-.body{font-size:clamp(15px,1.65vw,17px);line-height:1.65;font-weight:500;opacity:.85;max-width:58ch;}
+.mono{font-family:var(--mono);letter-spacing:.15em;text-transform:uppercase;}
+.wrap{max-width:1200px;margin:0 auto;padding:0 clamp(20px,5vw,52px);}
+.hero{padding:clamp(48px,7vw,96px) 0 clamp(36px,5vw,64px);border-bottom:2px solid var(--ink);background:#1E1E1E;color:#fff;}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;}
+.eyebrow i{width:8px;height:8px;border-radius:50%;background:var(--accent);}
+.hero h1{font-weight:800;font-size:clamp(2.8rem,7vw,5.8rem);line-height:.94;letter-spacing:-.04em;color:#fff;margin-bottom:16px;}
+.hero__sub{font-size:clamp(1.08rem,1.8vw,1.38rem);line-height:1.55;font-weight:500;color:#d6d6ce;max-width:62ch;}
+.hero__badge{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#1E1E1E;background:var(--accent);border-radius:100px;padding:7px 16px;font-weight:700;margin-top:20px;}
+.hero__actions{margin-top:28px;display:flex;gap:14px;flex-wrap:wrap;}
+.btn{display:inline-flex;align-items:center;gap:9px;text-decoration:none;font-weight:700;font-size:15px;padding:14px 28px;border-radius:100px;transition:transform .25s ease;}
+.btn:hover{transform:translateY(-2px);}
+.btn--accent{background:var(--accent);color:#1E1E1E;}
+.btn--hair{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.35);}
+.hero__meta{border-top:1.5px solid rgba(255,255,255,.16);display:grid;grid-template-columns:repeat(4,1fr);margin-top:clamp(36px,5vw,56px);padding-top:24px;gap:20px;}
+.hero__meta dt{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;}
+.hero__meta dd{font-size:14.5px;font-weight:700;color:#fff;line-height:1.35;}
+.sec{padding:clamp(56px,8vw,110px) 0;}
+.two{display:grid;grid-template-columns:1fr 1.15fr;gap:clamp(28px,6vw,80px);align-items:start;}
+.kicker{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#5a554c;margin-bottom:14px;font-weight:700;}
+.state{font-weight:800;font-size:clamp(1.85rem,3.6vw,2.9rem);letter-spacing:-.03em;line-height:1.05;}
+.body{font-size:clamp(15.5px,1.3vw,17.5px);line-height:1.65;font-weight:500;color:#2b2b26;}
 .body p+p{margin-top:16px;}
-.body em{font-style:italic;}
-
-/* pull quote — word by word, like the site's manifesto */
-.pull{text-align:center;padding:clamp(60px,10vw,150px) clamp(18px,5vw,44px);}
-.pull p{font-family:var(--serif);font-weight:400;font-size:clamp(2.3rem,7vw,5.6rem);letter-spacing:-.005em;line-height:1.04;max-width:17ch;margin:0 auto;}
-.pull .w{color:rgba(var(--ink-rgb),.13);transition:color .7s ease;}
-.pull .w.on{color:var(--ink);}
-.pull .w--g.on{color:var(--green);font-style:italic;}
-
-/* ============ MOVES ============ */
-.moves{display:grid;gap:clamp(80px,12vw,170px);}
-.move{position:relative;}
-.move__head{display:grid;grid-template-columns:minmax(120px,180px) 1fr;gap:clamp(18px,3vw,40px);align-items:baseline;margin-bottom:clamp(22px,3.4vw,40px);}
-.move__no{font-family:var(--serif);font-style:italic;font-size:clamp(1.5rem,3vw,2.3rem);color:var(--green);line-height:1;}
-.move__no small{display:block;font-family:var(--mono);font-style:normal;font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink);opacity:.45;margin-top:10px;}
-.move__txt h3{font-family:var(--serif);font-weight:400;font-size:clamp(1.7rem,3.6vw,2.7rem);letter-spacing:-.005em;line-height:1.04;margin-bottom:14px;}
-.move__txt p{font-size:clamp(14.5px,1.55vw,16.5px);line-height:1.65;font-weight:500;opacity:.82;max-width:62ch;}
-
-/* plates — book plates, not browser mockups */
-.plate{position:relative;opacity:0;transform:translateY(34px);transition:opacity .9s var(--ease-out),transform 1.2s var(--ease-out);}
-.plate.is-in{opacity:1;transform:none;}
-.plate img{width:100%;height:auto;}
-
-/* ============ CRAFT ============ */
-.craft{border-top:1.5px solid rgba(var(--ink-rgb),.55);}
-.craft__grid{display:grid;grid-template-columns:repeat(3,1fr);border-left:1px solid var(--hair);border-right:1px solid var(--hair);}
-.craft__cell{padding:clamp(26px,3.4vw,46px) clamp(22px,3vw,40px);border-left:1px solid var(--hair);}
+.plate{margin-top:clamp(36px,5vw,60px);border-radius:22px;overflow:hidden;border:2.5px solid var(--ink);box-shadow:10px 10px 0 var(--ink);background:#141413;}
+.plate img{width:100%;height:auto;display:block;}
+.craft{border-top:2px solid var(--ink);border-bottom:2px solid var(--ink);background:#fff;}
+.craft__grid{display:grid;grid-template-columns:repeat(3,1fr);}
+.craft__cell{padding:clamp(28px,3.6vw,48px);border-left:1.5px solid var(--hair);}
 .craft__cell:first-child{border-left:0;}
-.craft__cell .mono{font-size:9.5px;color:var(--green);display:block;margin-bottom:16px;opacity:.9;}
-.craft__cell h3{font-family:var(--serif);font-weight:400;font-size:clamp(1.35rem,2.2vw,1.8rem);letter-spacing:-.005em;margin-bottom:12px;}
-.craft__cell p{font-size:14.5px;line-height:1.6;font-weight:500;opacity:.8;}
-
-/* ============ CLOSE ============ */
-.close{background:var(--ink);color:var(--paper);text-align:center;padding:clamp(90px,14vw,170px) clamp(18px,5vw,44px) clamp(60px,8vw,90px);position:relative;overflow:hidden;}
-.close h2{font-weight:800;font-size:clamp(3rem,11vw,8rem);letter-spacing:-.045em;line-height:.9;color:var(--yellow);}
-.close p{margin:22px auto 0;max-width:480px;font-size:15.5px;line-height:1.6;font-weight:500;color:#cfcfc4;}
-.close__actions{margin-top:36px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
-.btn--accent{background:var(--yellow);color:var(--ink);}
-.btn--ghosty{background:transparent;color:var(--yellow);border:1.5px solid rgba(var(--yellow-rgb),.45);}
-.close__foot{margin-top:clamp(56px,8vw,90px);font-size:10px;letter-spacing:.08em;color:#8f8f80;display:flex;justify-content:center;gap:18px;flex-wrap:wrap;font-family:var(--mono);text-transform:uppercase;}
-
-.close__next{display:inline-block;margin-top:clamp(46px,7vw,80px);text-decoration:none;color:inherit;}
-.close__next-k{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;opacity:.45;margin-bottom:12px;}
-.close__next-n{font-weight:800;letter-spacing:-.04em;font-size:clamp(1.7rem,4.6vw,3rem);line-height:1;transition:color .3s ease;}
-.close__next-n i{font-style:normal;display:inline-block;transition:transform .4s cubic-bezier(.34,1.56,.64,1);}
-.close__next:hover .close__next-n{color:var(--yellow);}
-.close__next:hover .close__next-n i{transform:translateX(9px);}
-
-/* reveal */
-.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s var(--ease-out),transform .9s var(--ease-out);}
-.reveal.is-in{opacity:1;transform:none;}
-
+.craft__cell .mono{font-size:10.5px;color:#1E1E1E;background:var(--accent);display:inline-block;padding:4px 10px;border-radius:100px;font-weight:700;margin-bottom:16px;}
+.craft__cell h3{font-weight:800;font-size:clamp(1.3rem,2vw,1.65rem);letter-spacing:-.025em;margin-bottom:10px;}
+.craft__cell p{font-size:15px;line-height:1.6;font-weight:500;color:#3a3a32;}
+.close{background:#1E1E1E;color:#fff;text-align:center;padding:clamp(72px,10vw,130px) clamp(20px,5vw,44px);}
+.close h2{font-weight:800;font-size:clamp(2.4rem,6vw,4.8rem);letter-spacing:-.04em;line-height:.95;color:var(--accent);}
+.close p{margin:18px auto 0;max-width:520px;font-size:16px;line-height:1.6;color:#d0d0c6;}
+.close__actions{margin-top:32px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+.close__next{display:inline-block;margin-top:52px;text-decoration:none;color:#fff;padding-top:28px;border-top:1px solid rgba(255,255,255,.15);}
+.close__next-k{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:8px;}
+.close__next-n{font-weight:800;font-size:clamp(1.5rem,3.4vw,2.4rem);letter-spacing:-.03em;}
 @media(max-width:860px){
-  .illo--m{display:none;}
-  .two{grid-template-columns:1fr;gap:22px;}
+  .two,.craft__grid{grid-template-columns:1fr;}
   .hero__meta{grid-template-columns:repeat(2,1fr);}
-  .hero__meta>div:nth-child(3){border-left:0;}
-  .hero__meta>div{border-top:1px solid var(--hair);}
-  .hero__meta>div:nth-child(-n+2){border-top:0;}
-  .move__head{grid-template-columns:1fr;gap:14px;}
-  .craft__grid{grid-template-columns:1fr;}
-  .craft__cell{border-left:0;border-top:1px solid var(--hair);}
+  .craft__cell{border-left:0;border-top:1.5px solid var(--hair);}
   .craft__cell:first-child{border-top:0;}
-}
-@media(prefers-reduced-motion:reduce){
-  .hero h1 .l i{animation:none;transform:none;}
-  .hero__sub,.hero__actions{animation:none;opacity:1;}
-  .reveal,.plate{transition:none;opacity:1;transform:none;}
-  .marq__track{animation:none;}
-  .note{transform:rotate(var(--r,0deg));}
 }
 </style>
 </head>
 <body>
-<div class="grain"></div>
-
-<header class="bar">
-  <a class="bar__logo" href="/">cloudstudio*</a>
-  <span class="bar__right">
-    <a class="bar__back" href="/#work">← Work</a>
-    <span class="bar__pill">Case study</span>
-  </span>
-</header>
-
-<!-- ============ HERO ============ -->
 <section class="hero">
-  <img class="illo" src="/site/assets/work/moneyincheck/coin.webp" alt="" aria-hidden="true" style="--t:13%;--l:78%;--r:10deg;width:clamp(50px,6vw,92px)" data-drift="-0.12">
-  <img class="illo illo--m" src="/site/assets/work/moneyincheck/bill-2.webp" alt="" aria-hidden="true" style="--t:56%;--l:1.5%;--r:-16deg;width:clamp(100px,12vw,190px)" data-drift="-0.07">
-  <span class="note note--g" style="--t:16%;--l:8%;--r:-7deg" data-drift="-0.05">1. e4</span>
-  <span class="note" style="--t:24%;--l:86%;--r:5deg" data-drift="-0.09">Nf3</span>
-  <span class="note" style="--t:58%;--l:5%;--r:4deg" data-drift="-0.13">O-O</span>
-  <span class="note note--g" style="--t:64%;--l:90%;--r:-4deg" data-drift="-0.07">Bb5</span>
-  <span class="note" style="--t:38%;--l:13%;--r:-3deg" data-drift="-0.1">d4</span>
-  <span class="note" style="--t:12%;--l:68%;--r:6deg" data-drift="-0.06">Nc6</span>
-  <span class="note note--g" style="--t:74%;--l:74%;--r:3deg" data-drift="-0.11">Qxf7#</span>
-
-  <div class="hero__center">
-    <p class="eyebrow"><i></i>Case study · Cloudstudio × Óscar Pérez</p>
-    <h1><span class="l"><i>MONEY</i></span><span class="l"><i>IN CHECK</i></span></h1>
-    <p class="hero__sub">The launch site for a novel about the invisible rules of wealth — designed, like the book, as <b>a game of chess</b>.</p>
+  <div class="wrap">
+    <p class="eyebrow"><i></i>Feyron Selected Work · Case Study 02</p>
+    <h1>Qreva</h1>
+    <p class="hero__sub">Stablecoin Integration & Instant Payment Settlement Platform</p>
+    <div><span class="hero__badge">Stablecoin Rails (USDC / USDT) · Instant Transfers · SoftPOS</span></div>
     <div class="hero__actions">
-      <a class="btn btn--green" href="https://moneyincheck.org/" target="_blank" rel="noopener">Visit the live site
-        <svg style="width:.85em;height:.85em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
-      <a class="btn btn--hair" href="/#work">All work</a>
+      <a class="btn btn--accent" href="https://qreva-one.vercel.app" target="_blank" rel="noopener">Visit Qreva live ↗</a>
+      <a class="btn btn--hair" href="/#work" onclick="if(window.parent&&window.parent!==window){window.parent.postMessage({type:'CS_CLOSE_SUBPAGE',scrollWork:true},'*');return false;}">← All selected work</a>
     </div>
-  </div>
-
-  <div class="wrap">
-    <dl class="hero__meta">
-      <div><dt>Client</dt><dd>Óscar Pérez — author</dd></div>
-      <div><dt>Deliverable</dt><dd>Editorial launch site · EN/ES</dd></div>
-      <div><dt>Role</dt><dd>Design &amp; creative development</dd></div>
-      <div><dt>Year</dt><dd>2026 · Boston, MA</dd></div>
-    </dl>
+    <dl class="hero__meta"><div><dt>Product</dt><dd>Qreva — Power Your Payments</dd></div><div><dt>Core Rails</dt><dd>USDC / USDT Stablecoin + Instant NGN Bank Rails</dd></div><div><dt>Capabilities</dt><dd>Transfers · Bill Pay · Scan-to-Pay · SoftPOS</dd></div><div><dt>Settlement Speed</dt><dd>< 60 Seconds · Auto-Reconciled</dd></div></dl>
   </div>
 </section>
 
-<!-- ============ MARQUEE ============ -->
-<div class="marq" aria-hidden="true"><div class="marq__track" data-marq></div></div>
-
-<!-- ============ THE COMMISSION ============ -->
 <section class="sec">
-  <div class="wrap two">
-    <div class="reveal">
-      <p class="kicker">( The commission )</p>
-      <h2 class="state">Don't sell a book.<br><em>Play the game.</em></h2>
-      <video class="illo-flow" src="/site/assets/work/moneyincheck/video/doodle-1.mp4" autoplay muted loop playsinline aria-hidden="true" style="width:clamp(46px,5vw,72px);margin-top:clamp(26px,4vw,46px);transform:rotate(-1.5deg)"></video>
-    </div>
-    <div class="body reveal">
-      <p>Óscar Pérez wrote <em>Money in Check</em> — the story of Oliver Harper, a scholarship kid at Harvard who discovers that money is a game nobody taught him to play. The brief ruled out a bookshop page and anything that smelled of a finance site.</p>
-      <p>Instead, the site had to <em>be</em> the book's idea. So the whole page is a chessboard: a faint coordinate grid runs edge to edge, algebraic notation is scribbled through the margins like a game already in progress, and the pieces are sculpted out of banknotes. Nothing is decoration — every move on the page echoes a move in the book.</p>
-    </div>
-  </div>
-</section>
-
-<!-- ============ PULL ============ -->
-<section class="pull">
-  <p data-words>Money is a <em>game</em>. So we built the <em>board</em>.</p>
-  <video class="illo-flow" src="/site/assets/work/moneyincheck/video/doodle-4.mp4" autoplay muted loop playsinline aria-hidden="true" style="display:block;width:clamp(130px,16vw,210px);margin:clamp(28px,4.5vw,50px) auto 0"></video>
-</section>
-
-<!-- ============ THE GAME ============ -->
-<section class="sec" style="padding-top:0">
   <div class="wrap">
-    <p class="kicker reveal" style="margin-bottom:clamp(40px,6vw,70px)">( The game, move by move )</p>
-    <div class="moves">
-
-      <article class="move">
-        <span class="note" style="--t:-4%;--l:94%;--r:5deg" data-drift="-0.06">e5</span>
-        <div class="move__head reveal">
-          <span class="move__no">1. e4<small>the opening</small></span>
-          <div class="move__txt">
-            <h3>A knight carved from cash.</h3>
-            <p>The opening frame plays it straight: a towering high-contrast serif, a chess knight sculpted from rolled banknotes, hand-drawn marginalia and a custom cursor. Editorial gravitas first — the wit reveals itself as you move.</p>
-          </div>
-        </div>
-        <figure class="plate">
-          <img src="/site/assets/work/moneyincheck/hero.webp" width="2000" height="1250" alt="Money in Check opening frame — a chess knight sculpted from banknotes behind the towering serif headline.">
-        </figure>
-      </article>
-
-      <article class="move">
-        <span class="note note--g" style="--t:-6%;--l:4%;--r:-5deg" data-drift="-0.09">Ke8</span>
-        <video class="illo illo--m" src="/site/assets/work/moneyincheck/video/doodle-3.mp4" autoplay muted loop playsinline aria-hidden="true" style="--t:120px;--l:1%;--r:2deg;width:clamp(96px,9vw,132px)" data-drift="-0.04"></video>
-        <div class="move__head reveal">
-          <span class="move__no">2. Nf3<small>the manifesto</small></span>
-          <div class="move__txt">
-            <h3>Lines you have to earn.</h3>
-            <p>The book's argument builds word by word as you scroll — type turns from ghost outline to solid ink while illustrated characters wander through the columns. The reader earns each line, exactly like the book's premise: you only see the board once you know what to look for.</p>
-          </div>
-        </div>
-        <figure class="plate">
-          <img src="/site/assets/work/moneyincheck/manifesto.webp" width="2000" height="1250" loading="lazy" alt="Scroll-driven manifesto — sentences resolve from outline to solid ink as you read.">
-        </figure>
-      </article>
-
-      <article class="move">
-        <span class="note" style="--t:-4%;--l:90%;--r:4deg" data-drift="-0.07">c5</span>
-        <div class="move__head reveal">
-          <span class="move__no">3. O-O<small>the book &amp; the till</small></span>
-          <div class="move__txt">
-            <h3>Read it before you buy it.</h3>
-            <p>An honest preview: the cover in-hand, then a page-flip carousel through real interior spreads — chapters, charts, footnotes and all. Print, Kindle, audio and bundle pricing sit beside one-tap checkout and a launch email capture. The commerce is castled inside the story, not bolted on.</p>
-          </div>
-        </div>
-        <figure class="plate">
-          <img src="/site/assets/work/moneyincheck/book.webp" width="2000" height="1250" loading="lazy" alt="The book section — cover held in hand, a page-flip carousel of interior spreads, and multi-format pricing.">
-        </figure>
-      </article>
-
-      <article class="move">
-        <span class="note note--g" style="--t:-6%;--l:7%;--r:6deg" data-drift="-0.1">a6</span>
-        <div class="move__head reveal">
-          <span class="move__no">4. Bb5<small>the author</small></span>
-          <div class="move__txt">
-            <h3>A bio told like a chapter.</h3>
-            <p>Óscar's two decades between boardrooms and stages — Awwwards, conferences from New York to Tokyo, work alongside Google, Microsoft and Adobe — set as an editorial spread with a timeline of career artefacts in the margins. Credibility as narrative, not a CV.</p>
-          </div>
-        </div>
-        <figure class="plate">
-          <img src="/site/assets/work/moneyincheck/author.webp" width="2000" height="1250" loading="lazy" alt="About the author — an editorial spread with career artefacts in the margins.">
-        </figure>
-      </article>
-
-      <article class="move">
-        <span class="note" style="--t:-4%;--l:92%;--r:-4deg" data-drift="-0.08">1–0</span>
-        <video class="illo illo--m" src="/site/assets/work/moneyincheck/video/doodle-6.mp4" autoplay muted loop playsinline aria-hidden="true" style="--t:110px;--l:1.5%;--r:0deg;width:clamp(110px,10vw,150px)" data-drift="-0.04"></video>
-        <div class="move__head reveal">
-          <span class="move__no">5. Qxf7#<small>checkmate</small></span>
-          <div class="move__txt">
-            <h3>The closing position.</h3>
-            <p>The site ends on the thesis, delivered in kinetic type over a cast of hand-drawn characters: chess, life and finance share one truth — <em>everything changes when you understand the rules.</em> The last frame leaves you holding the book's promise.</p>
-          </div>
-        </div>
-        <figure class="plate">
-          <img src="/site/assets/work/moneyincheck/claim.webp" width="2000" height="1188" loading="lazy" alt="Closing claim — everything changes when you understand the rules, over hand-drawn characters.">
-        </figure>
-      </article>
-
+    <div class="two">
+      <div>
+        <p class="kicker">( Overview &amp; Architecture )</p>
+        <h2 class="state">Bridging stablecoin liquidity and local payment rails in one unified experience.</h2>
+      </div>
+      <div class="body"><p>Businesses and professionals operating across borders face slow international wires, fragmented checkout tools, and manual reconciliation between crypto/stablecoin treasuries and local bank accounts.</p><p>With Qreva, Feyron built a unified payment experience that combines stablecoin settlement (USDC/USDT) with instant local bank transfers, QR scan-to-pay, bill payments, and SoftPOS card acceptance — all reconciled automatically in under 60 seconds.</p></div>
+    </div>
+    <div class="plate">
+      <img src="/site/assets/work/qreva-cover.svg" alt="Qreva architecture and product preview">
     </div>
   </div>
 </section>
 
-<!-- ============ CRAFT ============ -->
-<section class="sec craft">
-  <video class="illo illo--m" src="/site/assets/work/moneyincheck/video/doodle-5.mp4" autoplay muted loop playsinline aria-hidden="true" style="--t:12%;--l:70%;--r:-1deg;width:clamp(130px,14vw,210px)" data-drift="-0.05"></video>
+<section class="craft">
   <div class="wrap">
-    <p class="kicker reveal">( Under the hood )</p>
-    <h2 class="state reveal" style="max-width:14ch;margin-bottom:clamp(34px,5vw,60px)">The craft behind <em>the calm.</em></h2>
-    <div class="craft__grid reveal">
+    <div class="craft__grid">
       <div class="craft__cell">
-        <span class="mono">01 · Motion</span>
-        <h3>Kinetic editorial</h3>
-        <p>Scroll-driven typography, word-level reveals, parallax marginalia and a page-flip book — all tuned to stay smooth on a phone. Motion that serves the reading instead of interrupting it.</p>
+        <span class="mono">01 · Stablecoin Settlement</span>
+        <h3>On-chain speed with instant local payout</h3>
+        <p>Accept and settle USDC and USDT alongside local currency rails through licensed liquidity partners, with automatic ledger matching.</p>
       </div>
       <div class="craft__cell">
-        <span class="mono">02 · System</span>
-        <h3>The chessboard system</h3>
-        <p>A coordinate grid, algebraic-notation marginalia, hand-drawn characters and a custom cursor form one coherent language — the book's metaphor encoded as a design system, in English and Spanish.</p>
+        <span class="mono">02 · Multi-Rail Super App</span>
+        <h3>Transfers, SoftPOS & Scan-to-Pay</h3>
+        <p>Turns any smartphone into a point-of-sale terminal while supporting instant bank transfers, utility payments, and agent commissions.</p>
       </div>
       <div class="craft__cell">
-        <span class="mono">03 · Commerce</span>
-        <h3>Selling, built in</h3>
-        <p>Interior-spread carousel, four-format pricing, one-tap checkout and launch email capture — native to the narrative, fast, accessible and SEO-ready from day one.</p>
-      </div>
-    </div>
+        <span class="mono">03 · Automated Reconciliation</span>
+        <h3>Zero manual spreadsheet matching</h3>
+        <p>Every inbound stablecoin or bank transaction triggers real-time webhooks, instant receipts, and clean accounting entries.</p>
+      </div></div>
   </div>
 </section>
 
-<!-- the book's cast, queuing up for the close -->
-<div class="queue" aria-hidden="true"><video src="/site/assets/work/moneyincheck/video/footer.mp4" autoplay muted loop playsinline preload="metadata"></video></div>
-
-<!-- ============ CLOSE ============ -->
-<section class="close">
-  <h2 class="reveal">Your move.</h2>
-  <p class="reveal">We design and build editorial experiences where motion and commerce are first-class citizens — like this one. Tell us what you're launching.</p>
-  <div class="close__actions reveal">
-    <a class="btn btn--accent" data-call href="mailto:hello@cloudstudio.es">Book a call
-      <svg style="width:.9em;height:.9em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15M13 6l6 6-6 6"/></svg></a>
-    <a class="btn btn--ghosty" href="https://moneyincheck.org/" target="_blank" rel="noopener">moneyincheck.org ↗</a>
+<footer class="close">
+  <h2>Want a system like Qreva?</h2>
+  <p>Tell us about the workflow, platform or payment integration your team needs. We scope clearly and ship to production.</p>
+  <div class="close__actions">
+    <a class="btn btn--accent" href="/contact" onclick="if(window.parent&&window.parent!==window){window.parent.postMessage({type:'CS_OPEN_SUBPAGE',path:'/contact'},'*');return false;}">Talk to our team</a>
+    <a class="btn btn--hair" href="/#work" onclick="if(window.parent&&window.parent!==window){window.parent.postMessage({type:'CS_CLOSE_SUBPAGE',scrollWork:true},'*');return false;}">← Back to Selected Work</a>
   </div>
-  <a class="close__next reveal" href="/work/phopet">
-    <span class="close__next-k">Next case study</span>
-    <span class="close__next-n">Phopet <i>→</i></span>
-  </a>
-
-  <div class="close__foot">
-    <span>cloudstudio.es</span><span>·</span><span>Est. 2008 · Valencia</span><span>·</span><span>hello@cloudstudio.es</span>
+  <div>
+    <a class="close__next" href="/work/phopet" onclick="if(window.parent&&window.parent!==window){window.parent.postMessage({type:'CS_OPEN_SUBPAGE',path:'/work/phopet'},'*');return false;}">
+      <span class="close__next-k">Next case study</span>
+      <span class="close__next-n">Sweepify · AI Treasury Agents →</span>
+    </a>
   </div>
-</section>
-
-<script>
-/* reveals */
-(function(){
-  var io=new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting){var el=en.target;setTimeout(function(){el.classList.add("is-in");},(el.dataset.d||0)*1);io.unobserve(el);}});},{threshold:.15});
-  document.querySelectorAll(".reveal,.plate").forEach(function(el,i){el.dataset.d=(i%3)*100;io.observe(el);});
-})();
-
-/* pull quote — word by word, like the site's manifesto */
-(function(){
-  var p=document.querySelector("[data-words]");if(!p)return;
-  var frag=document.createDocumentFragment();
-  p.childNodes.forEach(function(node){
-    if(node.nodeType===3){
-      node.textContent.split(/(\s+)/).forEach(function(tk){
-        if(!tk.trim()){frag.appendChild(document.createTextNode(tk));return;}
-        var s=document.createElement("span");s.className="w";s.textContent=tk;frag.appendChild(s);
-      });
-    }else if(node.nodeType===1){
-      var s=document.createElement("span");s.className="w w--g";s.textContent=node.textContent;frag.appendChild(s);
-    }
-  });
-  p.textContent="";p.appendChild(frag);
-  var ws=p.querySelectorAll(".w");
-  new IntersectionObserver(function(es,io){
-    if(!es[0].isIntersecting)return;io.disconnect();
-    ws.forEach(function(w,i){setTimeout(function(){w.classList.add("on");},220+i*110);});
-  },{threshold:.5}).observe(p);
-})();
-
-/* drifting notation & illustrations — parallax relative to each element's
-   place in the viewport, so deep-page pieces stay anchored to their spot */
-(function(){
-  if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;
-  var notes=[].slice.call(document.querySelectorAll("[data-drift]"));if(!notes.length)return;
-  var ticking=false;
-  function tick(){
-    var vh=window.innerHeight;
-    notes.forEach(function(n){
-      var r=n.parentElement.getBoundingClientRect();
-      var mid=r.top+r.height/2-vh/2;
-      n.style.setProperty("--y",(mid*parseFloat(n.dataset.drift)*2).toFixed(1)+"px");
-    });
-    ticking=false;
-  }
-  window.addEventListener("scroll",function(){if(!ticking){ticking=true;requestAnimationFrame(tick);}},{passive:true});
-  tick();
-})();
-
-/* marquee */
-(function(){
-  var t=document.querySelector("[data-marq]");if(!t)return;
-  var chunk="";
-  for(var i=0;i<5;i++){chunk+="<span>Money in Check</span><span class='st'>✦</span><span>The Invisible Rules of Wealth</span><span class='st'>✦</span><span>A novel by Óscar Pérez</span><span class='st'>✦</span>";}
-  t.innerHTML=chunk+chunk;
-})();
-
-/* honor reduced motion: freeze the doodle videos on their first frame */
-(function(){
-  if(!matchMedia("(prefers-reduced-motion: reduce)").matches)return;
-  document.querySelectorAll("video[autoplay]").forEach(function(v){v.removeAttribute("autoplay");v.pause();});
-})();
-
-/* booking modal hook (mailto fallback if booking.js absent) */
-(function(){
-  var call=document.querySelector("[data-call]");
-  if(call)call.addEventListener("click",function(e){
-    if(!window.openBooking)return;
-    e.preventDefault();
-    window.openBooking({source:"case-moneyincheck",lang:"en"});
-  });
-})();
-</script>
-<script defer src="/site/js/booking.js?v=1784102540"></script>
-<script>
-(function(){
-  var nativeFetch = window.fetch.bind(window);
-  window.fetch = function(input, init) {
-    var u = typeof input === "string" ? input : (input && input.url) || "";
-    if (u.indexOf("/bookings/slots") !== -1) {
-      return Promise.resolve(new Response(JSON.stringify({ taken: ["10:40", "14:00", "16:20"] }), { status: 200, headers: { "Content-Type": "application/json" } }));
-    }
-    if (u.indexOf("/bookings") !== -1 && init && init.method === "POST") {
-      return Promise.resolve(new Response(JSON.stringify({ ok: true, success: true }), { status: 200, headers: { "Content-Type": "application/json" } }));
-    }
-    return nativeFetch(input, init);
-  };
-  document.addEventListener("click", function(e) {
-    var a = e.target && e.target.closest ? e.target.closest("a") : null;
-    if (!a) return;
-    var href = a.getAttribute("href") || "";
-    if (href === "/" || href === "/#work" || href === "#work") {
-      if (window.parent && window.parent !== window) {
-        e.preventDefault();
-        window.parent.postMessage({ type: "CS_CLOSE_SUBPAGE", scrollWork: href.indexOf("work") !== -1 }, "*");
-      }
-    } else if (href.indexOf("/work/") === 0) {
-      if (window.parent && window.parent !== window) {
-        e.preventDefault();
-        window.parent.postMessage({ type: "CS_OPEN_SUBPAGE", path: href }, "*");
-      }
-    }
-  });
-  window.addEventListener("keydown", function(e) {
-    if (e.key === "Escape" && window.parent && window.parent !== window) {
-      window.parent.postMessage({ type: "CS_CLOSE_SUBPAGE" }, "*");
-    }
-  });
-})();
-</script></body>
+</footer>
+</body>
 </html>

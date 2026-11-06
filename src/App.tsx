@@ -791,101 +791,113 @@ export default function App() {
       {/* Hero Header */}
       <header
         style={{
-          background: 'var(--bg, #D4F534)',
+          background: 'var(--bg, #FEB47B)',
           color: 'var(--ink, #1E1E1E)',
           padding: 'clamp(52px, 8vw, 110px) clamp(18px, 4vw, 44px)',
           borderBottom: '2.5px solid var(--ink, #1E1E1E)',
         }}
       >
-        <div style={{ maxWidth: '1160px', margin: '0 auto' }}>
-          <div
-            style={{
-              fontFamily: "'Geist Mono', monospace",
-              fontSize: '12px',
-              letterSpacing: '.14em',
-              textTransform: 'uppercase',
-              marginBottom: '18px',
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '10px',
-            }}
-          >
-            <span
+        <div
+          style={{
+            maxWidth: '1160px',
+            margin: '0 auto',
+            display: 'flex',
+            flexWrap: 'wrap',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 'clamp(28px, 4vw, 52px)',
+          }}
+        >
+          <div style={{ flex: '1 1 540px', minWidth: '280px' }}>
+            <div
               style={{
-                width: '8px',
-                height: '8px',
-                borderRadius: '50%',
-                background: 'var(--ink, #1E1E1E)',
-              }}
-            />
-            {feyronPage.kicker}
-          </div>
-
-          <h1
-            style={{
-              margin: '0 0 22px',
-              fontWeight: 800,
-              fontSize: 'clamp(2.4rem, 6vw, 5.2rem)',
-              lineHeight: 0.94,
-              letterSpacing: '-.035em',
-              maxWidth: '18ch',
-            }}
-          >
-            {feyronPage.headline}
-          </h1>
-
-          {feyronPage.subheading && (
-            <p
-              style={{
-                margin: 0,
-                maxWidth: '680px',
-                fontSize: 'clamp(16px, 1.35vw, 20px)',
-                lineHeight: 1.55,
-                fontWeight: 500,
+                fontFamily: "'Geist Mono', monospace",
+                fontSize: '12px',
+                letterSpacing: '.14em',
+                textTransform: 'uppercase',
+                marginBottom: '18px',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '10px',
               }}
             >
-              {feyronPage.subheading}
-            </p>
-          )}
-
-          {feyronPage.primaryCta && !feyronPage.isContactPage && (
-            <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', marginTop: '32px' }}>
-              <button
-                type="button"
-                onClick={() => handleCtaAction(feyronPage.primaryCta.action)}
+              <span
                 style={{
-                  cursor: 'pointer',
-                  fontFamily: 'inherit',
-                  fontWeight: 700,
-                  fontSize: '16px',
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
                   background: 'var(--ink, #1E1E1E)',
-                  color: 'var(--accent, #D4F534)',
-                  border: '2px solid var(--ink, #1E1E1E)',
-                  padding: '15px 28px',
-                  borderRadius: '100px',
                 }}
-              >
-                {feyronPage.primaryCta.label}
-              </button>
-              <button
-                type="button"
-                onClick={() => navigateToPath('/solutions')}
-                style={{
-                  cursor: 'pointer',
-                  fontFamily: 'inherit',
-                  fontWeight: 700,
-                  fontSize: '16px',
-                  background: 'transparent',
-                  color: 'var(--ink, #1E1E1E)',
-                  border: '2px solid var(--ink, #1E1E1E)',
-                  padding: '15px 28px',
-                  borderRadius: '100px',
-                }}
-              >
-                Explore what we build
-              </button>
+              />
+              {feyronPage.kicker}
             </div>
-          )}
+
+            <h1
+              style={{
+                margin: '0 0 22px',
+                fontWeight: 800,
+                fontSize: 'clamp(2.4rem, 6vw, 5.2rem)',
+                lineHeight: 0.94,
+                letterSpacing: '-.035em',
+                maxWidth: '18ch',
+              }}
+            >
+              {feyronPage.headline}
+            </h1>
+
+            {feyronPage.subheading && (
+              <p
+                style={{
+                  margin: 0,
+                  maxWidth: '680px',
+                  fontSize: 'clamp(16px, 1.35vw, 20px)',
+                  lineHeight: 1.55,
+                  fontWeight: 500,
+                }}
+              >
+                {feyronPage.subheading}
+              </p>
+            )}
+
+            {feyronPage.primaryCta && !feyronPage.isContactPage && (
+              <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', marginTop: '32px' }}>
+                <button
+                  type="button"
+                  onClick={() => handleCtaAction(feyronPage.primaryCta.action)}
+                  style={{
+                    cursor: 'pointer',
+                    fontFamily: 'inherit',
+                    fontWeight: 700,
+                    fontSize: '16px',
+                    background: 'var(--ink, #1E1E1E)',
+                    color: 'var(--accent, #FEB47B)',
+                    border: '2px solid var(--ink, #1E1E1E)',
+                    padding: '15px 28px',
+                    borderRadius: '100px',
+                  }}
+                >
+                  {feyronPage.primaryCta.label}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => navigateToPath('/solutions')}
+                  style={{
+                    cursor: 'pointer',
+                    fontFamily: 'inherit',
+                    fontWeight: 700,
+                    fontSize: '16px',
+                    background: 'transparent',
+                    color: 'var(--ink, #1E1E1E)',
+                    border: '2px solid var(--ink, #1E1E1E)',
+                    padding: '15px 28px',
+                    borderRadius: '100px',
+                  }}
+                >
+                  Explore what we build
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 

@@ -3,556 +3,134 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Firevalle — Case study — Cloudstudio</title>
-
-<meta name="description" content="How Cloudstudio designed and built Firevalle — a personal-finance app where your net worth is a low-poly valley you cultivate, and the launch site that lets you grow it with a scroll.">
-<link rel="canonical" href="https://cloudstudio.es/work/firevalle">
+<title>FlowPay — Feyron Case Study</title>
+<meta name="description" content="FlowPay: Shareable Business Payment Links & Real-Time Revenue Platform — designed and engineered by Feyron.">
 <link rel="icon" type="image/svg+xml" href="/site/assets/favicon.svg">
-<meta property="og:type" content="article">
-<meta property="og:title" content="Firevalle — Case study — Cloudstudio">
-<meta property="og:description" content="A FIRE app where every savings goal is a plot of land — one three.js valley shipped to an iOS app and a scroll-driven launch site.">
-<meta property="og:image" content="https://cloudstudio.es/site/assets/work/firevalle/site-story.webp">
 <style>
-@font-face { font-family:'Bricolage Grotesque'; font-style:normal; font-weight:100 900; font-stretch:100%; font-display:swap; src:url("/site/fonts/bricolage-grotesque-latin.woff2") format('woff2'); }
-@font-face { font-family:'Geist Mono'; font-style:normal; font-weight:100 900; font-display:swap; src:url("/site/fonts/geist-mono-latin.woff2") format('woff2'); }
+@font-face { font-family:"Bricolage Grotesque"; font-style:normal; font-weight:100 900; font-stretch:100%; font-display:swap; src:url("/site/fonts/bricolage-grotesque-latin.woff2") format("woff2"); }
+@font-face { font-family:"Geist Mono"; font-style:normal; font-weight:100 900; font-display:swap; src:url("/site/fonts/geist-mono-latin.woff2") format("woff2"); }
 :root{
-  --paper:#eae6d9; --ink:#1c2419; --ink-rgb:28,36,25;
-  --body:#3b4436;
-  --orange:#ff6b45; --orange-rgb:255,107,69;
-  --lime:#b9f54a; --green:#75b967; --deep:#4f8b48;
-  --yellow:#fff48d; --yellow-rgb:255,244,141;
-  --hair:rgba(28,36,25,.14); --grid:rgba(28,36,25,.055);
-  --sans:'Bricolage Grotesque',ui-sans-serif,system-ui,sans-serif;
-  --mono:'Geist Mono',ui-monospace,monospace;
-  --ease-out:cubic-bezier(.16,1,.3,1); --ease-back:cubic-bezier(.34,1.56,.64,1);
-  --iso:86px;
+  --paper:#E7E7E7; --card:#ffffff; --ink:#1E1E1E; --ink-rgb:30,30,30;
+  --accent:#FEB47B;
+  --hair:rgba(30,30,30,.15);
+  --sans:"Bricolage Grotesque",system-ui,sans-serif;
+  --mono:"Geist Mono",ui-monospace,monospace;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
 html{scroll-behavior:smooth;}
-body{
-  background:var(--paper);
-  /* the valley's isometric lattice, barely there */
-  background-image:
-    repeating-linear-gradient(30deg,var(--grid) 0 1px,transparent 1px var(--iso)),
-    repeating-linear-gradient(-30deg,var(--grid) 0 1px,transparent 1px var(--iso));
-  color:var(--ink);font-family:var(--sans);overflow-x:hidden;-webkit-font-smoothing:antialiased;
-}
+body{background:var(--paper);color:var(--ink);font-family:var(--sans);overflow-x:hidden;-webkit-font-smoothing:antialiased;}
 img{max-width:100%;height:auto;display:block;}
 a{color:inherit;}
-::selection{background:var(--lime);color:var(--ink);}
-.mono{font-family:var(--mono);letter-spacing:.16em;text-transform:uppercase;}
-.wrap{max-width:1240px;margin:0 auto;padding:0 clamp(20px,5vw,52px);}
-
-/* house grain */
-.grain{position:fixed;inset:0;z-index:90;pointer-events:none;opacity:.04;mix-blend-mode:overlay;background-image:url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="140" height="140"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch"/></filter><rect width="140" height="140" filter="url(%23n)"/></svg>');}
-
-/* bar */
-.bar{position:fixed;top:0;left:0;right:0;z-index:80;display:flex;align-items:center;justify-content:space-between;padding:18px clamp(20px,4vw,48px);mix-blend-mode:multiply;}
-.bar__logo{font-weight:800;font-size:21px;letter-spacing:-.03em;text-decoration:none;color:var(--ink);}
-.bar__right{display:flex;align-items:center;gap:16px;}
-.bar__back{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;text-decoration:none;color:var(--ink);opacity:.55;transition:opacity .2s ease;}
-.bar__back:hover{opacity:1;}
-.bar__pill{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;border:1.5px solid rgba(var(--ink-rgb),.75);color:var(--ink);padding:7px 14px;border-radius:100px;white-space:nowrap;}
-
-/* the project's own low-poly buildings, drifting through the margins */
-.illo{position:absolute;top:var(--t);left:var(--l);pointer-events:none;transform:translateY(var(--y,0)) rotate(var(--r,0deg));will-change:transform;opacity:.92;}
-
-/* the app's type signature: solid line, outlined line */
-.out{color:transparent;-webkit-text-stroke:1.6px var(--ink);}
-
-/* ============ HERO ============ */
-.hero{position:relative;min-height:100svh;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden;padding-top:90px;}
-.hero__center{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:0 clamp(18px,4vw,44px);}
-.eyebrow{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;opacity:.6;display:inline-flex;align-items:center;gap:10px;margin-bottom:clamp(18px,3svh,30px);}
-.eyebrow i{width:8px;height:8px;background:var(--orange);transform:rotate(45deg);animation:blink 1.8s step-end infinite;}
-@keyframes blink{0%,100%{opacity:1;}50%{opacity:.25;}}
-.hero h1{font-weight:800;font-size:clamp(4.4rem,18vw,16rem);line-height:.82;letter-spacing:-.045em;}
-.hero h1 .l{display:block;overflow:hidden;padding:0 .06em;}
-.hero h1 .l i{display:inline-block;font-style:normal;transform:translateY(108%);animation:rise 1.1s var(--ease-out) forwards;}
-.hero h1 .l:nth-child(2) i{animation-delay:.12s;}
-@keyframes rise{to{transform:translateY(0);}}
-.hero__sub{margin-top:clamp(20px,3.4svh,34px);font-size:clamp(1.02rem,2.1vw,1.4rem);line-height:1.5;font-weight:500;max-width:46ch;color:var(--body);opacity:0;animation:fade 1s var(--ease-out) .55s forwards;}
-.hero__sub b{font-weight:700;color:var(--ink);}
-@keyframes fade{to{opacity:1;}}
-.hero__actions{margin-top:clamp(22px,3.6svh,38px);display:flex;gap:12px;flex-wrap:wrap;justify-content:center;opacity:0;animation:fade 1s var(--ease-out) .75s forwards;}
-.btn{display:inline-flex;align-items:center;gap:9px;text-decoration:none;font-weight:700;font-size:15px;padding:14px 26px;border-radius:100px;transition:transform .4s var(--ease-back);}
-.btn:hover{transform:scale(1.05) rotate(-.6deg);}
-.btn--ink{background:var(--ink);color:#f2f0e6;}
-.btn--hair{background:transparent;color:var(--ink);border:1.5px solid rgba(var(--ink-rgb),.4);}
-.hero__meta{border-top:1.5px solid rgba(var(--ink-rgb),.55);display:grid;grid-template-columns:repeat(4,1fr);margin-top:clamp(30px,5svh,54px);}
-.hero__meta>div{padding:clamp(14px,2vw,22px) clamp(18px,3vw,44px);border-left:1px solid var(--hair);}
-.hero__meta>div:first-child{border-left:0;}
-.hero__meta dt{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;opacity:.5;margin-bottom:6px;}
-.hero__meta dd{font-size:clamp(12.5px,1.15vw,14.5px);font-weight:700;letter-spacing:-.01em;line-height:1.3;}
-
-/* ============ MARQUEE ============ */
-.marq{background:var(--ink);color:var(--lime);overflow:hidden;padding:16px 0;}
-.marq__track{display:flex;align-items:center;white-space:nowrap;font-weight:800;letter-spacing:-.02em;font-size:clamp(1.1rem,2.3vw,1.8rem);text-transform:uppercase;animation:marq 32s linear infinite;}
-.marq__track span{padding:0 .5em;}
-.marq__track .st{color:var(--orange);font-size:.6em;transform:translateY(-.1em);}
-@keyframes marq{from{transform:translateX(0);}to{transform:translateX(-50%);}}
-
-/* ============ EDITORIAL BLOCKS ============ */
-.sec{position:relative;padding:clamp(70px,10vw,150px) 0;}
-.kicker{font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--deep);margin-bottom:clamp(16px,2.4vw,26px);display:flex;align-items:center;gap:9px;}
-.kicker::before{content:"";width:8px;height:8px;background:var(--lime);transform:rotate(45deg);flex:none;}
-.two{display:grid;grid-template-columns:1fr 1fr;gap:clamp(28px,6vw,90px);align-items:start;}
-.state{font-weight:800;font-size:clamp(2.1rem,5vw,3.7rem);letter-spacing:-.04em;line-height:1.02;}
-.body{font-size:clamp(15px,1.65vw,17px);line-height:1.65;font-weight:500;color:var(--body);max-width:58ch;}
+.mono{font-family:var(--mono);letter-spacing:.15em;text-transform:uppercase;}
+.wrap{max-width:1200px;margin:0 auto;padding:0 clamp(20px,5vw,52px);}
+.hero{padding:clamp(48px,7vw,96px) 0 clamp(36px,5vw,64px);border-bottom:2px solid var(--ink);background:#1E1E1E;color:#fff;}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);display:inline-flex;align-items:center;gap:10px;margin-bottom:18px;}
+.eyebrow i{width:8px;height:8px;border-radius:50%;background:var(--accent);}
+.hero h1{font-weight:800;font-size:clamp(2.8rem,7vw,5.8rem);line-height:.94;letter-spacing:-.04em;color:#fff;margin-bottom:16px;}
+.hero__sub{font-size:clamp(1.08rem,1.8vw,1.38rem);line-height:1.55;font-weight:500;color:#d6d6ce;max-width:62ch;}
+.hero__badge{display:inline-flex;align-items:center;gap:8px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:#1E1E1E;background:var(--accent);border-radius:100px;padding:7px 16px;font-weight:700;margin-top:20px;}
+.hero__actions{margin-top:28px;display:flex;gap:14px;flex-wrap:wrap;}
+.btn{display:inline-flex;align-items:center;gap:9px;text-decoration:none;font-weight:700;font-size:15px;padding:14px 28px;border-radius:100px;transition:transform .25s ease;}
+.btn:hover{transform:translateY(-2px);}
+.btn--accent{background:var(--accent);color:#1E1E1E;}
+.btn--hair{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.35);}
+.hero__meta{border-top:1.5px solid rgba(255,255,255,.16);display:grid;grid-template-columns:repeat(4,1fr);margin-top:clamp(36px,5vw,56px);padding-top:24px;gap:20px;}
+.hero__meta dt{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:6px;}
+.hero__meta dd{font-size:14.5px;font-weight:700;color:#fff;line-height:1.35;}
+.sec{padding:clamp(56px,8vw,110px) 0;}
+.two{display:grid;grid-template-columns:1fr 1.15fr;gap:clamp(28px,6vw,80px);align-items:start;}
+.kicker{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:#5a554c;margin-bottom:14px;font-weight:700;}
+.state{font-weight:800;font-size:clamp(1.85rem,3.6vw,2.9rem);letter-spacing:-.03em;line-height:1.05;}
+.body{font-size:clamp(15.5px,1.3vw,17.5px);line-height:1.65;font-weight:500;color:#2b2b26;}
 .body p+p{margin-top:16px;}
-.body b{color:var(--ink);font-weight:700;}
-
-/* pull quote — word by word, like the site's scroll copy */
-.pull{text-align:center;padding:clamp(60px,10vw,150px) clamp(18px,5vw,44px);}
-.pull p{font-weight:800;font-size:clamp(2.1rem,6.4vw,5rem);letter-spacing:-.045em;line-height:1.04;max-width:19ch;margin:0 auto;}
-.pull .w{color:rgba(var(--ink-rgb),.14);transition:color .7s ease;}
-.pull .w.on{color:var(--ink);}
-.pull .w--g.on{color:var(--deep);}
-
-/* ============ PARCELS (the chapters) ============ */
-.plots{display:grid;gap:clamp(80px,12vw,170px);}
-.plot{position:relative;}
-.plot__head{display:grid;grid-template-columns:minmax(150px,230px) 1fr;gap:clamp(18px,3vw,46px);align-items:start;margin-bottom:clamp(24px,3.6vw,44px);}
-.plot__no{font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--deep);}
-.plot__no b{display:block;font-family:var(--sans);font-weight:800;font-size:clamp(2.4rem,4.4vw,3.4rem);letter-spacing:-.05em;color:var(--ink);line-height:1;margin-bottom:10px;}
-/* bevelled progress bar, straight out of the app */
-.growth{margin-top:16px;height:12px;background:rgba(var(--ink-rgb),.1);clip-path:polygon(0 0,100% 0,calc(100% - 6px) 100%,0 100%);overflow:hidden;}
-.growth i{display:block;height:100%;width:0;background:var(--lime);clip-path:polygon(0 0,100% 0,calc(100% - 6px) 100%,0 100%);transition:width 1.4s var(--ease-out);}
-.growth.is-in i{width:var(--fill,50%);}
-.growth+small{display:block;margin-top:9px;font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;opacity:.5;}
-.plot__txt h3{font-weight:800;font-size:clamp(1.7rem,3.8vw,2.8rem);letter-spacing:-.04em;line-height:1.02;margin-bottom:16px;}
-.plot__txt p{font-size:clamp(14.5px,1.55vw,16.5px);line-height:1.65;font-weight:500;color:var(--body);max-width:62ch;}
-.plot__txt p+p{margin-top:14px;}
-.plot__txt b{color:var(--ink);font-weight:700;}
-
-/* plates */
-.plate{position:relative;opacity:0;transform:translateY(34px);transition:opacity .9s var(--ease-out),transform 1.2s var(--ease-out);}
-.plate.is-in{opacity:1;transform:none;}
-.plate img{width:100%;height:auto;}
-/* phone plates — the app's own cream lifts off the paper, no fake device chrome */
-.phones{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(14px,2.6vw,34px);align-items:start;max-width:900px;margin-inline:auto;}
-.phones--2{grid-template-columns:repeat(2,minmax(0,1fr));max-width:620px;margin-inline:auto;}
-.phones figure{margin:0;}
-.phones img{width:100%;border-radius:clamp(16px,2.2vw,30px);box-shadow:0 30px 60px -34px rgba(var(--ink-rgb),.55);}
-.phones figcaption{margin-top:12px;font-family:var(--mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;opacity:.5;}
-
-/* ============ CRAFT ============ */
-.craft{border-top:1.5px solid rgba(var(--ink-rgb),.55);}
-.craft__grid{display:grid;grid-template-columns:repeat(3,1fr);border-left:1px solid var(--hair);border-right:1px solid var(--hair);}
-.craft__cell{padding:clamp(26px,3.4vw,46px) clamp(22px,3vw,40px);border-left:1px solid var(--hair);}
+.plate{margin-top:clamp(36px,5vw,60px);border-radius:22px;overflow:hidden;border:2.5px solid var(--ink);box-shadow:10px 10px 0 var(--ink);background:#141413;}
+.plate img{width:100%;height:auto;display:block;}
+.craft{border-top:2px solid var(--ink);border-bottom:2px solid var(--ink);background:#fff;}
+.craft__grid{display:grid;grid-template-columns:repeat(3,1fr);}
+.craft__cell{padding:clamp(28px,3.6vw,48px);border-left:1.5px solid var(--hair);}
 .craft__cell:first-child{border-left:0;}
-.craft__cell .mono{font-size:9.5px;color:var(--deep);display:block;margin-bottom:16px;opacity:.95;}
-.craft__cell h3{font-weight:800;font-size:clamp(1.3rem,2.2vw,1.75rem);letter-spacing:-.035em;margin-bottom:12px;}
-.craft__cell p{font-size:14.5px;line-height:1.6;font-weight:500;color:var(--body);}
-
-/* ============ CLOSE ============ */
-.close{background:#0e0e0c;color:#f2f0e6;text-align:center;padding:clamp(90px,14vw,170px) clamp(18px,5vw,44px) clamp(60px,8vw,90px);position:relative;overflow:hidden;}
-.close h2{font-weight:800;font-size:clamp(3rem,11vw,8rem);letter-spacing:-.05em;line-height:.9;color:var(--yellow);}
-.close p{margin:22px auto 0;max-width:490px;font-size:15.5px;line-height:1.6;font-weight:500;color:#cfcfc4;}
-.close__actions{margin-top:36px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap;}
-.btn--accent{background:var(--yellow);color:#0e0e0c;}
-.btn--ghosty{background:transparent;color:var(--yellow);border:1.5px solid rgba(var(--yellow-rgb),.45);}
-.close__foot{margin-top:clamp(56px,8vw,90px);font-size:10px;letter-spacing:.08em;color:#8f8f80;display:flex;justify-content:center;gap:18px;flex-wrap:wrap;font-family:var(--mono);text-transform:uppercase;}
-.close__next{display:inline-block;margin-top:clamp(46px,7vw,80px);text-decoration:none;color:inherit;}
-.close__next-k{display:block;font-family:var(--mono);font-size:10px;letter-spacing:.22em;text-transform:uppercase;opacity:.45;margin-bottom:12px;}
-.close__next-n{font-weight:800;letter-spacing:-.04em;font-size:clamp(1.7rem,4.6vw,3rem);line-height:1;transition:color .3s ease;}
-.close__next-n i{font-style:normal;display:inline-block;transition:transform .4s var(--ease-back);}
-.close__next:hover .close__next-n{color:var(--yellow);}
-.close__next:hover .close__next-n i{transform:translateX(9px);}
-
-/* reveal */
-.reveal{opacity:0;transform:translateY(28px);transition:opacity .9s var(--ease-out),transform .9s var(--ease-out);}
-.reveal.is-in{opacity:1;transform:none;}
-
+.craft__cell .mono{font-size:10.5px;color:#1E1E1E;background:var(--accent);display:inline-block;padding:4px 10px;border-radius:100px;font-weight:700;margin-bottom:16px;}
+.craft__cell h3{font-weight:800;font-size:clamp(1.3rem,2vw,1.65rem);letter-spacing:-.025em;margin-bottom:10px;}
+.craft__cell p{font-size:15px;line-height:1.6;font-weight:500;color:#3a3a32;}
+.close{background:#1E1E1E;color:#fff;text-align:center;padding:clamp(72px,10vw,130px) clamp(20px,5vw,44px);}
+.close h2{font-weight:800;font-size:clamp(2.4rem,6vw,4.8rem);letter-spacing:-.04em;line-height:.95;color:var(--accent);}
+.close p{margin:18px auto 0;max-width:520px;font-size:16px;line-height:1.6;color:#d0d0c6;}
+.close__actions{margin-top:32px;display:flex;gap:14px;justify-content:center;flex-wrap:wrap;}
+.close__next{display:inline-block;margin-top:52px;text-decoration:none;color:#fff;padding-top:28px;border-top:1px solid rgba(255,255,255,.15);}
+.close__next-k{display:block;font-family:var(--mono);font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--accent);margin-bottom:8px;}
+.close__next-n{font-weight:800;font-size:clamp(1.5rem,3.4vw,2.4rem);letter-spacing:-.03em;}
 @media(max-width:860px){
-  .illo--m{display:none;}
-  .two{grid-template-columns:1fr;gap:22px;}
+  .two,.craft__grid{grid-template-columns:1fr;}
   .hero__meta{grid-template-columns:repeat(2,1fr);}
-  .hero__meta>div:nth-child(3){border-left:0;}
-  .hero__meta>div{border-top:1px solid var(--hair);}
-  .hero__meta>div:nth-child(-n+2){border-top:0;}
-  .plot__head{grid-template-columns:1fr;gap:16px;}
-  .growth{max-width:220px;}
-  .craft__grid{grid-template-columns:1fr;}
-  .craft__cell{border-left:0;border-top:1px solid var(--hair);}
+  .craft__cell{border-left:0;border-top:1.5px solid var(--hair);}
   .craft__cell:first-child{border-top:0;}
-  .out{-webkit-text-stroke-width:1.2px;}
-}
-@media(prefers-reduced-motion:reduce){
-  .hero h1 .l i{animation:none;transform:none;}
-  .hero__sub,.hero__actions{animation:none;opacity:1;}
-  .reveal,.plate{transition:none;opacity:1;transform:none;}
-  .marq__track{animation:none;}
-  .growth i{transition:none;width:var(--fill,50%);}
-  .eyebrow i{animation:none;}
 }
 </style>
 </head>
 <body>
-<div class="grain"></div>
-
-<header class="bar">
-  <a class="bar__logo" href="/">cloudstudio*</a>
-  <span class="bar__right">
-    <a class="bar__back" href="/#work">← Work</a>
-    <span class="bar__pill">Case study</span>
-  </span>
-</header>
-
-<!-- ============ HERO ============ -->
 <section class="hero">
-  <img class="illo" src="/site/assets/work/firevalle/ico-house.webp" width="512" height="512" alt="" aria-hidden="true" style="--t:16%;--l:77%;--r:0deg;width:clamp(88px,10vw,158px)" data-drift="-0.12">
-  <img class="illo illo--m" src="/site/assets/work/firevalle/ico-watermill.webp" width="512" height="512" alt="" aria-hidden="true" style="--t:54%;--l:3%;--r:0deg;width:clamp(100px,11vw,170px)" data-drift="-0.07">
-  <img class="illo illo--m" src="/site/assets/work/firevalle/ico-hive.webp" width="512" height="512" alt="" aria-hidden="true" style="--t:20%;--l:9%;--r:0deg;width:clamp(70px,7vw,110px)" data-drift="-0.05">
-  <img class="illo illo--m" src="/site/assets/work/firevalle/ico-camper.webp" width="512" height="512" alt="" aria-hidden="true" style="--t:66%;--l:82%;--r:0deg;width:clamp(78px,8vw,124px)" data-drift="-0.1">
-
-  <div class="hero__center">
-    <p class="eyebrow"><i></i>Case study · Cloudstudio in-house</p>
-    <h1><span class="l"><i>FIRE</i></span><span class="l"><i class="out">VALLE</i></span></h1>
-    <p class="hero__sub">A personal-finance app where your net worth is <b>a low-poly valley you cultivate</b> — and the launch site that lets you grow it with a scroll.</p>
+  <div class="wrap">
+    <p class="eyebrow"><i></i>Feyron Selected Work · Case Study 05</p>
+    <h1>FlowPay</h1>
+    <p class="hero__sub">Shareable Business Payment Links & Real-Time Revenue Platform</p>
+    <div><span class="hero__badge">Payment Links · Stablecoin & Token Checkout · Live Analytics</span></div>
     <div class="hero__actions">
-      <a class="btn btn--ink" href="https://firevalle.app/" target="_blank" rel="noopener">Visit firevalle.app
-        <svg style="width:.85em;height:.85em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M9 7h8v8"/></svg></a>
-      <a class="btn btn--hair" href="/#work">All work</a>
+      <a class="btn btn--accent" href="https://flowpay-iota.vercel.app" target="_blank" rel="noopener">Visit FlowPay live ↗</a>
+      <a class="btn btn--hair" href="/#work" onclick="if(window.parent&&window.parent!==window){window.parent.postMessage({type:'CS_CLOSE_SUBPAGE',scrollWork:true},'*');return false;}">← All selected work</a>
     </div>
-  </div>
-
-  <div class="wrap">
-    <dl class="hero__meta">
-      <div><dt>Client</dt><dd>Firevalle — in-house product</dd></div>
-      <div><dt>Deliverable</dt><dd>iOS app + launch site</dd></div>
-      <div><dt>Role</dt><dd>Product, design &amp; build</dd></div>
-      <div><dt>Year</dt><dd>2026 · Valencia</dd></div>
-    </dl>
+    <dl class="hero__meta"><div><dt>Platform</dt><dd>FlowPay Business Payments</dd></div><div><dt>Settlement Rails</dt><dd>USDC.e & Instant Digital Checkout</dd></div><div><dt>Core Features</dt><dd>Shareable Payment Links · Merchant Dashboard</dd></div><div><dt>Live URL</dt><dd>flowpay-iota.vercel.app</dd></div></dl>
   </div>
 </section>
 
-<!-- ============ MARQUEE ============ -->
-<div class="marq" aria-hidden="true"><div class="marq__track" data-marq></div></div>
-
-<!-- ============ THE BRIEF ============ -->
 <section class="sec">
-  <img class="illo illo--m" src="/site/assets/work/firevalle/ico-orchard.webp" width="512" height="512" alt="" aria-hidden="true" style="--t:8%;--l:44%;--r:0deg;width:clamp(80px,8vw,120px)" data-drift="-0.06">
-  <div class="wrap two">
-    <div class="reveal">
-      <p class="kicker">( The brief )</p>
-      <h2 class="state">Nobody feels a<br><span class="out">spreadsheet.</span></h2>
-    </div>
-    <div class="body reveal">
-      <p>FIRE — financial independence, retire early — runs on one number you will not reach for fifteen years. Every app in the category answers with the same thing: a table, a percentage, a line going up. None of it feels like anything.</p>
-      <p>So Firevalle turns the number into <b>a place</b>. Every savings goal becomes a plot of land, every contribution waters it, and your FIRE progress is the wheat field at the centre of the island. Miss a month and nothing scolds you — the valley simply grows slower. Calm, not anxiety, was the first product principle.</p>
-    </div>
-  </div>
-</section>
-
-<!-- ============ PULL ============ -->
-<section class="pull">
-  <p data-words>A number nobody feels. A <em>valley</em> everybody does.</p>
-</section>
-
-<!-- ============ THE PLOTS ============ -->
-<section class="sec" style="padding-top:0">
   <div class="wrap">
-    <p class="kicker reveal" style="margin-bottom:clamp(40px,6vw,70px)">( Plot by plot )</p>
-    <div class="plots">
-
-      <article class="plot">
-        <img class="illo illo--m" src="/site/assets/work/firevalle/ico-garden.webp" width="512" height="512" alt="" aria-hidden="true" style="--t:-70px;--l:97%;--r:0deg;width:clamp(78px,8vw,120px)" data-drift="-0.06">
-        <div class="plot__head reveal">
-          <div class="plot__no"><b>01</b>The valley
-            <div class="growth" style="--fill:14%"><i></i></div><small>14 % cultivated</small>
-          </div>
-          <div class="plot__txt">
-            <h3>Your net worth, as a place.</h3>
-            <p>The home screen is a low-poly island rendered with three.js on top of expo-gl: a dozen plots ring the central FIRE field, and each goal grows through four stages — furrows, sprouts, crop, harvest — as money goes in. Sheep wander, the mill turns, ducks sit on the pond.</p>
-            <p>The scene reads the device clock, so <b>dawn, day, dusk and night</b> light the same valley differently. No manual toggle, no gimmick: open the app at eleven at night and the water goes deep blue.</p>
-          </div>
-        </div>
-        <figure class="plate">
-          <div class="phones">
-            <figure><img src="/site/assets/work/firevalle/app-valle-day.webp" width="860" height="1864" alt="Firevalle home screen at midday — the low-poly island with its plots and the net worth card on top."><figcaption>Day</figcaption></figure>
-            <figure><img src="/site/assets/work/firevalle/app-valle-dusk.webp" width="860" height="1864" loading="lazy" alt="The same valley at dusk — warm light, long shadows across the island."><figcaption>Dusk</figcaption></figure>
-            <figure><img src="/site/assets/work/firevalle/app-valle-night.webp" width="860" height="1864" loading="lazy" alt="The same valley at night — deep blue water and cool moonlight."><figcaption>Night</figcaption></figure>
-          </div>
-        </figure>
-      </article>
-
-      <article class="plot">
-        <img class="illo illo--m" src="/site/assets/work/firevalle/ico-camper.webp" width="512" height="512" alt="" aria-hidden="true" style="--t:150px;--l:-9%;--r:0deg;width:clamp(84px,9vw,130px)" data-drift="-0.05">
-        <div class="plot__head reveal">
-          <div class="plot__no"><b>02</b>Accounts &amp; goals
-            <div class="growth" style="--fill:28%"><i></i></div><small>28 % cultivated</small>
-          </div>
-          <div class="plot__txt">
-            <h3>It never phones your bank.</h3>
-            <p>Balances are typed in by hand, deliberately: no aggregator, no credentials, no bank connection at all. Each account declares whether it counts towards FIRE, and a bevelled stacked bar shows the composition of the whole estate at a glance.</p>
-            <p>Goals carry the building they raise — <b>hives</b> for the emergency fund, a <b>camper</b> for the trip to Japan, a <b>house</b> for the flat deposit, a <b>solar field</b> for the electric car. Reach 100 % and you harvest the plot: it moves to a permanent record of what you already achieved, and the land is free again.</p>
-          </div>
-        </div>
-        <figure class="plate">
-          <div class="phones phones--2">
-            <figure><img src="/site/assets/work/firevalle/app-cuentas.webp" width="860" height="1864" loading="lazy" alt="Accounts screen — balances grouped by type, each one marked as counting towards FIRE or not."><figcaption>Accounts</figcaption></figure>
-            <figure><img src="/site/assets/work/firevalle/app-metas.webp" width="860" height="1864" loading="lazy" alt="Goals screen — each goal with its low-poly building, amount saved, percentage cultivated and monthly pace."><figcaption>Goals</figcaption></figure>
-          </div>
-        </figure>
-      </article>
-
-      <article class="plot">
-        <img class="illo illo--m" src="/site/assets/work/firevalle/ico-orchard.webp" width="512" height="512" alt="" aria-hidden="true" style="--t:-40px;--l:96%;--r:0deg;width:clamp(80px,8vw,124px)" data-drift="-0.07">
-        <div class="plot__head reveal">
-          <div class="plot__no"><b>03</b>The daily walk
-            <div class="growth" style="--fill:42%"><i></i></div><small>42 % cultivated</small>
-          </div>
-          <div class="plot__txt">
-            <h3>One minute. Nothing to buy.</h3>
-            <p>Most finance apps hold you with alerts about spending. Firevalle asks for a walk: pick one of three routes — <b>Clarity</b> (revisit a number and decide whether it still tells the truth), <b>Knowledge</b> (one financial idea, no products), <b>Horizon</b> (look past today's balance at risk, time and the road to your FIRE number). Each walk sets a mission, grows a grove and extends a streak, and the screen says it out loud: <em>no route rewards spending or moving money.</em></p>
-            <p>Market is the same idea pointed at the outside world. No tickers, no portfolio connection: four signals explained in plain language, and an honest note that live quotes will only arrive when there is a source that doesn't need your searches or your IP address.</p>
-          </div>
-        </div>
-        <figure class="plate">
-          <div class="phones phones--2">
-            <figure><img src="/site/assets/work/firevalle/app-ritual.webp" width="860" height="2000" loading="lazy" alt="Today's walk — six walks in a row, twelve days cultivated, and three routes to choose from: clarity, knowledge and horizon."><figcaption>Today's walk</figcaption></figure>
-            <figure><img src="/site/assets/work/firevalle/app-mercado.webp" width="860" height="2000" loading="lazy" alt="Market screen — context, not noise: four signals explained and an honest note about why there are no live quotes yet."><figcaption>Market, without noise</figcaption></figure>
-          </div>
-        </figure>
-      </article>
-
-      <article class="plot">
-        <div class="plot__head reveal">
-          <div class="plot__no"><b>04</b>Progress &amp; learning
-            <div class="growth" style="--fill:57%"><i></i></div><small>57 % cultivated</small>
-          </div>
-          <div class="plot__txt">
-            <h3>Two seconds of reading.</h3>
-            <p>Evolución charts net worth, contributions and FIRE progress on a curve you scrub with your finger. The FIRE number is annual spend divided by withdrawal rate, and only investable accounts count towards it — the maths is shown, never hidden behind a score.</p>
-            <p>Aprender adds twenty two-minute capsules — compound interest, inflation, index funds, fees — each ending on the same line: <b>what this looks like in your valley</b>. Progress is tracked like a garden, with a permanent "this is not financial advice" at the bottom.</p>
-          </div>
-        </div>
-        <figure class="plate">
-          <div class="phones">
-            <figure><img src="/site/assets/work/firevalle/app-evolucion.webp" width="860" height="1864" loading="lazy" alt="Evolution screen — scrubbable net worth curve, FIRE number card and market shortcut."><figcaption>Evolution</figcaption></figure>
-            <figure><img src="/site/assets/work/firevalle/app-aprender.webp" width="860" height="1864" loading="lazy" alt="Learn screen — twenty capsules with completion state and a knowledge-garden progress bar."><figcaption>Twenty seeds</figcaption></figure>
-            <figure><img src="/site/assets/work/firevalle/app-leccion.webp" width="860" height="1864" loading="lazy" alt="A capsule on compound interest, ending with the in-valley analogy."><figcaption>A capsule</figcaption></figure>
-          </div>
-        </figure>
-      </article>
-
-      <article class="plot">
-        <img class="illo illo--m" src="/site/assets/work/firevalle/ico-greenhouse.webp" width="512" height="512" alt="" aria-hidden="true" style="--t:-60px;--l:98%;--r:0deg;width:clamp(80px,8vw,124px)" data-drift="-0.07">
-        <div class="plot__head reveal">
-          <div class="plot__no"><b>05</b>The launch site
-            <div class="growth" style="--fill:71%"><i></i></div><small>71 % cultivated</small>
-          </div>
-          <div class="plot__txt">
-            <h3>The demo is the product.</h3>
-            <p>firevalle.app opens on the same island, running in the browser through WebGL, with the headline set straight into the scene instead of on a card above it. Scroll and it moves through five beats — first sprout, first goal, life arrives, everything takes shape, the village grows — while the counter climbs from 12.500 € to 104.800 €.</p>
-            <p>Drag to orbit, scroll to cultivate. There is no video, no mockup and no feature list: the visitor plays with the actual scene the app ships.</p>
-          </div>
-        </div>
-        <figure class="plate">
-          <img src="/site/assets/work/firevalle/site-hero.webp" width="2000" height="1250" loading="lazy" alt="Firevalle landing hero — the island full-bleed with 'Tu patrimonio, ahora vivo' set into the scene.">
-        </figure>
-        <figure class="plate" style="margin-top:clamp(16px,2.4vw,34px)">
-          <img src="/site/assets/work/firevalle/site-story.webp" width="2000" height="1250" loading="lazy" alt="Fourth scroll beat — the full village, 104.800 € of net worth and nine live goals.">
-        </figure>
-      </article>
-
-      <article class="plot">
-        <img class="illo illo--m" src="/site/assets/work/firevalle/ico-coop.webp" width="512" height="512" alt="" aria-hidden="true" style="--t:-30px;--l:-13%;--r:0deg;width:clamp(78px,8vw,118px)" data-drift="-0.06">
-        <div class="plot__head reveal">
-          <div class="plot__no"><b>06</b>Sections that demo
-            <div class="growth" style="--fill:85%"><i></i></div><small>85 % cultivated</small>
-          </div>
-          <div class="plot__txt">
-            <h3>Show the thing working.</h3>
-            <p>Every section on the site is its own little machine. The wealth card fills row by row as you scroll and the total climbs from 17.050 € to the full estate; the learning module is a tabbed stage with a live 3D field behind it — a flock of sheep for inflation, scattered crops for diversification.</p>
-            <p>Headlines carry the app's type signature: first line solid, second line drawn in outline — the same treatment you're reading on this page — with every label set in mono.</p>
-          </div>
-        </div>
-        <figure class="plate">
-          <img src="/site/assets/work/firevalle/site-wealth.webp" width="2000" height="1250" loading="lazy" alt="Wealth section — 'Cada cifra en su sitio' beside a dark card listing accounts as they light up.">
-        </figure>
-        <figure class="plate" style="margin-top:clamp(16px,2.4vw,34px)">
-          <img src="/site/assets/work/firevalle/site-learn.webp" width="2000" height="1250" loading="lazy" alt="Learning section — a tabbed capsule about inflation over a live low-poly field with sheep.">
-        </figure>
-      </article>
-
-      <article class="plot">
-        <img class="illo illo--m" src="/site/assets/work/firevalle/ico-solar.webp" width="512" height="512" alt="" aria-hidden="true" style="--t:-60px;--l:97%;--r:0deg;width:clamp(84px,9vw,132px)" data-drift="-0.06">
-        <div class="plot__head reveal">
-          <div class="plot__no"><b>07</b>Local first, one price
-            <div class="growth" style="--fill:100%"><i></i></div><small>100 % — harvest</small>
-          </div>
-          <div class="plot__txt">
-            <h3>Zero bytes. 7,99 €.</h3>
-            <p>Accounts, goals and FIRE profile live on the device and nowhere else. There is no account to create, no cloud to sync with and nothing to breach; the site states it as a single number — a giant lime zero for the financial bytes that reach a Firevalle server — with low-poly bees drifting through the dark.</p>
-            <p>The price follows the same argument. Free to start, <b>one purchase</b> to unlock the whole valley, restorable across devices, no subscription — the only honest model for an app about not paying subscriptions.</p>
-          </div>
-        </div>
-        <figure class="plate">
-          <img src="/site/assets/work/firevalle/site-privacy.webp" width="2000" height="1250" loading="lazy" alt="Privacy section — 'Tus cifras no viajan' next to a giant lime zero, with low-poly bees floating in the dark.">
-        </figure>
-        <figure class="plate" style="margin-top:clamp(16px,2.4vw,34px)">
-          <img src="/site/assets/work/firevalle/site-pricing.webp" width="2000" height="1250" loading="lazy" alt="Pricing section — one-off 7,99 € beside an animated low-poly sailboat.">
-        </figure>
-      </article>
-
+    <div class="two">
+      <div>
+        <p class="kicker">( Overview &amp; Architecture )</p>
+        <h2 class="state">Accepting digital and stablecoin payments in seconds — without custom checkout code.</h2>
+      </div>
+      <div class="body"><p>Merchants, agencies, and digital businesses needed a frictionless way to invoice clients and collect USDC.e and digital token payments without building custom smart-contract checkouts from scratch.</p><p>FlowPay lets any business generate shareable payment links for products or invoices in seconds, accept instant digital payments on desktop or mobile, and track revenue analytics in real time.</p></div>
     </div>
-
-    <figure class="plate" style="margin-top:clamp(70px,10vw,140px)">
-      <img src="/site/assets/work/firevalle/site-cta.webp" width="2000" height="1250" loading="lazy" alt="The site's closing frame — 'Haz crecer algo tuyo' under a small lit island at night.">
-    </figure>
+    <div class="plate">
+      <img src="/site/assets/work/flowpay-cover.svg" alt="FlowPay architecture and product preview">
+    </div>
   </div>
 </section>
 
-<!-- ============ CRAFT ============ -->
-<section class="sec craft">
-  <img class="illo illo--m" src="/site/assets/work/firevalle/ico-workshop.webp" width="512" height="512" alt="" aria-hidden="true" style="--t:9%;--l:74%;--r:0deg;width:clamp(90px,10vw,150px)" data-drift="-0.05">
+<section class="craft">
   <div class="wrap">
-    <p class="kicker reveal">( Under the hood )</p>
-    <h2 class="state reveal" style="max-width:15ch;margin-bottom:clamp(34px,5vw,60px)">One scene,<br><span class="out">two runtimes.</span></h2>
-    <div class="craft__grid reveal">
+    <div class="craft__grid">
       <div class="craft__cell">
-        <span class="mono">01 · Engine</span>
-        <h3>three.js, twice</h3>
-        <p>The same farm scene runs on expo-gl inside the Expo/React Native app and on plain WebGL in the browser. Flat shading, basic shadow maps, no post-processing — the style is modelled in the poly, never filtered on top. Touch reconciliation, pinch, two-finger rotate and plot taps all live in the scene, not in the DOM.</p>
+        <span class="mono">01 · Shareable Payment Links</span>
+        <h3>Create a checkout link in 10 seconds</h3>
+        <p>Generate branded payment links for services, subscriptions, or one-off invoices and share them via WhatsApp, email, or social channels.</p>
       </div>
       <div class="craft__cell">
-        <span class="mono">02 · System</span>
-        <h3>Low-poly as a design system</h3>
-        <p>A pastel palette tinted by four day phases, diamond bullets, bevelled bars, Space Grotesk and DM Sans. The procedural buildings — hives, camper, watermill, greenhouse, solar field — are modelled once and reused as 3D scene props, list icons and capsule illustrations, in the app and on the site.</p>
+        <span class="mono">02 · Instant Settlement</span>
+        <h3>Direct-to-treasury USDC.e & token checkout</h3>
+        <p>Customers pay in one click with mobile-friendly wallet integration and instant on-chain confirmation.</p>
       </div>
       <div class="craft__cell">
-        <span class="mono">03 · Local first</span>
-        <h3>No backend at all</h3>
-        <p>State lives in AsyncStorage on the device: no accounts, no sync, no analytics, no trackers, nothing to breach. Capsules and market context ship bundled, so the app works with the radio off — which is also the argument.</p>
-      </div>
-    </div>
+        <span class="mono">03 · Real-Time Revenue Dashboard</span>
+        <h3>Live conversion & payout analytics</h3>
+        <p>Monitor paid links, customer transaction history, and daily revenue performance from a clean merchant command center.</p>
+      </div></div>
   </div>
 </section>
 
-<!-- ============ CLOSE ============ -->
-<section class="close">
-  <h2 class="reveal">Grow something.</h2>
-  <p class="reveal">We design and build products where the interface carries the idea — 3D, motion and the boring parts underneath. Tell us what you want to launch.</p>
-  <div class="close__actions reveal">
-    <a class="btn btn--accent" data-call href="mailto:hello@cloudstudio.es">Book a call
-      <svg style="width:.9em;height:.9em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15M13 6l6 6-6 6"/></svg></a>
-    <a class="btn btn--ghosty" href="https://firevalle.app/" target="_blank" rel="noopener">firevalle.app ↗</a>
+<footer class="close">
+  <h2>Want a system like FlowPay?</h2>
+  <p>Tell us about the workflow, platform or payment integration your team needs. We scope clearly and ship to production.</p>
+  <div class="close__actions">
+    <a class="btn btn--accent" href="/contact" onclick="if(window.parent&&window.parent!==window){window.parent.postMessage({type:'CS_OPEN_SUBPAGE',path:'/contact'},'*');return false;}">Talk to our team</a>
+    <a class="btn btn--hair" href="/#work" onclick="if(window.parent&&window.parent!==window){window.parent.postMessage({type:'CS_CLOSE_SUBPAGE',scrollWork:true},'*');return false;}">← Back to Selected Work</a>
   </div>
-  <a class="close__next reveal" href="/work/hq">
-    <span class="close__next-k">Next case study</span>
-    <span class="close__next-n">HQ <i>→</i></span>
-  </a>
-
-  <div class="close__foot">
-    <span>cloudstudio.es</span><span>·</span><span>Est. 2008 · Valencia</span><span>·</span><span>hello@cloudstudio.es</span>
+  <div>
+    <a class="close__next" href="/work/hq" onclick="if(window.parent&&window.parent!==window){window.parent.postMessage({type:'CS_OPEN_SUBPAGE',path:'/work/hq'},'*');return false;}">
+      <span class="close__next-k">Next case study</span>
+      <span class="close__next-n">WorkVerify & MintNG · Digital Platforms →</span>
+    </a>
   </div>
-</section>
-
-<script>
-/* reveals — plates, blocks and the growth bars */
-(function(){
-  var io=new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting){var el=en.target;setTimeout(function(){el.classList.add("is-in");},(el.dataset.d||0)*1);io.unobserve(el);}});},{threshold:.15});
-  document.querySelectorAll(".reveal,.plate").forEach(function(el,i){el.dataset.d=(i%3)*100;io.observe(el);});
-  var gio=new IntersectionObserver(function(es){es.forEach(function(en){if(en.isIntersecting){en.target.classList.add("is-in");gio.unobserve(en.target);}});},{threshold:.6});
-  document.querySelectorAll(".growth").forEach(function(el){gio.observe(el);});
-})();
-
-/* pull quote — word by word */
-(function(){
-  var p=document.querySelector("[data-words]");if(!p)return;
-  var frag=document.createDocumentFragment();
-  p.childNodes.forEach(function(node){
-    if(node.nodeType===3){
-      node.textContent.split(/(\s+)/).forEach(function(tk){
-        if(!tk.trim()){frag.appendChild(document.createTextNode(tk));return;}
-        var s=document.createElement("span");s.className="w";s.textContent=tk;frag.appendChild(s);
-      });
-    }else if(node.nodeType===1){
-      var s=document.createElement("span");s.className="w w--g";s.textContent=node.textContent;frag.appendChild(s);
-    }
-  });
-  p.textContent="";p.appendChild(frag);
-  var ws=p.querySelectorAll(".w");
-  new IntersectionObserver(function(es,io){
-    if(!es[0].isIntersecting)return;io.disconnect();
-    ws.forEach(function(w,i){setTimeout(function(){w.classList.add("on");},220+i*110);});
-  },{threshold:.5}).observe(p);
-})();
-
-/* drifting buildings — parallax relative to each piece's place in the viewport */
-(function(){
-  if(matchMedia("(prefers-reduced-motion: reduce)").matches)return;
-  var notes=[].slice.call(document.querySelectorAll("[data-drift]"));if(!notes.length)return;
-  var ticking=false;
-  function tick(){
-    var vh=window.innerHeight;
-    notes.forEach(function(n){
-      var r=n.parentElement.getBoundingClientRect();
-      var mid=r.top+r.height/2-vh/2;
-      n.style.setProperty("--y",(mid*parseFloat(n.dataset.drift)*2).toFixed(1)+"px");
-    });
-    ticking=false;
-  }
-  window.addEventListener("scroll",function(){if(!ticking){ticking=true;requestAnimationFrame(tick);}},{passive:true});
-  window.addEventListener("resize",tick);
-  tick();
-})();
-
-/* marquee — the site's own claims */
-(function(){
-  var t=document.querySelector("[data-marq]");if(!t)return;
-  var chunk="";
-  for(var i=0;i<5;i++){chunk+="<span>Private</span><span class='st'>◆</span><span>Offline</span><span class='st'>◆</span><span>No subscription</span><span class='st'>◆</span><span>Grows with you</span><span class='st'>◆</span>";}
-  t.innerHTML=chunk+chunk;
-})();
-
-/* booking modal hook (mailto fallback if booking.js absent) */
-(function(){
-  var call=document.querySelector("[data-call]");
-  if(call)call.addEventListener("click",function(e){
-    if(!window.openBooking)return;
-    e.preventDefault();
-    window.openBooking({source:"case-firevalle",lang:"en"});
-  });
-})();
-</script>
-<script defer src="/site/js/booking.js?v=1784102540"></script>
-<script>
-(function(){
-  var nativeFetch = window.fetch.bind(window);
-  window.fetch = function(input, init) {
-    var u = typeof input === "string" ? input : (input && input.url) || "";
-    if (u.indexOf("/bookings/slots") !== -1) {
-      return Promise.resolve(new Response(JSON.stringify({ taken: ["10:40", "14:00", "16:20"] }), { status: 200, headers: { "Content-Type": "application/json" } }));
-    }
-    if (u.indexOf("/bookings") !== -1 && init && init.method === "POST") {
-      return Promise.resolve(new Response(JSON.stringify({ ok: true, success: true }), { status: 200, headers: { "Content-Type": "application/json" } }));
-    }
-    return nativeFetch(input, init);
-  };
-  document.addEventListener("click", function(e) {
-    var a = e.target && e.target.closest ? e.target.closest("a") : null;
-    if (!a) return;
-    var href = a.getAttribute("href") || "";
-    if (href === "/" || href === "/#work" || href === "#work") {
-      if (window.parent && window.parent !== window) {
-        e.preventDefault();
-        window.parent.postMessage({ type: "CS_CLOSE_SUBPAGE", scrollWork: href.indexOf("work") !== -1 }, "*");
-      }
-    } else if (href.indexOf("/work/") === 0) {
-      if (window.parent && window.parent !== window) {
-        e.preventDefault();
-        window.parent.postMessage({ type: "CS_OPEN_SUBPAGE", path: href }, "*");
-      }
-    }
-  });
-  window.addEventListener("keydown", function(e) {
-    if (e.key === "Escape" && window.parent && window.parent !== window) {
-      window.parent.postMessage({ type: "CS_CLOSE_SUBPAGE" }, "*");
-    }
-  });
-})();
-</script></body>
+</footer>
+</body>
 </html>

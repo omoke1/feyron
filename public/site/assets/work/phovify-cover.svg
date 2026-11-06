@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 750">
+    <rect width="1200" height="750" fill="#161b18"/>
+    <rect x="130" y="95" width="940" height="515" rx="24" fill="#1E1E1E" stroke="rgba(74,222,128,0.35)" stroke-width="2"/>
+    <text x="180" y="155" fill="#4ADE80" font-family="monospace" font-size="13" font-weight="700" letter-spacing="2">PHOVIFY (WACRM) · WHATSAPP CRM &amp; PIPELINE AUTOMATION</text>
+    <text x="180" y="208" fill="#FFFFFF" font-family="sans-serif" font-size="38" font-weight="800">Shared Inbox, Sales Pipelines &amp; Auto-Broadcasts</text>
+    <rect x="180" y="250" width="265" height="285" rx="16" fill="#252926" stroke="rgba(255,255,255,0.12)"/>
+    <text x="205" y="288" fill="#4ADE80" font-family="monospace" font-size="12">STAGE 01 · NEW LEADS (28)</text>
+    <rect x="205" y="310" width="215" height="82" rx="12" fill="#1b1e1c"/>
+    <text x="222" y="342" fill="#FFF" font-family="sans-serif" font-size="16" font-weight="700">Inbound WhatsApp</text>
+    <text x="222" y="368" fill="#9ca39f" font-family="monospace" font-size="12">Auto-tagged &amp; assigned</text>
+    <rect x="468" y="250" width="265" height="285" rx="16" fill="#252926" stroke="rgba(254,180,123,0.3)"/>
+    <text x="493" y="288" fill="#FEB47B" font-family="monospace" font-size="12">STAGE 02 · QUALIFIED (14)</text>
+    <rect x="493" y="310" width="215" height="82" rx="12" fill="#1b1e1c"/>
+    <text x="510" y="342" fill="#FFF" font-family="sans-serif" font-size="16" font-weight="700">No-Code Flow Active</text>
+    <text x="510" y="368" fill="#9ca39f" font-family="monospace" font-size="12">Quote + booking sent</text>
+    <rect x="756" y="250" width="265" height="285" rx="16" fill="#252926" stroke="rgba(192,132,252,0.3)"/>
+    <text x="781" y="288" fill="#C084FC" font-family="monospace" font-size="12">STAGE 03 · CLOSED WON</text>
+    <rect x="781" y="310" width="215" height="82" rx="12" fill="#1b1e1c"/>
+    <text x="798" y="342" fill="#FFF" font-family="sans-serif" font-size="16" font-weight="700">Payment Confirmed</text>
+    <text x="798" y="368" fill="#9ca39f" font-family="monospace" font-size="12">Synced to CRM &amp; ERP</text>
+  </svg>

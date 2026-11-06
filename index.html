@@ -78,13 +78,297 @@
       })();
     </script>
   </head>
-  <body>
-    <div id="cs-boot-veil" style="position:fixed;inset:0;z-index:2147482790;background:var(--bg,#FEB47B)"></div>
+  <body style="background:#1E1E1E">
+    <style>
+      #feyron-intro-splash {
+        position: fixed;
+        inset: 0;
+        z-index: 2147483650;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #1E1E1E;
+        overflow: hidden;
+        transition: opacity 0.48s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.48s ease, background-color 0.18s ease;
+      }
+      #feyron-intro-splash.is-warm {
+        background: var(--bg, #FEB47B);
+      }
+      #feyron-intro-splash.is-leaving {
+        opacity: 0;
+        visibility: hidden;
+        pointer-events: none;
+      }
+      #feyron-intro-canvas {
+        width: min(80vmin, 560px);
+        height: min(80vmin, 560px);
+        display: block;
+        background: transparent !important;
+        pointer-events: none;
+      }
+      #feyron-intro-video {
+        position: fixed;
+        width: 1px;
+        height: 1px;
+        opacity: 0;
+        pointer-events: none;
+        left: -9999px;
+        top: -9999px;
+      }
+      .feyron-intro-controls {
+        position: fixed;
+        right: clamp(18px, 3vw, 36px);
+        bottom: clamp(18px, 3vh, 32px);
+        z-index: 3;
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .feyron-intro-btn {
+        cursor: pointer !important;
+        border: 1.5px solid var(--bg, #FEB47B);
+        background: rgba(30, 30, 30, 0.8);
+        color: var(--bg, #FEB47B);
+        font-family: ui-monospace, 'Geist Mono', monospace;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        padding: 8px 16px;
+        border-radius: 100px;
+        transition: background 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+      }
+      #feyron-intro-splash.is-warm .feyron-intro-btn {
+        background: #1E1E1E;
+        color: var(--bg, #FEB47B);
+        border-color: #1E1E1E;
+      }
+      .feyron-intro-btn:hover {
+        background: var(--bg, #FEB47B);
+        color: #1E1E1E;
+      }
+    </style>
+
+    <div id="feyron-intro-splash" role="dialog" aria-label="Feyron intro animation">
+      <video
+        id="feyron-intro-video"
+        src="/site/assets/brand/feyron_logo_animation.mp4"
+        playsinline
+        preload="auto"
+      ></video>
+      <canvas id="feyron-intro-canvas" width="540" height="540"></canvas>
+      <div class="feyron-intro-controls">
+        <button type="button" class="feyron-intro-btn" id="feyron-intro-sound" style="display:none">
+          🔊 Sound
+        </button>
+        <button type="button" class="feyron-intro-btn" id="feyron-intro-skip">
+          Skip →
+        </button>
+      </div>
+    </div>
+
     <script>
-      window.setTimeout(function () {
-        var v = document.getElementById('cs-boot-veil');
-        if (v) v.remove();
-      }, 5000);
+      (function () {
+        var splash = document.getElementById('feyron-intro-splash');
+        var video = document.getElementById('feyron-intro-video');
+        var canvas = document.getElementById('feyron-intro-canvas');
+        var skipBtn = document.getElementById('feyron-intro-skip');
+        var soundBtn = document.getElementById('feyron-intro-sound');
+        var closed = false;
+        var rafId = 0;
+
+        var THEME_RGB = {
+          melocoton: [254, 180, 123],
+          menta: [74, 222, 128],
+          rosa: [192, 132, 252],
+          electrico: [129, 140, 248],
+          cielo: [142, 216, 255],
+          coral: [255, 175, 163],
+          hielo: [201, 233, 246]
+        };
+        var VARIANT_THEME = {
+          pixel: 'melocoton',
+          denso: 'menta',
+          nube: 'rosa',
+          erizo: 'electrico',
+          orb: 'cielo',
+          gota: 'coral',
+          anillo: 'hielo',
+          estrella: 'melocoton'
+        };
+
+        function getActiveAgentRgb() {
+          try {
+            var cs = getComputedStyle(document.documentElement).getPropertyValue('--bg-rgb').trim();
+            if (cs) {
+              var parts = cs.split(',').map(function (n) { return parseInt(n.trim(), 10); });
+              if (parts.length === 3 && !isNaN(parts[0])) return parts;
+            }
+          } catch (e) {}
+          try {
+            var dt = document.documentElement.getAttribute('data-theme') || localStorage.getItem('cs-theme');
+            if (!dt) {
+              var mv = localStorage.getItem('cs-mascot-variant');
+              if (mv && VARIANT_THEME[mv]) dt = VARIANT_THEME[mv];
+            }
+            if (dt && THEME_RGB[dt]) return THEME_RGB[dt];
+          } catch (e) {}
+          return [254, 180, 123];
+        }
+
+        window.__feyronIntroActive = true;
+
+        function closeIntro() {
+          if (closed) return;
+          closed = true;
+          window.__feyronIntroActive = false;
+          if (rafId) cancelAnimationFrame(rafId);
+          if (video) {
+            try { video.pause(); } catch (e) {}
+          }
+          document.body.style.background = '';
+          if (!splash) return;
+          splash.classList.add('is-leaving');
+          setTimeout(function () {
+            if (splash && splash.parentNode) splash.parentNode.removeChild(splash);
+          }, 480);
+        }
+
+        var ctx = canvas ? canvas.getContext('2d', { willReadFrequently: true }) : null;
+
+        function renderFrame() {
+          if (closed || !video || !splash || !ctx) return;
+          var t = video.currentTime || 0;
+          var isSecondHalf = t >= 2.98;
+          if (isSecondHalf) {
+            splash.classList.add('is-warm');
+          } else {
+            splash.classList.remove('is-warm');
+          }
+
+          if (video.readyState >= 2) {
+            var w = canvas.width;
+            var h = canvas.height;
+            ctx.clearRect(0, 0, w, h);
+            ctx.drawImage(video, 0, 0, w, h);
+            try {
+              var img = ctx.getImageData(0, 0, w, h);
+              var d = img.data;
+              var rgb = getActiveAgentRgb();
+              var Ar = rgb[0], Ag = rgb[1], Ab = rgb[2];
+
+              for (var i = 0, len = d.length; i < len; i += 4) {
+                var r = d[i], g = d[i + 1], b = d[i + 2];
+                // In source video:
+                // Dark bg = (28,28,28), Orange brand = (252,179,123) [r-b = 129], White = (255,255,255) [r-b = 0]
+                var wBrand = (r - b) / 129;
+                if (wBrand < 0) wBrand = 0;
+                else if (wBrand > 1) wBrand = 1;
+
+                if (!isSecondHalf) {
+                  // First half: background is dark (#1C1C1C) -> make transparent; foreground is brand mark -> tint to active agent color
+                  var lum = (r + g + b) / 3;
+                  var fgStrength = Math.max(wBrand, (lum - 34) / 180);
+                  if (fgStrength < 0.05) {
+                    d[i + 3] = 0;
+                  } else {
+                    var a1 = fgStrength > 1 ? 1 : fgStrength;
+                    d[i] = Ar;
+                    d[i + 1] = Ag;
+                    d[i + 2] = Ab;
+                    d[i + 3] = (a1 * 255) | 0;
+                  }
+                } else {
+                  // Second half: background is orange (wBrand ~ 1) -> make transparent over agent bg; foreground mark is white -> draw in crisp #1E1E1E ink
+                  var fgWhite = 1 - wBrand;
+                  if (fgWhite < 0.06) {
+                    d[i + 3] = 0;
+                  } else {
+                    var a2 = fgWhite > 1 ? 1 : fgWhite;
+                    d[i] = 30;
+                    d[i + 1] = 30;
+                    d[i + 2] = 30;
+                    d[i + 3] = (a2 * 255) | 0;
+                  }
+                }
+              }
+              ctx.putImageData(img, 0, 0);
+            } catch (e) {}
+          }
+
+          rafId = requestAnimationFrame(renderFrame);
+        }
+
+        function tryPlayWithSound() {
+          if (!video) return;
+          video.muted = false;
+          video.volume = 1.0;
+          var p = video.play();
+          if (p && typeof p.then === 'function') {
+            p.then(function () {
+              if (soundBtn) soundBtn.style.display = 'none';
+            }).catch(function () {
+              // Browser blocked unmuted autoplay on cold load: play immediately muted and unmute on first gesture
+              video.muted = true;
+              if (soundBtn) soundBtn.style.display = 'inline-flex';
+              var p2 = video.play();
+              if (p2 && typeof p2.catch === 'function') p2.catch(function () {});
+
+              var unmuteOnGesture = function () {
+                if (!closed && video) {
+                  video.muted = false;
+                  video.volume = 1.0;
+                  if (soundBtn) soundBtn.style.display = 'none';
+                }
+                window.removeEventListener('pointerdown', unmuteOnGesture);
+                window.removeEventListener('touchstart', unmuteOnGesture);
+                window.removeEventListener('keydown', unmuteOnGesture);
+              };
+              window.addEventListener('pointerdown', unmuteOnGesture, { passive: true });
+              window.addEventListener('touchstart', unmuteOnGesture, { passive: true });
+              window.addEventListener('keydown', unmuteOnGesture, { passive: true });
+            });
+          }
+        }
+
+        var cleanPath = (location.pathname || '/').replace(/\/+$/, '') || '/';
+        if (cleanPath !== '/') {
+          window.__feyronIntroActive = false;
+          document.body.style.background = '';
+          if (splash && splash.parentNode) splash.parentNode.removeChild(splash);
+          closed = true;
+        } else {
+          if (video) {
+            tryPlayWithSound();
+            rafId = requestAnimationFrame(renderFrame);
+            video.addEventListener('ended', closeIntro);
+            video.addEventListener('error', closeIntro);
+          }
+          if (soundBtn) {
+            soundBtn.addEventListener('click', function (e) {
+              e.stopPropagation();
+              if (video) {
+                video.muted = false;
+                video.volume = 1.0;
+                video.play().catch(function () {});
+              }
+              soundBtn.style.display = 'none';
+            });
+          }
+          if (skipBtn) {
+            skipBtn.addEventListener('click', function (e) {
+              e.stopPropagation();
+              closeIntro();
+            });
+          }
+          window.addEventListener('keydown', function (e) {
+            if (!closed && (e.key === 'Escape' || e.key === 'Enter')) {
+              closeIntro();
+            }
+          });
+          setTimeout(closeIntro, 6400);
+        }
+      })();
     </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
