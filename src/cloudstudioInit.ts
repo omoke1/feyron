@@ -348,8 +348,10 @@ function setupMainMobileMenu() {
     const nav = document.getElementById('cs-nav');
     if (!nav) return false;
 
-    const logo = nav.querySelector('a[href="#top"]');
-    if (logo) logo.classList.add('cs-nav-logo');
+    const logo = (nav.querySelector('a[href="#top"]') || nav.querySelector('a:first-child') || nav.querySelector('a')) as HTMLElement | null;
+    if (logo) {
+      logo.classList.add('cs-nav-logo');
+    }
 
     const desktopDiv = nav.querySelector('div:not(.cs-nav-burger):not(.cs-mobile-menu)');
     if (desktopDiv && !desktopDiv.classList.contains('cs-nav-desktop')) {

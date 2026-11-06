@@ -532,10 +532,11 @@ try {
     #top h1+div>a{display:none!important}
     #top h1+div>span{max-width:100%!important;font-size:clamp(14px,2.1svh,16px)!important;line-height:1.42!important}
     /* mobile action bar: quote pill bottom-center (sound/play chips flank it) */
-    #cs-nav a[href="#contact"]{display:none!important}
-    /* logo dead-center; the pet keeps the right edge without skewing it */
-    #cs-nav{justify-content:center!important}
-    #cs-nav>div{position:absolute!important;right:18px;top:50%;transform:translateY(-50%)}
+    /* mobile nav: logo left, burger right, desktop links hidden */
+    #cs-nav{display:flex!important;flex-direction:row!important;justify-content:space-between!important;align-items:center!important;padding:14px clamp(16px,4vw,24px)!important;width:100%!important;box-sizing:border-box!important}
+    #cs-nav>a:first-child,#cs-nav .cs-nav-logo{position:static!important;transform:none!important;display:inline-flex!important;flex-direction:row!important;flex-wrap:nowrap!important;align-items:center!important;gap:10px!important;white-space:nowrap!important;margin:0 auto 0 0!important}
+    #cs-nav>button#cs-nav-burger,.cs-nav-burger{display:inline-flex!important;position:static!important;margin:0 0 0 auto!important}
+    #cs-nav>div:not(.cs-mobile-menu):not(.cs-nav-burger){display:none!important}
     .cs-quote-chip{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:2147483205;display:inline-flex;align-items:center;justify-content:center;height:46px;padding:0 24px;box-sizing:border-box;background:var(--ink);color:var(--accent);text-decoration:none;font-weight:700;font-size:14.5px;border-radius:100px;box-shadow:0 4px 18px rgba(var(--ink-rgb),.25);white-space:nowrap}
     html.cs-guide-locked .cs-quote-chip{display:none!important}
     html.cs-gaming .cs-quote-chip{visibility:hidden!important}
