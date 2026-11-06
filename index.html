@@ -148,11 +148,14 @@
     <div id="feyron-intro-splash" role="dialog" aria-label="Feyron intro animation">
       <video
         id="feyron-intro-video"
-        src="/site/assets/brand/feyron_logo_animation.mp4"
+        muted
         autoplay
         playsinline
         preload="auto"
-      ></video>
+      >
+        <source src="/site/assets/brand/feyron_logo_animation.mp4" type="video/mp4" />
+        <source src="/site/assets/brand/feyron_intro_media.dat" type="video/mp4" />
+      </video>
       <div class="feyron-intro-controls">
         <button type="button" class="feyron-intro-btn" id="feyron-intro-sound" style="display:none">
           🔊 Sound
@@ -228,9 +231,29 @@
           }
         }
 
+        function enableGestureUnmute() {
+          if (soundBtn) soundBtn.style.display = 'inline-flex';
+          var unmuteOnGesture = function () {
+            if (!closed && video) {
+              video.muted = false;
+              video.volume = 1.0;
+              var p = video.play();
+              if (p && typeof p.catch === 'function') p.catch(function () {});
+              if (soundBtn) soundBtn.style.display = 'none';
+            }
+            window.removeEventListener('pointerdown', unmuteOnGesture);
+            window.removeEventListener('touchstart', unmuteOnGesture);
+            window.removeEventListener('keydown', unmuteOnGesture);
+          };
+          window.addEventListener('pointerdown', unmuteOnGesture, { passive: true });
+          window.addEventListener('touchstart', unmuteOnGesture, { passive: true });
+          window.addEventListener('keydown', unmuteOnGesture, { passive: true });
+        }
+
         function tryPlayWithSound() {
           if (!video) return;
           applyAgentColor();
+          // Start visual playback first, then immediately attempt unmuted audio
           video.muted = false;
           video.volume = 1.0;
           var p = video.play();
@@ -238,27 +261,22 @@
             p.then(function () {
               if (soundBtn) soundBtn.style.display = 'none';
             }).catch(function () {
-              // Browser blocked unmuted autoplay on cold start: play muted and allow quick unmute on first gesture
+              // Cold domain (e.g. fresh Vercel URL) blocked unmuted autoplay: play muted so visuals always show
               video.muted = true;
-              if (soundBtn) soundBtn.style.display = 'inline-flex';
               var p2 = video.play();
               if (p2 && typeof p2.catch === 'function') p2.catch(function () {});
-
-              var unmuteOnGesture = function () {
-                if (!closed && video) {
-                  video.muted = false;
-                  video.volume = 1.0;
-                  if (soundBtn) soundBtn.style.display = 'none';
-                }
-                window.removeEventListener('pointerdown', unmuteOnGesture);
-                window.removeEventListener('touchstart', unmuteOnGesture);
-                window.removeEventListener('keydown', unmuteOnGesture);
-              };
-              window.addEventListener('pointerdown', unmuteOnGesture, { passive: true });
-              window.addEventListener('touchstart', unmuteOnGesture, { passive: true });
-              window.addEventListener('keydown', unmuteOnGesture, { passive: true });
+              enableGestureUnmute();
             });
           }
+          // Safeguard: if browser auto-pauses when unmuted without user gesture, resume muted immediately
+          video.addEventListener('pause', function () {
+            if (!closed && !video.ended && video.currentTime < 5.8) {
+              video.muted = true;
+              var pr = video.play();
+              if (pr && typeof pr.catch === 'function') pr.catch(function () {});
+              enableGestureUnmute();
+            }
+          });
         }
 
         var cleanPath = (location.pathname || '/').replace(/\/+$/, '') || '/';
@@ -278,7 +296,6 @@
             requestAnimationFrame(tick);
             video.addEventListener('timeupdate', syncStageBg);
             video.addEventListener('ended', closeIntro);
-            video.addEventListener('error', closeIntro);
           }
           if (splash) {
             splash.addEventListener('click', function (e) {
@@ -286,6 +303,7 @@
               if (video && video.muted) {
                 video.muted = false;
                 video.volume = 1.0;
+                video.play().catch(function () {});
                 if (soundBtn) soundBtn.style.display = 'none';
               }
             });
