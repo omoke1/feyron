@@ -321,7 +321,7 @@ function setupPostMountEnhancements() {
       bookBtn.setAttribute('data-book', '');
       bookBtn.textContent = 'Book a 20-min call';
       bookBtn.style.cssText =
-        'cursor:pointer;font-family:inherit;font-weight:700;font-size:clamp(15px,1.2vw,18px);background:transparent;color:var(--accent,#fff48d);border:2px solid var(--accent,#fff48d);padding:18px 34px;border-radius:100px;margin-left:12px;margin-top:8px;transition:transform .25s ease';
+        'cursor:pointer;font-family:inherit;font-weight:700;font-size:clamp(16px,1.35vw,19px);background:var(--paper,#E7E7E7);color:var(--ink,#1E1E1E);border:2.5px solid var(--ink,#1E1E1E);box-shadow:0 4px 0 var(--ink,#1E1E1E);padding:17px 34px;border-radius:100px;transition:transform .25s ease';
       bookBtn.onclick = (e) => {
         e.preventDefault();
         e.stopPropagation();
