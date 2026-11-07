@@ -310,3 +310,58 @@ html, body {
     font-size: 16px !important;
   }
 }
+
+/* ------------------------------------------------------------------ */
+/* Agent-Theme Adaptive Brand Showcase & Imagery                       */
+/* ------------------------------------------------------------------ */
+
+:root,
+:root[data-theme="melocoton"] {
+  --cs-brand-hue: 0deg;
+}
+:root[data-theme="menta"] {
+  --cs-brand-hue: 116deg;
+}
+:root[data-theme="rosa"] {
+  --cs-brand-hue: 244deg;
+}
+:root[data-theme="electrico"] {
+  --cs-brand-hue: 209deg;
+}
+:root[data-theme="cielo"] {
+  --cs-brand-hue: 175deg;
+}
+:root[data-theme="coral"] {
+  --cs-brand-hue: -19deg;
+}
+:root[data-theme="hielo"] {
+  --cs-brand-hue: 180deg;
+}
+
+.cs-brand-hue {
+  filter: hue-rotate(var(--cs-brand-hue, 0deg));
+  transition: filter 0.45s ease;
+}
+
+.cs-brand-duotone {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.cs-brand-duotone > img {
+  filter: grayscale(1) contrast(1.06);
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.cs-brand-duotone::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--accent, #FEB47B);
+  mix-blend-mode: color;
+  pointer-events: none;
+  transition: background-color 0.45s ease;
+}
+

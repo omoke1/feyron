@@ -663,14 +663,14 @@ export const FEYRON_PAGES: Record<string, FeyronPageData> = {
     kicker: 'Contact Feyron',
     headline: 'Tell us about the work that slows you down.',
     subheading:
-      'A short note is enough. You can also write to us directly at hello@feyron.co.',
+      'A short note is enough. You can also write to us directly at hello@feyron.site.',
     isContactPage: true,
     sections: [
       {
         kicker: 'Email & location',
         heading: 'Direct email and where we work',
         body: [
-          'Email: hello@feyron.co',
+          'Email: hello@feyron.site',
           'Based in Lagos, Nigeria. We work with businesses, startups and professionals locally and internationally.',
           'Not sure what to build first? Start with a workflow audit and we will give you a written plan, clear scope and price before you commit to a larger build.',
         ],
@@ -787,7 +787,7 @@ export const FEYRON_PAGES: Record<string, FeyronPageData> = {
             text: 'Object to or request a restriction on how we process your personal information.',
           },
         ],
-        note: 'To exercise any of these rights, contact us at hello@feyron.co or reach out through our Contact page.',
+        note: 'To exercise any of these rights, contact us at hello@feyron.site or reach out through our Contact page.',
       },
     ],
     closingLine: 'Questions about how we handle data? Send us a note.',

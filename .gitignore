@@ -6,6 +6,10 @@ coverage/
 *.log
 .env*
 !.env.example
+.aistudio/
 public/assets/aistudio/
 !public/site/assets/brand/*
+bun.lock
+bun.lockb
+firebase-applet-config.json
 

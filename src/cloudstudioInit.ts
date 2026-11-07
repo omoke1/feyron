@@ -55,34 +55,6 @@ function saveLeaderboard(list: ScoreEntry[]) {
   }
 }
 
-function getTakenSlots(dateStr: string): string[] {
-  const defaultTaken = ['10:40', '12:00', '15:20', '16:40'];
-  try {
-    const raw = localStorage.getItem(`cs-booked-slots-${dateStr}`);
-    if (raw) {
-      const custom = JSON.parse(raw);
-      if (Array.isArray(custom)) {
-        return Array.from(new Set([...defaultTaken, ...custom]));
-      }
-    }
-  } catch {
-    // ignore
-  }
-  return defaultTaken;
-}
-
-function addTakenSlot(dateStr: string, slot: string) {
-  try {
-    const existing = getTakenSlots(dateStr);
-    if (!existing.includes(slot)) {
-      existing.push(slot);
-    }
-    localStorage.setItem(`cs-booked-slots-${dateStr}`, JSON.stringify(existing));
-  } catch {
-    // ignore
-  }
-}
-
 function installFetchInterceptor() {
   const nativeFetch = window.fetch.bind(window);
 
@@ -106,20 +78,9 @@ function installFetchInterceptor() {
         });
       }
 
-      // 2. Contact / Lead submission
+      // 2. Legacy /contact POST -> forward to real /api/contact endpoint
       if (u.pathname === '/contact' && init?.method?.toUpperCase() === 'POST') {
-        try {
-          const body = init.body ? JSON.parse(String(init.body)) : {};
-          const leads = JSON.parse(localStorage.getItem('cs-leads') || '[]');
-          leads.push({ ...body, createdAt: new Date().toISOString() });
-          localStorage.setItem('cs-leads', JSON.stringify(leads));
-        } catch {
-          // ignore
-        }
-        return new Response(JSON.stringify({ ok: true, success: true }), {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' },
-        });
+        return nativeFetch('/api/contact', init);
       }
 
       // 3. Leaderboard top scores
@@ -149,33 +110,15 @@ function installFetchInterceptor() {
         });
       }
 
-      // 5. Booking slots
+      // 5. Legacy /bookings/slots -> forward to real /api/bookings
       if (u.pathname === '/bookings/slots') {
         const dateParam = u.searchParams.get('date') || '';
-        const taken = getTakenSlots(dateParam);
-        return new Response(JSON.stringify({ taken }), {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' },
-        });
+        return nativeFetch(`/api/bookings?date=${encodeURIComponent(dateParam)}`, init);
       }
 
-      // 6. Create booking
+      // 6. Legacy /bookings POST -> forward to real /api/bookings
       if (u.pathname === '/bookings' && init?.method?.toUpperCase() === 'POST') {
-        try {
-          const body = init.body ? JSON.parse(String(init.body)) : {};
-          if (body.date && body.time) {
-            addTakenSlot(String(body.date), String(body.time));
-          }
-          const bookings = JSON.parse(localStorage.getItem('cs-bookings') || '[]');
-          bookings.push({ ...body, createdAt: new Date().toISOString() });
-          localStorage.setItem('cs-bookings', JSON.stringify(bookings));
-        } catch {
-          // ignore
-        }
-        return new Response(JSON.stringify({ ok: true, success: true }), {
-          status: 200,
-          headers: { 'Content-Type': 'application/json' },
-        });
+        return nativeFetch('/api/bookings', init);
       }
     } catch {
       // fall through to nativeFetch
@@ -341,6 +284,26 @@ function setupPostMountEnhancements() {
       }
     };
   });
+
+  // 7. Add visible "Book a 20-min call" button in the #contact section on the homepage
+  const contactSection = document.getElementById('contact');
+  if (contactSection && !contactSection.querySelector('[data-book]')) {
+    const primaryCta = contactSection.querySelector('[data-lead]') as HTMLElement | null;
+    if (primaryCta && primaryCta.parentElement) {
+      const bookBtn = document.createElement('button');
+      bookBtn.type = 'button';
+      bookBtn.setAttribute('data-book', '');
+      bookBtn.textContent = 'Book a 20-min call';
+      bookBtn.style.cssText =
+        'cursor:pointer;font-family:inherit;font-weight:700;font-size:clamp(15px,1.2vw,18px);background:transparent;color:var(--accent,#fff48d);border:2px solid var(--accent,#fff48d);padding:18px 34px;border-radius:100px;margin-left:12px;margin-top:8px;transition:transform .25s ease';
+      bookBtn.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        if (window.openBooking) window.openBooking({ source: 'homepage-contact' });
+      };
+      primaryCta.parentElement.appendChild(bookBtn);
+    }
+  }
 }
 
 function setupMainMobileMenu() {
@@ -407,7 +370,8 @@ function setupMainMobileMenu() {
           </div>
           <div class="cs-mobile-nav-actions">
             <a href="#contact" data-lead="" class="cs-mobile-cta" data-mobile-nav>Let's talk</a>
-            <a href="mailto:hello@feyron.co" class="cs-mobile-contact-line">hello@feyron.co · Lagos, Nigeria</a>
+            <button type="button" data-book="" class="cs-mobile-cta" data-mobile-nav style="background:transparent;color:var(--accent,#fff48d);border:1.5px solid var(--accent,#fff48d);margin-top:8px">Book a 20-min call</button>
+            <a href="mailto:hello@feyron.site" class="cs-mobile-contact-line">hello@feyron.site · feyron.site · Lagos, Nigeria</a>
           </div>
           <div class="cs-mobile-nav-footer">
             <a href="/privacy" class="cs-mobile-sublink" data-mobile-nav>Privacy Policy</a>

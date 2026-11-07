@@ -10,6 +10,7 @@ import { FEYRON_PAGES, FeyronPageData } from './feyronPages';
 declare global {
   interface Window {
     __feyronOpenLeadModal?: () => void;
+    openBooking?: (opts?: { name?: string; lang?: string; source?: string }) => void;
   }
 }
 
@@ -85,7 +86,9 @@ export default function App() {
   const [contactCompany, setContactCompany] = useState('');
   const [contactTime, setContactTime] = useState('');
   const [contactInterest, setContactInterest] = useState('AI Automation');
-  const [contactStatus, setContactStatus] = useState<'idle' | 'sent' | 'error'>('idle');
+  const [contactHoneypot, setContactHoneypot] = useState('');
+  const [contactStatus, setContactStatus] = useState<'idle' | 'sending' | 'sent' | 'error'>('idle');
+  const [contactErrorMsg, setContactErrorMsg] = useState('');
 
   const navigateToPath = (pathname: string, hash?: string) => {
     setMobileNavOpen(false);
@@ -237,40 +240,94 @@ export default function App() {
     navigateToPath(action);
   };
 
-  const handleContactSubmit = (e: React.FormEvent) => {
+  const handleContactSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!contactName.trim() || !contactInfo.trim() || !contactTime.trim()) {
+    const trimmedName = contactName.trim();
+    const trimmedContact = contactInfo.trim();
+    const trimmedTime = contactTime.trim();
+
+    if (!trimmedName || !trimmedContact || !trimmedTime) {
+      setContactErrorMsg('Please fill in your name, email address, and project details.');
       setContactStatus('error');
       return;
     }
-    try {
-      const existing = JSON.parse(localStorage.getItem('feyron-enquiries') || '[]');
-      existing.push({
-        name: contactName.trim(),
-        contact: contactInfo.trim(),
-        company: contactCompany.trim(),
-        bottleneck: contactTime.trim(),
-        interest: contactInterest,
-        createdAt: new Date().toISOString(),
-      });
-      localStorage.setItem('feyron-enquiries', JSON.stringify(existing));
-    } catch {
-      // ignore storage errors
+
+    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedContact);
+    if (!isEmail) {
+      setContactErrorMsg('Please enter a valid email address (e.g. you@company.com).');
+      setContactStatus('error');
+      return;
     }
-    setContactStatus('sent');
+
+    setContactStatus('sending');
+    setContactErrorMsg('');
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({
+          name: trimmedName,
+          email: trimmedContact,
+          contact: trimmedContact,
+          company: contactCompany.trim(),
+          interest: contactInterest,
+          description: trimmedTime,
+          website: contactHoneypot,
+          source: 'contact-page',
+        }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok || !data.ok) {
+        throw new Error(data.error || 'Your message could not be sent right now.');
+      }
+
+      try {
+        const existing = JSON.parse(localStorage.getItem('feyron-enquiries') || '[]');
+        existing.push({
+          name: trimmedName,
+          contact: trimmedContact,
+          company: contactCompany.trim(),
+          bottleneck: trimmedTime,
+          interest: contactInterest,
+          createdAt: new Date().toISOString(),
+        });
+        localStorage.setItem('feyron-enquiries', JSON.stringify(existing));
+      } catch {
+        // ignore storage errors
+      }
+      setContactStatus('sent');
+    } catch (err: any) {
+      setContactErrorMsg(
+        err?.message || 'Could not send your enquiry right now. Please try again or email hello@feyron.site.'
+      );
+      setContactStatus('error');
+    }
   };
 
-  const handleProductJoin = (e: React.FormEvent) => {
+  const handleProductJoin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!productEmail.trim() || !productEmail.includes('@')) return;
+    const trimmed = productEmail.trim();
+    if (!trimmed || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) return;
     try {
       const list = JSON.parse(localStorage.getItem('feyron-product-waitlist') || '[]');
-      list.push({ email: productEmail.trim(), createdAt: new Date().toISOString() });
+      list.push({ email: trimmed, createdAt: new Date().toISOString() });
       localStorage.setItem('feyron-product-waitlist', JSON.stringify(list));
     } catch {
       // ignore
     }
     setProductJoined(true);
+    fetch('/api/contact', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+      body: JSON.stringify({
+        name: 'Products Early-Access Subscriber',
+        contact: trimmed,
+        interest: 'Products Waitlist',
+        description: `Joined the Feyron Products early-access waitlist (${trimmed}).`,
+        source: 'products-waitlist',
+      }),
+    }).catch(() => {});
   };
 
   const renderMobileDrawer = () => {
@@ -408,8 +465,8 @@ export default function App() {
               >
                 Let&apos;s talk
               </button>
-              <a href="mailto:hello@feyron.co" className="cs-mobile-contact-line">
-                hello@feyron.co · Lagos, Nigeria
+              <a href="mailto:hello@feyron.site" className="cs-mobile-contact-line">
+                hello@feyron.site · feyron.site · Lagos, Nigeria
               </a>
             </div>
             <div className="cs-mobile-nav-footer">
@@ -943,30 +1000,48 @@ export default function App() {
                 <p style={{ margin: '0 0 18px', fontSize: '16px', lineHeight: 1.55, fontWeight: 500, color: '#2c301c' }}>
                   Your enquiry has been received. We&apos;ll review the details and get back to you.
                 </p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setContactName('');
-                    setContactInfo('');
-                    setContactCompany('');
-                    setContactTime('');
-                    setContactStatus('idle');
-                  }}
-                  style={{
-                    cursor: 'pointer',
-                    marginTop: '8px',
-                    fontFamily: 'inherit',
-                    fontWeight: 700,
-                    fontSize: '14.5px',
-                    background: 'var(--ink, #1E1E1E)',
-                    color: 'var(--accent, #D4F534)',
-                    border: 'none',
-                    padding: '12px 24px',
-                    borderRadius: '100px',
-                  }}
-                >
-                  Send another enquiry
-                </button>
+                <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '8px' }}>
+                  <button
+                    type="button"
+                    onClick={() => window.openBooking?.({ name: contactName, source: 'contact-page' })}
+                    style={{
+                      cursor: 'pointer',
+                      fontFamily: 'inherit',
+                      fontWeight: 700,
+                      fontSize: '14.5px',
+                      background: 'var(--accent, #D4F534)',
+                      color: 'var(--ink, #1E1E1E)',
+                      border: '2px solid var(--ink, #1E1E1E)',
+                      padding: '12px 24px',
+                      borderRadius: '100px',
+                    }}
+                  >
+                    Book a 20-min call →
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setContactName('');
+                      setContactInfo('');
+                      setContactCompany('');
+                      setContactTime('');
+                      setContactStatus('idle');
+                    }}
+                    style={{
+                      cursor: 'pointer',
+                      fontFamily: 'inherit',
+                      fontWeight: 700,
+                      fontSize: '14.5px',
+                      background: 'var(--ink, #1E1E1E)',
+                      color: 'var(--accent, #D4F534)',
+                      border: 'none',
+                      padding: '12px 24px',
+                      borderRadius: '100px',
+                    }}
+                  >
+                    Send another enquiry
+                  </button>
+                </div>
               </div>
             ) : (
               <form onSubmit={handleContactSubmit} noValidate style={{ display: 'grid', gap: '20px' }}>
@@ -976,31 +1051,48 @@ export default function App() {
                     alignItems: 'center',
                     justifyContent: 'space-between',
                     flexWrap: 'wrap',
-                    gap: '12px',
-                    padding: '12px 18px',
+                    gap: '14px',
+                    padding: '14px 18px',
                     background: 'var(--paper, #E7E7E7)',
                     border: '2px solid var(--ink, #1E1E1E)',
                     borderRadius: '14px',
                   }}
                 >
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '14.5px', fontWeight: 600 }}>
-                    <span style={{ fontFamily: "'Geist Mono', monospace", fontSize: '11px', textTransform: 'uppercase', letterSpacing: '.1em', opacity: 0.7 }}>
-                      Prefer email?
-                    </span>
-                    <a
-                      href="mailto:hello@feyron.co"
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap', fontSize: '14.5px', fontWeight: 600 }}>
+                    <button
+                      type="button"
+                      onClick={() => window.openBooking?.({ name: contactName, source: 'contact-page' })}
                       style={{
-                        color: 'var(--ink, #1E1E1E)',
-                        fontWeight: 700,
-                        textDecoration: 'underline',
-                        textUnderlineOffset: '3px',
+                        cursor: 'pointer',
+                        fontFamily: 'inherit',
+                        fontWeight: 800,
+                        fontSize: '13.5px',
+                        background: 'var(--ink, #1E1E1E)',
+                        color: 'var(--accent, #D4F534)',
+                        border: 'none',
+                        padding: '9px 18px',
+                        borderRadius: '100px',
                       }}
                     >
-                      hello@feyron.co
-                    </a>
+                      Book a 20-min call →
+                    </button>
+                    <span style={{ fontSize: '13.5px' }}>
+                      or email{' '}
+                      <a
+                        href="mailto:hello@feyron.site"
+                        style={{
+                          color: 'var(--ink, #1E1E1E)',
+                          fontWeight: 700,
+                          textDecoration: 'underline',
+                          textUnderlineOffset: '3px',
+                        }}
+                      >
+                        hello@feyron.site
+                      </a>
+                    </span>
                   </div>
                   <div style={{ fontFamily: "'Geist Mono', monospace", fontSize: '12px', color: '#555' }}>
-                    Lagos, Nigeria
+                    Lagos, Nigeria · 20-min video call
                   </div>
                 </div>
                 <div
@@ -1034,7 +1126,7 @@ export default function App() {
                       type="email"
                       value={contactInfo}
                       onChange={(e) => setContactInfo(e.target.value)}
-                      placeholder="Your email address"
+                      placeholder="you@company.com"
                       required
                       style={{
                         padding: '13px 15px',
@@ -1047,6 +1139,16 @@ export default function App() {
                     />
                   </label>
                 </div>
+                <input
+                  type="text"
+                  name="website"
+                  value={contactHoneypot}
+                  onChange={(e) => setContactHoneypot(e.target.value)}
+                  tabIndex={-1}
+                  autoComplete="off"
+                  aria-hidden="true"
+                  style={{ position: 'absolute', left: '-5000px', width: '1px', height: '1px', opacity: 0 }}
+                />
 
                 <div
                   style={{
@@ -1130,15 +1232,17 @@ export default function App() {
                       fontSize: '14.5px',
                     }}
                   >
-                    Your message did not send. Please check your details and try again.
+                    {contactErrorMsg || 'Your message did not send. Please check your details and try again.'}
                   </p>
                 )}
 
                 <div>
                   <button
                     type="submit"
+                    disabled={contactStatus === 'sending'}
                     style={{
-                      cursor: 'pointer',
+                      cursor: contactStatus === 'sending' ? 'default' : 'pointer',
+                      opacity: contactStatus === 'sending' ? 0.65 : 1,
                       fontFamily: 'inherit',
                       fontWeight: 700,
                       fontSize: '16px',
@@ -1149,7 +1253,7 @@ export default function App() {
                       borderRadius: '100px',
                     }}
                   >
-                    Send enquiry
+                    {contactStatus === 'sending' ? 'Sending enquiry…' : 'Send enquiry'}
                   </button>
                 </div>
               </form>
@@ -1476,10 +1580,11 @@ export default function App() {
               }}
             >
               <div
+                className="cs-brand-duotone"
                 style={{
                   borderRadius: '18px',
                   overflow: 'hidden',
-                  border: '1.5px solid rgba(255,255,255,0.14)',
+                  border: '1.5px solid rgba(var(--accent-rgb, 254, 180, 123), 0.28)',
                   background: '#141414',
                 }}
               >
@@ -1494,11 +1599,12 @@ export default function App() {
                 style={{
                   borderRadius: '18px',
                   overflow: 'hidden',
-                  border: '1.5px solid rgba(255,255,255,0.14)',
+                  border: '1.5px solid rgba(var(--accent-rgb, 254, 180, 123), 0.28)',
                   background: '#141414',
                 }}
               >
                 <img
+                  className="cs-brand-hue"
                   src="/site/assets/brand/mission_vision.png"
                   alt="Feyron Mission & Vision"
                   loading="lazy"
@@ -1509,11 +1615,12 @@ export default function App() {
                 style={{
                   borderRadius: '18px',
                   overflow: 'hidden',
-                  border: '1.5px solid rgba(255,255,255,0.14)',
+                  border: '1.5px solid rgba(var(--accent-rgb, 254, 180, 123), 0.28)',
                   background: '#141414',
                 }}
               >
                 <img
+                  className="cs-brand-hue"
                   src="/site/assets/brand/jpg1.jpg"
                   alt="Feyron hardware and connected system interface"
                   loading="lazy"
@@ -1524,11 +1631,12 @@ export default function App() {
                 style={{
                   borderRadius: '18px',
                   overflow: 'hidden',
-                  border: '1.5px solid rgba(255,255,255,0.14)',
+                  border: '1.5px solid rgba(var(--accent-rgb, 254, 180, 123), 0.28)',
                   background: '#141414',
                 }}
               >
                 <img
+                  className="cs-brand-hue"
                   src="/site/assets/brand/phone_mockup.png"
                   alt="Feyron OS mobile mockup"
                   loading="lazy"
@@ -1539,11 +1647,12 @@ export default function App() {
                 style={{
                   borderRadius: '18px',
                   overflow: 'hidden',
-                  border: '1.5px solid rgba(255,255,255,0.14)',
+                  border: '1.5px solid rgba(var(--accent-rgb, 254, 180, 123), 0.28)',
                   background: '#141414',
                 }}
               >
                 <img
+                  className="cs-brand-hue"
                   src="/site/assets/brand/colour_palette.png"
                   alt="Feyron Official Brand Colour Palette"
                   loading="lazy"
@@ -1554,11 +1663,12 @@ export default function App() {
                 style={{
                   borderRadius: '18px',
                   overflow: 'hidden',
-                  border: '1.5px solid rgba(255,255,255,0.14)',
+                  border: '1.5px solid rgba(var(--accent-rgb, 254, 180, 123), 0.28)',
                   background: '#141414',
                 }}
               >
                 <img
+                  className="cs-brand-hue"
                   src="/site/assets/brand/jpg2.jpg"
                   alt="Feyron studio apparel"
                   loading="lazy"
@@ -1730,10 +1840,17 @@ export default function App() {
             <span>© 2026 Feyron. All rights reserved.</span>
             <span>
               <a
-                href="mailto:hello@feyron.co"
+                href="https://feyron.site"
                 style={{ color: 'var(--accent, #D4F534)', textDecoration: 'none' }}
               >
-                hello@feyron.co
+                feyron.site
+              </a>{' '}
+              ·{' '}
+              <a
+                href="mailto:hello@feyron.site"
+                style={{ color: 'var(--accent, #D4F534)', textDecoration: 'none' }}
+              >
+                hello@feyron.site
               </a>{' '}
               · Lagos, Nigeria
             </span>

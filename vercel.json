@@ -20,7 +20,15 @@
   ],
   "rewrites": [
     {
-      "source": "/((?!site/|assets/|mascot\\.js|mascot\\.css|game\\.js|favicon\\.ico).*)",
+      "source": "/bookings/slots",
+      "destination": "/api/bookings"
+    },
+    {
+      "source": "/bookings",
+      "destination": "/api/bookings"
+    },
+    {
+      "source": "/((?!api/|site/|assets/|mascot\\.js|mascot\\.css|game\\.js|favicon\\.ico).*)",
       "destination": "/index.html"
     }
   ]

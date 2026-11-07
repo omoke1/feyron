@@ -1898,13 +1898,16 @@
       '<button type="button" class="cs-lead-modal__close" aria-label="Close">×</button>' +
       '<div style="display:inline-flex;align-items:center;gap:9px;margin-bottom:10px;color:var(--accent,#FEB47B);font-weight:700;font-size:16px;letter-spacing:-.02em"><svg width="22" height="22" viewBox="0 0 100 100" aria-hidden="true" style="display:block;flex-shrink:0"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M14.5,0.0H85.5A14.5,14.5 0 0 1 100.0,14.5V85.5A14.5,14.5 0 0 1 85.5,100.0H14.5A14.5,14.5 0 0 1 0.0,85.5V14.5A14.5,14.5 0 0 1 14.5,0.0Z M21.2,16.2H33.1A8.2,8.2 0 0 1 41.3,24.4V59.4A8.2,8.2 0 0 1 33.1,67.6H21.2A8.2,8.2 0 0 1 13.0,59.4V24.4A8.2,8.2 0 0 1 21.2,16.2Z M66.9,16.2H78.8A8.2,8.2 0 0 1 87.0,24.4V59.4A8.2,8.2 0 0 1 78.8,67.6H66.9A8.2,8.2 0 0 1 58.7,59.4V24.4A8.2,8.2 0 0 1 66.9,16.2Z M45.1,76.0H54.9A4.9,4.9 0 0 1 59.8,80.9V80.9A4.9,4.9 0 0 1 54.9,85.8H45.1A4.9,4.9 0 0 1 40.2,80.9V80.9A4.9,4.9 0 0 1 45.1,76.0Z"/></svg><span>Feyron</span></div>' +
       "<h3>Tell us about the work that slows you down.</h3>" +
-      "<p>A short note is enough. We reply with questions, or with an idea for how to fix it.</p>" +
-      '<p style="margin:-6px 0 16px;font-size:13px;color:#cfcfc4">Prefer direct email? Write to <a href="mailto:hello@feyron.co" style="color:var(--accent,#FEB47B);text-decoration:underline;text-underline-offset:2px">hello@feyron.co</a></p>' +
+      "<p>Send a note below, or pick a 20-minute slot on our calendar right now.</p>" +
+      '<div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin:0 0 16px;padding:11px 14px;border-radius:14px;background:rgba(255,255,255,.06);border:1.5px solid rgba(255,244,141,.32)">' +
+      '<span style="font-size:13px;color:#faf7ea;font-weight:600">Prefer a live discovery call?</span>' +
+      '<button type="button" data-open-booking style="border:0;border-radius:100px;padding:8px 16px;background:var(--accent,#fff48d);color:#0e0e0c;font-family:inherit;font-size:13px;font-weight:800;cursor:pointer">Book a 20-min call →</button>' +
+      "</div>" +
       '<form class="cs-lead-modal__form" novalidate>' +
       '<input type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" class="cs-lead-modal__hp">' +
       '<div class="cs-lead-modal__row">' +
       '<label>Your name<input type="text" name="name" required maxlength="255" autocomplete="name" placeholder="Your name"></label>' +
-      '<label>Email or WhatsApp number<input type="text" name="contact" required maxlength="255" placeholder="Email or WhatsApp number"></label>' +
+      '<label>Work email<input type="email" name="contact" required maxlength="255" autocomplete="email" placeholder="you@company.com"></label>' +
       "</div>" +
       '<div class="cs-lead-modal__row">' +
       '<label>Company (optional)<input type="text" name="company" maxlength="255" autocomplete="organization" placeholder="Company (optional)"></label>' +
@@ -1933,7 +1936,16 @@
     }
     window.addEventListener("keydown", onKey, true);
     wrap.addEventListener("click", function (e) {
-      if (e.target === wrap || e.target.closest(".cs-lead-modal__close")) close();
+      if (e.target === wrap || e.target.closest(".cs-lead-modal__close")) {
+        close();
+        return;
+      }
+      if (e.target.closest("[data-open-booking]")) {
+        close();
+        window.setTimeout(function () {
+          if (window.openBooking) window.openBooking({ source: "lead-modal" });
+        }, 120);
+      }
     });
     var form = wrap.querySelector("form");
     form.addEventListener("submit", function (e) {
@@ -1942,28 +1954,65 @@
       var errBox = form.querySelector(".cs-lead-modal__error");
       var nameVal = (form.querySelector('[name="name"]').value || "").trim();
       var contactVal = (form.querySelector('[name="contact"]').value || "").trim();
+      var companyVal = (form.querySelector('[name="company"]').value || "").trim();
+      var interestVal = (form.querySelector('[name="interest"]').value || "ai-automation").trim();
       var descVal = (form.querySelector('[name="description"]').value || "").trim();
+      var hpVal = (form.querySelector('[name="website"]').value || "").trim();
       if (!nameVal || !contactVal || !descVal) {
-        errBox.textContent = "Your message did not send. Please check your contact details and try again.";
+        errBox.textContent = "Please fill in your name, email address, and message.";
+        errBox.hidden = false;
+        return;
+      }
+      var isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactVal);
+      if (!isEmail) {
+        errBox.textContent = "Please enter a valid email address (e.g. you@company.com).";
         errBox.hidden = false;
         return;
       }
       errBox.hidden = true;
       btn.disabled = true;
       btn.textContent = "Sending…";
-      window.setTimeout(function () {
+      window.fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify({
+          name: nameVal,
+          email: contactVal,
+          contact: contactVal,
+          company: companyVal,
+          interest: interestVal,
+          description: descVal,
+          website: hpVal,
+          source: "lead-modal"
+        })
+      }).then(function (r) {
+        return r.json().catch(function () { return {}; }).then(function (data) {
+          if (!r.ok || !data.ok) {
+            throw new Error(data.error || "Could not send message right now.");
+          }
+          return data;
+        });
+      }).then(function () {
         var card = wrap.querySelector(".cs-lead-modal__card");
         card.innerHTML =
           '<button type="button" class="cs-lead-modal__close" aria-label="Close">×</button>' +
-          '<h3>Thank you.</h3>' +
-          "<p>Thank you. We have your note and will reply within one working day.</p>" +
-          '<div class="cs-guide-confirm__actions"><button type="button" data-confirm-stay>Back to Feyron</button></div>';
+          "<h3>Thank you.</h3>" +
+          "<p>We have your note and sent a confirmation to " + contactVal + ". Want to lock in a time on our calendar too?</p>" +
+          '<div class="cs-guide-confirm__actions" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">' +
+          '<button type="button" data-open-booking style="background:var(--accent,#fff48d);color:#0e0e0c">Book a 20-min call</button>' +
+          '<button type="button" data-confirm-stay style="background:transparent;color:#faf7ea;border:1.5px solid rgba(255,255,255,.3)">Back to Feyron</button>' +
+          "</div>";
         card.addEventListener("click", function (e2) {
           if (e2.target.closest(".cs-lead-modal__close") || e2.target.closest("[data-confirm-stay]")) close();
         });
         sfx("pop");
         chomp(1);
-      }, 320);
+      }).catch(function (err) {
+        btn.disabled = false;
+        btn.textContent = "Send to Feyron";
+        errBox.textContent = (err && err.message) ? err.message : "Could not send right now — please email hello@feyron.site.";
+        errBox.hidden = false;
+      });
     });
   }
   window.__feyronOpenLeadModal = openLeadModal;
@@ -1972,8 +2021,13 @@
      capture blocker routes it through the confirm modal first. */
   function initLeadCapture() {
     window.addEventListener("click", function (e) {
-      // explicit opt-in: only elements marked data-lead open the form.
-      // No copy matching, no href heuristics — i18n/rename proof.
+      var bookBtn = e.target.closest("[data-book]");
+      if (bookBtn && !guide.running) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (window.openBooking) window.openBooking({ source: "site" });
+        return;
+      }
       var link = e.target.closest("[data-lead]");
       if (!link) return;
       if (guide.running) return;
