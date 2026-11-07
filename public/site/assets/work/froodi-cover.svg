@@ -1,58 +1,54 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 750">
-    <defs>
-      <linearGradient id="bg1" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stop-color="#141413"/>
-        <stop offset="55%" stop-color="#1E1E1E"/>
-        <stop offset="100%" stop-color="#2b2118"/>
-      </linearGradient>
-      <pattern id="grid1" width="40" height="40" patternUnits="userSpaceOnUse">
-        <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(254,180,123,0.07)" stroke-width="1"/>
-      </pattern>
-    </defs>
-    <rect width="1200" height="750" fill="url(#bg1)"/>
-    <rect width="1200" height="750" fill="url(#grid1)"/>
-    <circle cx="960" cy="180" r="260" fill="rgba(254,180,123,0.12)" filter="blur(40px)"/>
-    <circle cx="240" cy="560" r="220" fill="rgba(74,222,128,0.08)" filter="blur(40px)"/>
-    <!-- Agentic Workflow Graph Window -->
-    <rect x="130" y="95" width="940" height="510" rx="22" fill="#181816" stroke="rgba(254,180,123,0.32)" stroke-width="2"/>
-    <rect x="130" y="95" width="940" height="52" rx="22" fill="#22221f"/>
-    <circle cx="164" cy="121" r="7" fill="#FEB47B"/>
-    <circle cx="186" cy="121" r="7" fill="#C084FC"/>
-    <circle cx="208" cy="121" r="7" fill="#4ADE80"/>
-    <text x="240" y="126" fill="#E7E7E7" font-family="monospace" font-size="14" font-weight="700" letter-spacing="2">FROODI · AGENTIC WORKFLOW ORCHESTRATOR</text>
-    <rect x="890" y="107" width="150" height="28" rx="14" fill="rgba(74,222,128,0.16)" stroke="#4ADE80" stroke-width="1.2"/>
-    <circle cx="910" cy="121" r="5" fill="#4ADE80"/>
-    <text x="924" y="126" fill="#4ADE80" font-family="monospace" font-size="12" font-weight="700">AGENTS ACTIVE</text>
-    <!-- Nodes & Connectors -->
-    <path d="M 370 265 C 430 265, 440 215, 500 215" fill="none" stroke="#FEB47B" stroke-width="3" stroke-dasharray="6 4"/>
-    <path d="M 370 265 C 430 265, 440 345, 500 345" fill="none" stroke="#C084FC" stroke-width="3"/>
-    <path d="M 710 215 C 770 215, 780 280, 835 280" fill="none" stroke="#4ADE80" stroke-width="3"/>
-    <path d="M 710 345 C 770 345, 780 280, 835 280" fill="none" stroke="#FEB47B" stroke-width="3"/>
-    <!-- Node 1: Trigger / Intake -->
-    <rect x="175" y="215" width="195" height="100" rx="16" fill="#23221f" stroke="#FEB47B" stroke-width="2"/>
-    <text x="195" y="246" fill="#FEB47B" font-family="monospace" font-size="11" letter-spacing="1.5">01 · INTAKE TRIGGER</text>
-    <text x="195" y="274" fill="#FFFFFF" font-family="sans-serif" font-size="18" font-weight="800">Multi-Channel Lead</text>
-    <text x="195" y="296" fill="#A8A89E" font-family="monospace" font-size="12">WhatsApp · Email · Webhook</text>
-    <!-- Node 2: Reasoning Agent -->
-    <rect x="500" y="165" width="210" height="100" rx="16" fill="#23221f" stroke="#C084FC" stroke-width="2"/>
-    <text x="520" y="196" fill="#C084FC" font-family="monospace" font-size="11" letter-spacing="1.5">02 · FROODI AGENT</text>
-    <text x="520" y="224" fill="#FFFFFF" font-family="sans-serif" font-size="18" font-weight="800">Context &amp; Triage</text>
-    <text x="520" y="246" fill="#A8A89E" font-family="monospace" font-size="12">Memory + Policy Guardrails</text>
-    <!-- Node 3: Tool Execution -->
-    <rect x="500" y="295" width="210" height="100" rx="16" fill="#23221f" stroke="#FEB47B" stroke-width="2"/>
-    <text x="520" y="326" fill="#FEB47B" font-family="monospace" font-size="11" letter-spacing="1.5">03 · TOOL CALLS</text>
-    <text x="520" y="354" fill="#FFFFFF" font-family="sans-serif" font-size="18" font-weight="800">CRM + DB + Docs</text>
-    <text x="520" y="376" fill="#A8A89E" font-family="monospace" font-size="12">Auto-draft &amp; state sync</text>
-    <!-- Node 4: Human Approval & Dispatch -->
-    <rect x="835" y="225" width="195" height="110" rx="16" fill="#1d2922" stroke="#4ADE80" stroke-width="2.2"/>
-    <text x="855" y="256" fill="#4ADE80" font-family="monospace" font-size="11" letter-spacing="1.5">04 · VERIFIED ACTION</text>
-    <text x="855" y="284" fill="#FFFFFF" font-family="sans-serif" font-size="18" font-weight="800">Approved &amp; Sent</text>
-    <text x="855" y="308" fill="#b5f2cb" font-family="monospace" font-size="12">Audit trail logged · 1.4s</text>
-    <!-- Bottom Telemetry Strip -->
-    <rect x="175" y="445" width="855" height="115" rx="14" fill="#141412" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
-    <g transform="translate(200, 472) scale(0.55)">
-      <path fill="#FEB47B" fill-rule="evenodd" clip-rule="evenodd" d="M14.5,0.0H85.5A14.5,14.5 0 0 1 100.0,14.5V85.5A14.5,14.5 0 0 1 85.5,100.0H14.5A14.5,14.5 0 0 1 0.0,85.5V14.5A14.5,14.5 0 0 1 14.5,0.0Z M21.2,16.2H33.1A8.2,8.2 0 0 1 41.3,24.4V59.4A8.2,8.2 0 0 1 33.1,67.6H21.2A8.2,8.2 0 0 1 13.0,59.4V24.4A8.2,8.2 0 0 1 21.2,16.2Z M66.9,16.2H78.8A8.2,8.2 0 0 1 87.0,24.4V59.4A8.2,8.2 0 0 1 78.8,67.6H66.9A8.2,8.2 0 0 1 58.7,59.4V24.4A8.2,8.2 0 0 1 66.9,16.2Z M45.1,76.0H54.9A4.9,4.9 0 0 1 59.8,80.9V80.9A4.9,4.9 0 0 1 54.9,85.8H45.1A4.9,4.9 0 0 1 40.2,80.9V80.9A4.9,4.9 0 0 1 45.1,76.0Z"/>
-    </g>
-    <text x="275" y="495" fill="#FFFFFF" font-family="sans-serif" font-size="22" font-weight="800">Froodi Autonomous Workflow Engine</text>
-    <text x="275" y="525" fill="#A8A89E" font-family="monospace" font-size="13">Built by Feyron · Event-driven agents, deterministic tool-calling &amp; human approval gates</text>
-  </svg>
+  <defs>
+    <pattern id="grid-froodi" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(212,245,52,0.08)" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="750" fill="#141413"/>
+  <rect width="1200" height="750" fill="url(#grid-froodi)"/>
+  <!-- Main Window -->
+  <rect x="90" y="75" width="1020" height="540" rx="22" fill="#1E1E1E" stroke="#D4F534" stroke-width="2.5"/>
+  <rect x="90" y="75" width="1020" height="54" rx="22" fill="#262624"/>
+  <text x="130" y="108" fill="#D4F534" font-family="monospace" font-size="13" font-weight="700" letter-spacing="2">01 · FROODI · AUTONOMOUS MULTI-AGENT WORKFLOW ENGINE</text>
+  <rect x="895" y="88" width="185" height="28" rx="14" fill="#D4F534"/>
+  <text x="920" y="107" fill="#1E1E1E" font-family="monospace" font-size="12" font-weight="700">HUMAN GATE ACTIVE</text>
+
+  <!-- Connectors -->
+  <path d="M 340 255 L 415 255" fill="none" stroke="#D4F534" stroke-width="3"/>
+  <path d="M 655 255 L 730 255" fill="none" stroke="#D4F534" stroke-width="3"/>
+  <path d="M 850 325 L 850 385" fill="none" stroke="#E7E7E7" stroke-width="2.5" stroke-dasharray="6 4"/>
+
+  <!-- Step 1 -->
+  <rect x="130" y="175" width="210" height="150" rx="16" fill="#252522" stroke="#E7E7E7" stroke-width="2"/>
+  <text x="152" y="210" fill="#D4F534" font-family="monospace" font-size="11" font-weight="700" letter-spacing="1.5">STAGE 01 · TRIGGER</text>
+  <text x="152" y="242" fill="#FFFFFF" font-family="sans-serif" font-size="20" font-weight="800">Inbound Request</text>
+  <text x="152" y="270" fill="#CFCFC4" font-family="monospace" font-size="12">Email · Webhook · Docs</text>
+  <text x="152" y="296" fill="#D4F534" font-family="monospace" font-size="12">Structured in 0.3s</text>
+
+  <!-- Step 2 -->
+  <rect x="415" y="175" width="240" height="150" rx="16" fill="#252522" stroke="#D4F534" stroke-width="2.5"/>
+  <text x="437" y="210" fill="#D4F534" font-family="monospace" font-size="11" font-weight="700" letter-spacing="1.5">STAGE 02 · AGENT</text>
+  <text x="437" y="242" fill="#FFFFFF" font-family="sans-serif" font-size="20" font-weight="800">Policy &amp; Tool Calls</text>
+  <text x="437" y="270" fill="#CFCFC4" font-family="monospace" font-size="12">CRM lookup + Doc parse</text>
+  <text x="437" y="296" fill="#D4F534" font-family="monospace" font-size="12">99.4% rule match</text>
+
+  <!-- Step 3 -->
+  <rect x="730" y="175" width="335" height="150" rx="16" fill="#D4F534" stroke="#1E1E1E" stroke-width="2.5"/>
+  <text x="754" y="210" fill="#1E1E1E" font-family="monospace" font-size="11" font-weight="700" letter-spacing="1.5">STAGE 03 · APPROVAL GATE</text>
+  <text x="754" y="244" fill="#1E1E1E" font-family="sans-serif" font-size="22" font-weight="800">1-Click Operator Sign-Off</text>
+  <text x="754" y="272" fill="#1E1E1E" font-family="monospace" font-size="12.5" font-weight="700">Agents prepare · People decide</text>
+  <rect x="754" y="286" width="170" height="26" rx="13" fill="#1E1E1E"/>
+  <text x="774" y="303" fill="#D4F534" font-family="monospace" font-size="11" font-weight="700">AUDIT TRAIL SAVED</text>
+
+  <!-- Bottom Metrics Strip -->
+  <rect x="130" y="385" width="935" height="185" rx="16" fill="#161614" stroke="rgba(231,231,231,0.22)" stroke-width="1.5"/>
+  <text x="165" y="432" fill="#E7E7E7" font-family="monospace" font-size="12" letter-spacing="1.5">VERIFIED PRODUCTION OUTCOME · BACK-OFFICE OPERATIONS</text>
+  <text x="165" y="485" fill="#D4F534" font-family="sans-serif" font-size="42" font-weight="800">1.4s</text>
+  <text x="165" y="518" fill="#CFCFC4" font-family="monospace" font-size="13">First action latency</text>
+
+  <text x="445" y="485" fill="#FFFFFF" font-family="sans-serif" font-size="42" font-weight="800">78%</text>
+  <text x="445" y="518" fill="#CFCFC4" font-family="monospace" font-size="13">Manual triage reclaimed</text>
+
+  <text x="745" y="485" fill="#D4F534" font-family="sans-serif" font-size="42" font-weight="800">100%</text>
+  <text x="745" y="518" fill="#CFCFC4" font-family="monospace" font-size="13">Actions logged &amp; auditable</text>
+</svg>

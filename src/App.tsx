@@ -7,6 +7,11 @@ import React, { useEffect, useState } from 'react';
 import { bootCloudstudio } from './cloudstudioInit';
 import { FEYRON_PAGES, FeyronPageData } from './feyronPages';
 import {
+  FeyronCaseStudy,
+  FeyronCaseStudyView,
+  resolveCaseStudyByPath,
+} from './feyronCaseStudies';
+import {
   TeamDashboardSection,
   WorkflowRoiCalculatorCard,
   WorkflowVisualizerCard,
@@ -47,25 +52,6 @@ function FeyronLogo({ size = 26, fontSize = 22 }: { size?: number; fontSize?: nu
   );
 }
 
-const VALID_WORK_SLUGS = new Set([
-  'agents',
-  'moneyincheck',
-  'phopet',
-  'workee',
-  'firevalle',
-  'hq',
-]);
-
-function normalizeSubpagePath(pathname: string): string | null {
-  const clean = pathname.replace(/\/+$/, '');
-  const match = clean.match(/^\/work\/([a-z0-9-]+)$/i);
-  if (match && VALID_WORK_SLUGS.has(match[1].toLowerCase())) {
-    return `/work/${match[1].toLowerCase()}/index.html`;
-  }
-  return null;
-}
-
-
 function resolveFeyronPage(pathname: string): FeyronPageData | null {
   const clean = pathname.replace(/^\/+|\/+$/g, '').toLowerCase();
   if (clean && FEYRON_PAGES[clean]) {
@@ -88,8 +74,8 @@ function resolveFeyronPage(pathname: string): FeyronPageData | null {
 }
 
 export default function App() {
-  const [subpageSrc, setSubpageSrc] = useState<string | null>(() =>
-    normalizeSubpagePath(window.location.pathname)
+  const [activeCaseStudy, setActiveCaseStudy] = useState<FeyronCaseStudy | null>(() =>
+    resolveCaseStudyByPath(window.location.pathname)
   );
   const [feyronPage, setFeyronPage] = useState<FeyronPageData | null>(() =>
     resolveFeyronPage(window.location.pathname)
@@ -115,7 +101,7 @@ export default function App() {
     const clean = pathname.replace(/\/+$/, '') || '/';
     if (clean === '/') {
       window.history.pushState({}, '', '/' + (hash || ''));
-      setSubpageSrc(null);
+      setActiveCaseStudy(null);
       setFeyronPage(null);
       document.title = 'Feyron | AI Productivity & Technology';
       const metaDesc = document.querySelector('meta[name="description"]');
@@ -139,7 +125,7 @@ export default function App() {
     const page = resolveFeyronPage(clean);
     if (page) {
       window.history.pushState({ feyronSlug: page.slug }, '', `/${page.slug}`);
-      setSubpageSrc(null);
+      setActiveCaseStudy(null);
       setFeyronPage(page);
       setContactStatus('idle');
       document.title = page.metaTitle;
@@ -148,11 +134,15 @@ export default function App() {
       return;
     }
 
-    const subSrc = normalizeSubpagePath(clean);
-    if (subSrc) {
-      window.history.pushState({ subpage: subSrc }, '', clean);
+    const cs = resolveCaseStudyByPath(clean);
+    if (cs) {
+      window.history.pushState({ caseStudy: cs.slug }, '', `/work/${cs.slug}`);
       setFeyronPage(null);
-      setSubpageSrc(subSrc);
+      setActiveCaseStudy(cs);
+      document.title = `${cs.name} — Case Study | Feyron`;
+      const metaDesc = document.querySelector('meta[name="description"]');
+      if (metaDesc) metaDesc.setAttribute('content', cs.summary);
+      return;
     }
   };
 
@@ -183,11 +173,11 @@ export default function App() {
           return;
         }
 
-        const subSrc = normalizeSubpagePath(u.pathname);
-        if (subSrc) {
+        const cs = resolveCaseStudyByPath(u.pathname);
+        if (cs) {
           e.preventDefault();
           e.stopPropagation();
-          navigateToPath(u.pathname);
+          navigateToPath(`/work/${cs.slug}`);
           return;
         }
       } catch {
@@ -207,10 +197,15 @@ export default function App() {
 
     const onPopState = () => {
       setMobileNavOpen(false);
-      setSubpageSrc(normalizeSubpagePath(window.location.pathname));
+      const cs = resolveCaseStudyByPath(window.location.pathname);
+      setActiveCaseStudy(cs);
       const p = resolveFeyronPage(window.location.pathname);
       setFeyronPage(p);
-      document.title = p ? p.metaTitle : 'Feyron | AI Productivity & Technology';
+      if (cs) {
+        document.title = `${cs.name} — Case Study | Feyron`;
+      } else {
+        document.title = p ? p.metaTitle : 'Feyron | AI Productivity & Technology';
+      }
     };
 
     const onKeyDown = (e: KeyboardEvent) => {
@@ -219,7 +214,7 @@ export default function App() {
           setMobileNavOpen(false);
           return;
         }
-        if (subpageSrc || feyronPage) {
+        if (activeCaseStudy || feyronPage) {
           navigateToPath('/');
         }
       }
@@ -236,12 +231,12 @@ export default function App() {
       window.removeEventListener('popstate', onPopState);
       window.removeEventListener('keydown', onKeyDown);
     };
-  }, [subpageSrc, feyronPage]);
+  }, [activeCaseStudy, feyronPage, mobileNavOpen]);
 
   useEffect(() => {
     const syncOverlayLock = () => {
       const gate = document.querySelector('.cs-guide-gate') as HTMLElement | null;
-      if (feyronPage || subpageSrc) {
+      if (feyronPage || activeCaseStudy) {
         document.documentElement.classList.remove('cs-guide-locked');
         document.body.style.position = '';
         document.body.style.overflow = '';
@@ -259,7 +254,7 @@ export default function App() {
       clearTimeout(timer1);
       clearTimeout(timer2);
     };
-  }, [feyronPage, subpageSrc]);
+  }, [feyronPage, activeCaseStudy]);
 
   const handleCtaAction = (action?: string) => {
     if (!action) return;
@@ -540,34 +535,39 @@ export default function App() {
     );
   };
 
-  if (subpageSrc) {
+  if (activeCaseStudy) {
     return (
       <div
+        key={activeCaseStudy.slug}
+        data-lenis-prevent=""
         style={{
           position: 'fixed',
           inset: 0,
-          zIndex: 2147483500,
-          background: '#1E1E1E',
-          display: 'flex',
-          flexDirection: 'column',
+          zIndex: 2147483150,
+          background: 'var(--paper, #E7E7E7)',
+          color: 'var(--ink, #1E1E1E)',
+          overflowY: 'auto',
+          overflowX: 'hidden',
+          fontFamily: "'Bricolage Grotesque', system-ui, sans-serif",
         }}
       >
-        {/* Top Bar for subpage view */}
+        {/* Top Bar */}
         <nav
           style={{
-            position: 'relative',
+            position: 'sticky',
+            top: 0,
             zIndex: 40,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
+            flexWrap: 'wrap',
             gap: '14px',
-            padding: '16px clamp(18px, 4vw, 44px)',
+            padding: '18px clamp(18px, 4vw, 44px)',
             background: 'var(--bg, #D4F534)',
             borderBottom: '2.5px solid var(--ink, #1E1E1E)',
-            fontFamily: "'Bricolage Grotesque', system-ui, sans-serif",
           }}
         >
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
             <button
               type="button"
               onClick={() => navigateToPath('/')}
@@ -589,7 +589,7 @@ export default function App() {
             </button>
             <button
               type="button"
-              onClick={() => navigateToPath('/')}
+              onClick={() => navigateToPath('/', '#selected-work')}
               style={{
                 cursor: 'pointer',
                 background: 'rgba(30,30,30,0.08)',
@@ -598,18 +598,21 @@ export default function App() {
                 padding: '5px 13px',
                 fontFamily: "'Geist Mono', monospace",
                 fontSize: '11.5px',
-                fontWeight: 600,
+                fontWeight: 700,
                 color: 'var(--ink, #1E1E1E)',
               }}
             >
-              ← Home
+              ← All Selected Work
             </button>
           </div>
 
-          <div className="cs-nav-desktop" style={{ display: 'flex', alignItems: 'center', gap: 'clamp(14px, 2.2vw, 32px)', flexWrap: 'wrap' }}>
+          <div
+            className="cs-nav-desktop"
+            style={{ display: 'flex', alignItems: 'center', gap: 'clamp(14px, 2.2vw, 32px)', flexWrap: 'wrap' }}
+          >
             <button
               type="button"
-              onClick={() => navigateToPath('/', '#work')}
+              onClick={() => navigateToPath('/')}
               style={{
                 cursor: 'pointer',
                 background: 'none',
@@ -621,11 +624,27 @@ export default function App() {
                 color: 'var(--ink, #1E1E1E)',
               }}
             >
-              Work
+              Home
             </button>
             <button
               type="button"
-              onClick={() => navigateToPath('/', '#how')}
+              onClick={() => navigateToPath('/solutions')}
+              style={{
+                cursor: 'pointer',
+                background: 'none',
+                border: 'none',
+                padding: '6px 0',
+                fontFamily: 'inherit',
+                fontWeight: 600,
+                fontSize: '15px',
+                color: 'var(--ink, #1E1E1E)',
+              }}
+            >
+              Solutions
+            </button>
+            <button
+              type="button"
+              onClick={() => navigateToPath('/how-we-work')}
               style={{
                 cursor: 'pointer',
                 background: 'none',
@@ -641,7 +660,7 @@ export default function App() {
             </button>
             <button
               type="button"
-              onClick={() => navigateToPath('/', '#faq')}
+              onClick={() => navigateToPath('/contact')}
               style={{
                 cursor: 'pointer',
                 background: 'none',
@@ -653,11 +672,16 @@ export default function App() {
                 color: 'var(--ink, #1E1E1E)',
               }}
             >
-              FAQ
+              Contact
             </button>
             <button
               type="button"
-              onClick={() => handleCtaAction('contact')}
+              onClick={() =>
+                window.openBooking?.({
+                  notes: activeCaseStudy.bookingContextNote,
+                  source: `case-study-${activeCaseStudy.slug}`,
+                })
+              }
               style={{
                 cursor: 'pointer',
                 fontFamily: 'inherit',
@@ -670,7 +694,7 @@ export default function App() {
                 borderRadius: '100px',
               }}
             >
-              Talk to our team
+              Book a 20-min call
             </button>
           </div>
 
@@ -687,18 +711,260 @@ export default function App() {
           </button>
         </nav>
         {renderMobileDrawer()}
-        <iframe
-          key={subpageSrc}
-          src={subpageSrc}
-          title="Case Study"
+
+        {/* Hero Header */}
+        <header
           style={{
-            width: '100%',
-            height: '100%',
-            border: 'none',
-            display: 'block',
-            background: '#1E1E1E',
+            background: 'var(--bg, #D4F534)',
+            color: 'var(--ink, #1E1E1E)',
+            padding: 'clamp(48px, 7vw, 96px) clamp(18px, 4vw, 44px)',
+            borderBottom: '2.5px solid var(--ink, #1E1E1E)',
           }}
-        />
+        >
+          <div style={{ maxWidth: '1160px', margin: '0 auto', display: 'grid', gap: '20px' }}>
+            <div
+              style={{
+                fontFamily: "'Geist Mono', monospace",
+                fontSize: '12px',
+                letterSpacing: '.14em',
+                textTransform: 'uppercase',
+                fontWeight: 700,
+                display: 'flex',
+                flexWrap: 'wrap',
+                alignItems: 'center',
+                gap: '10px',
+              }}
+            >
+              <span>Case Study {activeCaseStudy.index}</span>
+              <span aria-hidden="true">·</span>
+              <span>{activeCaseStudy.division}</span>
+              <span aria-hidden="true">·</span>
+              <span>{activeCaseStudy.sector}</span>
+              <span aria-hidden="true">·</span>
+              <span>{activeCaseStudy.timeline}</span>
+            </div>
+
+            <h1
+              style={{
+                margin: 0,
+                fontWeight: 800,
+                fontSize: 'clamp(2.3rem, 5.4vw, 4.6rem)',
+                lineHeight: 0.95,
+                letterSpacing: '-.035em',
+                maxWidth: '20ch',
+              }}
+            >
+              {activeCaseStudy.name}: {activeCaseStudy.headline}
+            </h1>
+
+            <p
+              style={{
+                margin: 0,
+                maxWidth: '72ch',
+                fontSize: 'clamp(16px, 1.3vw, 19.5px)',
+                lineHeight: 1.55,
+                fontWeight: 500,
+              }}
+            >
+              {activeCaseStudy.summary}
+            </p>
+
+            <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '8px' }}>
+              <button
+                type="button"
+                onClick={() =>
+                  window.openBooking?.({
+                    notes: activeCaseStudy.bookingContextNote,
+                    source: `case-study-${activeCaseStudy.slug}`,
+                  })
+                }
+                style={{
+                  cursor: 'pointer',
+                  fontFamily: 'inherit',
+                  fontWeight: 800,
+                  fontSize: '15.5px',
+                  background: 'var(--ink, #1E1E1E)',
+                  color: 'var(--accent, #D4F534)',
+                  border: '2px solid var(--ink, #1E1E1E)',
+                  padding: '14px 28px',
+                  borderRadius: '100px',
+                }}
+              >
+                Start a similar project →
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setContactInterest(`${activeCaseStudy.division} (${activeCaseStudy.name})`);
+                  setContactTime(
+                    `We would like to build a project similar to ${activeCaseStudy.name} (${activeCaseStudy.headline}).`
+                  );
+                  navigateToPath('/contact');
+                }}
+                style={{
+                  cursor: 'pointer',
+                  fontFamily: 'inherit',
+                  fontWeight: 700,
+                  fontSize: '15.5px',
+                  background: 'transparent',
+                  color: 'var(--ink, #1E1E1E)',
+                  border: '2px solid var(--ink, #1E1E1E)',
+                  padding: '14px 26px',
+                  borderRadius: '100px',
+                }}
+              >
+                Send project inquiry
+              </button>
+              {activeCaseStudy.liveUrl && (
+                <a
+                  href={activeCaseStudy.liveUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                    fontFamily: 'inherit',
+                    fontWeight: 700,
+                    fontSize: '15.5px',
+                    background: '#fff',
+                    color: 'var(--ink, #1E1E1E)',
+                    border: '2px solid var(--ink, #1E1E1E)',
+                    padding: '14px 24px',
+                    borderRadius: '100px',
+                    textDecoration: 'none',
+                  }}
+                >
+                  Visit live site ↗
+                </a>
+              )}
+            </div>
+          </div>
+        </header>
+
+        {/* Main Case Study Body */}
+        <main
+          style={{
+            maxWidth: '1160px',
+            margin: '0 auto',
+            padding: 'clamp(40px, 5.5vw, 80px) clamp(18px, 4vw, 44px)',
+          }}
+        >
+          <FeyronCaseStudyView
+            study={activeCaseStudy}
+            onNavigate={navigateToPath}
+            onBookWithContext={(cs) => {
+              setContactInterest(`${cs.division} (${cs.name})`);
+              setContactTime(
+                `We would like to build a project similar to ${cs.name} (${cs.headline}).`
+              );
+              navigateToPath('/contact');
+            }}
+          />
+        </main>
+
+        {/* Site-wide Footer */}
+        <footer
+          style={{
+            background: 'var(--ink, #1E1E1E)',
+            color: 'var(--accent, #D4F534)',
+            padding: 'clamp(40px, 6vw, 72px) clamp(18px, 4vw, 44px) clamp(24px, 3vw, 38px)',
+          }}
+        >
+          <div style={{ maxWidth: '1160px', margin: '0 auto' }}>
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '24px',
+                marginBottom: '40px',
+                fontFamily: "'Geist Mono', monospace",
+                fontSize: '12px',
+                letterSpacing: '.06em',
+              }}
+            >
+              <div style={{ lineHeight: 1.7, maxWidth: '420px' }}>
+                <strong
+                  style={{
+                    color: 'var(--accent, #D4F534)',
+                    fontSize: '14px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '9px',
+                    marginBottom: '4px',
+                  }}
+                >
+                  <svg viewBox="0 0 100 100" style={{ width: '20px', height: '20px', flexShrink: 0 }} aria-hidden="true">
+                    <path fill="currentColor" fillRule="evenodd" clipRule="evenodd" d={FEYRON_MARK_PATH} />
+                  </svg>
+                  <span>Feyron · Technology that moves work forward.</span>
+                </strong>
+                <br />
+                <span style={{ color: '#cfcfc4' }}>
+                  We build AI agents, digital platforms and connected systems that help people and businesses work better.
+                </span>
+              </div>
+              <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
+                {[
+                  { slug: '', label: 'Home' },
+                  { slug: 'solutions', label: 'Solutions' },
+                  { slug: 'products', label: 'Products' },
+                  { slug: 'about', label: 'About' },
+                  { slug: 'contact', label: 'Contact' },
+                  { slug: 'how-we-work', label: 'How we work' },
+                  { slug: 'who-we-serve', label: 'Who we serve' },
+                  { slug: 'responsible-ai', label: 'Responsible AI' },
+                  { slug: 'privacy', label: 'Privacy Policy' },
+                  { slug: 'terms', label: 'Terms of Service' },
+                ].map((l) => (
+                  <button
+                    key={l.slug}
+                    type="button"
+                    onClick={() => navigateToPath(`/${l.slug}`)}
+                    style={{
+                      cursor: 'pointer',
+                      background: 'none',
+                      border: 'none',
+                      padding: 0,
+                      fontFamily: 'inherit',
+                      fontSize: '12px',
+                      color: 'var(--accent, #D4F534)',
+                    }}
+                  >
+                    {l.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '12px',
+                paddingTop: '20px',
+                borderTop: '1px solid rgba(255,255,255,0.14)',
+                fontFamily: "'Geist Mono', monospace",
+                fontSize: '11px',
+                color: '#9a9a8c',
+              }}
+            >
+              <span>© 2026 Feyron. All rights reserved.</span>
+              <span>
+                <a href="https://feyron.site" style={{ color: 'var(--accent, #D4F534)', textDecoration: 'none' }}>
+                  feyron.site
+                </a>{' '}
+                ·{' '}
+                <a href="mailto:hello@feyron.site" style={{ color: 'var(--accent, #D4F534)', textDecoration: 'none' }}>
+                  hello@feyron.site
+                </a>{' '}
+                · Lagos, Nigeria
+              </span>
+            </div>
+          </div>
+        </footer>
       </div>
     );
   }
@@ -891,7 +1157,7 @@ export default function App() {
       {/* Hero Header */}
       <header
         style={{
-          background: 'var(--bg, #FEB47B)',
+          background: 'var(--bg, #D4F534)',
           color: 'var(--ink, #1E1E1E)',
           padding: 'clamp(52px, 8vw, 110px) clamp(18px, 4vw, 44px)',
           borderBottom: '2.5px solid var(--ink, #1E1E1E)',
@@ -970,7 +1236,7 @@ export default function App() {
                     fontWeight: 700,
                     fontSize: '16px',
                     background: 'var(--ink, #1E1E1E)',
-                    color: 'var(--accent, #FEB47B)',
+                    color: 'var(--accent, #D4F534)',
                     border: '2px solid var(--ink, #1E1E1E)',
                     padding: '15px 28px',
                     borderRadius: '100px',
@@ -1600,7 +1866,7 @@ export default function App() {
                   style={{
                     cursor: 'pointer',
                     background: 'var(--ink, #1E1E1E)',
-                    color: 'var(--accent, #FEB47B)',
+                    color: 'var(--accent, #D4F534)',
                     border: 'none',
                     borderRadius: '100px',
                     padding: '13px 26px',
@@ -1637,7 +1903,7 @@ export default function App() {
                 fontSize: '11.5px',
                 letterSpacing: '.16em',
                 textTransform: 'uppercase',
-                color: '#FEB47B',
+                color: '#D4F534',
                 marginBottom: '12px',
               }}
             >
@@ -1869,7 +2135,7 @@ export default function App() {
             <div style={{ lineHeight: 1.7, maxWidth: '420px' }}>
               <strong
                 style={{
-                  color: 'var(--accent, #FEB47B)',
+                  color: 'var(--accent, #D4F534)',
                   fontSize: '14px',
                   display: 'inline-flex',
                   alignItems: 'center',

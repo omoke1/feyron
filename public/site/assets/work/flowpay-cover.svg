@@ -1,18 +1,38 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 750">
-    <rect width="1200" height="750" fill="#1b1714"/>
-    <rect x="130" y="95" width="940" height="515" rx="24" fill="#1E1E1E" stroke="rgba(254,180,123,0.38)" stroke-width="2"/>
-    <text x="180" y="155" fill="#FEB47B" font-family="monospace" font-size="13" font-weight="700" letter-spacing="2">FLOWPAY · INSTANT PAYMENT LINKS &amp; REVENUE ANALYTICS</text>
-    <text x="180" y="208" fill="#FFFFFF" font-family="sans-serif" font-size="38" font-weight="800">One-Click Payment Links &amp; Live Settlement</text>
-    <rect x="180" y="250" width="520" height="285" rx="18" fill="#26221e" stroke="rgba(254,180,123,0.28)"/>
-    <text x="215" y="295" fill="#FEB47B" font-family="monospace" font-size="12">REVENUE TELEMETRY · REAL-TIME</text>
-    <text x="215" y="352" fill="#FFFFFF" font-family="sans-serif" font-size="44" font-weight="800">$48,920.00</text>
-    <text x="215" y="385" fill="#4ADE80" font-family="monospace" font-size="14">▲ +24.8% settled via shareable payment links</text>
-    <path d="M 215 485 L 300 455 L 385 468 L 470 415 L 555 425 L 650 365" fill="none" stroke="#FEB47B" stroke-width="4" stroke-linecap="round"/>
-    <rect x="730" y="250" width="290" height="285" rx="18" fill="#26221e" stroke="#4ADE80" stroke-width="1.8"/>
-    <text x="760" y="295" fill="#4ADE80" font-family="monospace" font-size="12">SHAREABLE LINK</text>
-    <text x="760" y="338" fill="#FFFFFF" font-family="sans-serif" font-size="22" font-weight="800">flowpay.link/inv-409</text>
-    <rect x="760" y="370" width="230" height="46" rx="10" fill="#181614"/>
-    <text x="780" y="398" fill="#E7E7E7" font-family="monospace" font-size="13">USDC.e / Instant Checkout</text>
-    <rect x="760" y="440" width="230" height="50" rx="25" fill="#FEB47B"/>
-    <text x="815" y="471" fill="#1E1E1E" font-family="sans-serif" font-size="16" font-weight="800">Paid &amp; Verified</text>
-  </svg>
+  <defs>
+    <pattern id="grid-flowpay" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(212,245,52,0.08)" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="750" fill="#141413"/>
+  <rect width="1200" height="750" fill="url(#grid-flowpay)"/>
+  <rect x="90" y="75" width="1020" height="540" rx="22" fill="#1E1E1E" stroke="#D4F534" stroke-width="2.5"/>
+  <rect x="90" y="75" width="1020" height="54" rx="22" fill="#262624"/>
+  <text x="130" y="108" fill="#D4F534" font-family="monospace" font-size="13" font-weight="700" letter-spacing="2">04 · FLOWPAY · AUTOMATED PAYOUTS &amp; INSTANT PAYMENT LINKS</text>
+  <rect x="895" y="88" width="185" height="28" rx="14" fill="#D4F534"/>
+  <text x="920" y="107" fill="#1E1E1E" font-family="monospace" font-size="12" font-weight="700">94% SAME-DAY PAID</text>
+
+  <!-- Left Telemetry Card -->
+  <rect x="130" y="165" width="560" height="405" rx="18" fill="#252522" stroke="#E7E7E7" stroke-width="2"/>
+  <text x="168" y="210" fill="#D4F534" font-family="monospace" font-size="12" font-weight="700" letter-spacing="1.5">REVENUE &amp; PAYOUT RECONCILIATION LEDGER</text>
+  <text x="168" y="272" fill="#FFFFFF" font-family="sans-serif" font-size="48" font-weight="800">$148,920.00</text>
+  <text x="168" y="308" fill="#D4F534" font-family="monospace" font-size="14" font-weight="700">+32.4% faster settlement via automated invoice links</text>
+  <path d="M 168 475 L 265 440 L 360 452 L 455 390 L 550 402 L 645 335" fill="none" stroke="#D4F534" stroke-width="4.5" stroke-linecap="round"/>
+  <rect x="168" y="502" width="484" height="42" rx="10" fill="#161614"/>
+  <text x="188" y="528" fill="#CFCFC4" font-family="monospace" font-size="12.5">Zero manual spreadsheet matching · Exported to accounting</text>
+
+  <!-- Right Shareable Link Card -->
+  <rect x="720" y="165" width="345" height="405" rx="18" fill="#D4F534" stroke="#1E1E1E" stroke-width="2.5"/>
+  <text x="752" y="210" fill="#1E1E1E" font-family="monospace" font-size="12" font-weight="700" letter-spacing="1.5">ONE-CLICK CHECKOUT LINK</text>
+  <rect x="752" y="235" width="281" height="72" rx="14" fill="#FFFFFF" stroke="#1E1E1E" stroke-width="2"/>
+  <text x="774" y="268" fill="#1E1E1E" font-family="sans-serif" font-size="19" font-weight="800">flowpay.link/inv-409</text>
+  <text x="774" y="292" fill="#555548" font-family="monospace" font-size="12">Multi-currency + Instant Receipt</text>
+
+  <rect x="752" y="328" width="281" height="110" rx="14" fill="#E7E7E7" stroke="#1E1E1E" stroke-width="2"/>
+  <text x="774" y="362" fill="#1E1E1E" font-family="monospace" font-size="12" font-weight="700">APPROVAL &amp; AUDIT CONTROLS</text>
+  <text x="774" y="390" fill="#1E1E1E" font-family="sans-serif" font-size="15" font-weight="700"> Dual sign-off above limit</text>
+  <text x="774" y="416" fill="#1E1E1E" font-family="sans-serif" font-size="15" font-weight="700"> Auto-generated tax receipt</text>
+
+  <rect x="752" y="468" width="281" height="56" rx="28" fill="#1E1E1E"/>
+  <text x="815" y="502" fill="#D4F534" font-family="sans-serif" font-size="16" font-weight="800">Paid &amp; Reconciled</text>
+</svg>

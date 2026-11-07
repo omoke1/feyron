@@ -1,6 +1,6 @@
 import {
   getDashboardData,
-  triggerBookingReminder,
+  handleDashboardAction,
   updateDashboardRecord,
   verifyDashboardAuth,
 } from '../src/server/emailService';
@@ -40,7 +40,7 @@ export default async function handler(req: any, res: any) {
   }
 
   if (req.method === 'POST') {
-    const result = await triggerBookingReminder(String(body?.id || ''));
+    const result = await handleDashboardAction(body || {});
     return res.status(result.ok ? 200 : 400).json(result);
   }
 

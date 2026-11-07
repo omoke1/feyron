@@ -315,32 +315,107 @@ html, body {
 /* Agent-Theme Adaptive Brand Showcase & Imagery                       */
 /* ------------------------------------------------------------------ */
 
-:root,
-:root[data-theme="melocoton"] {
+:root {
+  --bg: #D4F534;
+  --bg-rgb: 212, 245, 52;
+  --accent: #D4F534;
+  --accent-rgb: 212, 245, 52;
+  --ink: #1E1E1E;
+  --ink-rgb: 30, 30, 30;
+  --paper: #E7E7E7;
+  --ink-soft: #2c301c;
+  --ink-mute: #6e7552;
+  --ok: #4ADE80;
   --cs-brand-hue: 0deg;
-}
-:root[data-theme="menta"] {
-  --cs-brand-hue: 116deg;
-}
-:root[data-theme="rosa"] {
-  --cs-brand-hue: 244deg;
-}
-:root[data-theme="electrico"] {
-  --cs-brand-hue: 209deg;
+  --cs-portfolio-hue: 0deg;
 }
 :root[data-theme="cielo"] {
+  --bg: #818CF8;
+  --bg-rgb: 129, 140, 248;
+  --accent: #60A5FA;
+  --accent-rgb: 96, 165, 250;
+  --paper: #E7E7E7;
+  --ink-soft: #252845;
+  --ink-mute: #686c8f;
   --cs-brand-hue: 175deg;
+  --cs-portfolio-hue: 144deg;
+}
+:root[data-theme="electrico"] {
+  --bg: #E7E7E7;
+  --bg-rgb: 231, 231, 231;
+  --accent: #D4F534;
+  --accent-rgb: 212, 245, 52;
+  --paper: #EAEAEA;
+  --ink-soft: #333333;
+  --ink-mute: #737373;
+  --cs-brand-hue: 209deg;
+  --cs-portfolio-hue: 0deg;
 }
 :root[data-theme="coral"] {
+  --bg: #FF7E5F;
+  --bg-rgb: 255, 126, 95;
+  --accent: #FF7E5F;
+  --accent-rgb: 255, 126, 95;
+  --paper: #E7E7E7;
+  --ink-soft: #42231b;
+  --ink-mute: #8f655b;
   --cs-brand-hue: -19deg;
+  --cs-portfolio-hue: -61deg;
+}
+:root[data-theme="menta"] {
+  --bg: #4ADE80;
+  --bg-rgb: 74, 222, 128;
+  --accent: #4ADE80;
+  --accent-rgb: 74, 222, 128;
+  --paper: #E7E7E7;
+  --ink-soft: #1c3d28;
+  --ink-mute: #5c856b;
+  --cs-brand-hue: 116deg;
+  --cs-portfolio-hue: 69deg;
+}
+:root[data-theme="rosa"] {
+  --bg: #C084FC;
+  --bg-rgb: 192, 132, 252;
+  --accent: #C084FC;
+  --accent-rgb: 192, 132, 252;
+  --paper: #E7E7E7;
+  --ink-soft: #352246;
+  --ink-mute: #7e6691;
+  --cs-brand-hue: 244deg;
+  --cs-portfolio-hue: 197deg;
+}
+:root[data-theme="melocoton"] {
+  --bg: #FEB47B;
+  --bg-rgb: 254, 180, 123;
+  --accent: #FEB47B;
+  --accent-rgb: 254, 180, 123;
+  --paper: #E7E7E7;
+  --ink-soft: #402e20;
+  --ink-mute: #8c7462;
+  --cs-brand-hue: 0deg;
+  --cs-portfolio-hue: -47deg;
 }
 :root[data-theme="hielo"] {
+  --bg: #67E8F9;
+  --bg-rgb: 103, 232, 249;
+  --accent: #22D3EE;
+  --accent-rgb: 34, 211, 238;
+  --paper: #E7E7E7;
+  --ink-soft: #1e3a40;
+  --ink-mute: #5c7c85;
   --cs-brand-hue: 180deg;
+  --cs-portfolio-hue: 115deg;
 }
 
 .cs-brand-hue {
   filter: hue-rotate(var(--cs-brand-hue, 0deg));
   transition: filter 0.45s ease;
+}
+
+.cs-portfolio-img,
+.cs-wgrid .wimg {
+  filter: hue-rotate(var(--cs-portfolio-hue, 0deg)) saturate(1.06) contrast(1.05);
+  transition: filter 0.55s ease, transform 0.9s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .cs-brand-duotone {
@@ -364,4 +439,5 @@ html, body {
   pointer-events: none;
   transition: background-color 0.45s ease;
 }
+
 

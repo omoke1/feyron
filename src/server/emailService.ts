@@ -1053,13 +1053,38 @@ export interface BookingRecord {
 interface FeyronDataStore {
   enquiries: EnquiryRecord[];
   bookings: BookingRecord[];
+  blockedDates: string[];
+  blockedSlots: Record<string, string[]>;
 }
+
+export const ALL_WAT_SLOTS = [
+  '09:00',
+  '09:30',
+  '10:00',
+  '10:30',
+  '11:00',
+  '11:30',
+  '12:00',
+  '12:30',
+  '13:00',
+  '13:30',
+  '14:00',
+  '14:30',
+  '15:00',
+  '15:30',
+  '16:00',
+  '16:30',
+  '17:00',
+  '17:30',
+];
 
 const STORE_FILE = path.join(process.cwd(), 'data', 'feyron-store.json');
 
 const memoryStore: FeyronDataStore = {
   enquiries: [],
   bookings: [],
+  blockedDates: [],
+  blockedSlots: {},
 };
 
 // In-memory store for booked 20-min call slots per date (YYYY-MM-DD -> Set of "HH:MM")
@@ -1073,6 +1098,11 @@ function loadPersistentStore(): FeyronDataStore {
       if (parsed && typeof parsed === 'object') {
         memoryStore.enquiries = Array.isArray(parsed.enquiries) ? parsed.enquiries : [];
         memoryStore.bookings = Array.isArray(parsed.bookings) ? parsed.bookings : [];
+        memoryStore.blockedDates = Array.isArray(parsed.blockedDates) ? parsed.blockedDates : [];
+        memoryStore.blockedSlots =
+          parsed.blockedSlots && typeof parsed.blockedSlots === 'object'
+            ? parsed.blockedSlots
+            : {};
         for (const b of memoryStore.bookings) {
           if (b.date && b.time && b.status !== 'Archived') {
             const set = bookedSlotsByDate.get(b.date) || new Set<string>();
@@ -1118,10 +1148,22 @@ function recordBooking(item: BookingRecord): void {
   savePersistentStore();
 }
 
-export function getBookedSlotsForDate(dateStr: string): { taken: string[] } {
+export function getBookedSlotsForDate(dateStr: string): { taken: string[]; blockedDay?: boolean } {
   const clean = String(dateStr || '').trim();
-  const set = bookedSlotsByDate.get(clean);
-  return { taken: set ? Array.from(set) : [] };
+  if (!clean) return { taken: [] };
+  if (memoryStore.blockedDates.includes(clean)) {
+    return { taken: [...ALL_WAT_SLOTS], blockedDay: true };
+  }
+  const combined = new Set<string>();
+  const booked = bookedSlotsByDate.get(clean);
+  if (booked) {
+    booked.forEach((s) => combined.add(s));
+  }
+  const customBlocked = memoryStore.blockedSlots[clean];
+  if (Array.isArray(customBlocked)) {
+    customBlocked.forEach((s) => combined.add(s));
+  }
+  return { taken: Array.from(combined) };
 }
 
 function generateMeetingLink(datePart: string, slotPart: string, guestName: string): string {
@@ -1361,6 +1403,8 @@ export interface BookingSubmissionBody {
   client_time_label?: string;
   lang?: string;
   source?: string;
+  skipEmails?: boolean;
+  bypassBlockedCheck?: boolean;
 }
 
 export async function handleBookingSubmission(body: BookingSubmissionBody): Promise<{
@@ -1369,6 +1413,7 @@ export async function handleBookingSubmission(body: BookingSubmissionBody): Prom
     ok: boolean;
     error?: string;
     id?: string;
+    booking?: BookingRecord;
     gcalUrl?: string;
     outlookUrl?: string;
     meetingUrl?: string;
@@ -1400,6 +1445,22 @@ export async function handleBookingSubmission(body: BookingSubmissionBody): Prom
       status: 400,
       body: { ok: false, error: 'Invalid slot format.' },
     };
+  }
+
+  if (!body.bypassBlockedCheck) {
+    if (memoryStore.blockedDates.includes(datePart)) {
+      return {
+        status: 409,
+        body: { ok: false, error: 'Selected date is unavailable.' },
+      };
+    }
+    const dayBlockedSlots = memoryStore.blockedSlots[datePart];
+    if (Array.isArray(dayBlockedSlots) && dayBlockedSlots.includes(slotPart)) {
+      return {
+        status: 409,
+        body: { ok: false, error: 'Selected time slot is unavailable.' },
+      };
+    }
   }
 
   const existing = bookedSlotsByDate.get(datePart) || new Set<string>();
@@ -1435,6 +1496,41 @@ export async function handleBookingSubmission(body: BookingSubmissionBody): Prom
     meetingUrl
   );
   const rescheduleUrl = 'https://feyron.site/contact';
+
+  const bookingRecord: BookingRecord = {
+    id: `bk-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    name,
+    email,
+    notes,
+    date: datePart,
+    time: slotPart,
+    endTime: endSlotPart,
+    formattedDate,
+    clientTimezone,
+    clientTimeLabel,
+    meetingUrl,
+    gcalUrl,
+    outlookUrl,
+    status: 'Audit Scheduled',
+    reminderSent: false,
+    internalNotes: body.source === 'dashboard' ? 'Created manually from Team Dashboard.' : '',
+    createdAt: new Date().toISOString(),
+  };
+
+  if (body.skipEmails) {
+    recordBooking(bookingRecord);
+    return {
+      status: 200,
+      body: {
+        ok: true,
+        id: bookingRecord.id,
+        booking: bookingRecord,
+        gcalUrl,
+        outlookUrl,
+        meetingUrl,
+      },
+    };
+  }
 
   const icsContent = buildIcsCalendarInvite(
     datePart,
@@ -1507,25 +1603,6 @@ export async function handleBookingSubmission(body: BookingSubmissionBody): Prom
     attachments,
   });
 
-  const bookingRecord: BookingRecord = {
-    id: `bk-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-    name,
-    email,
-    notes,
-    date: datePart,
-    time: slotPart,
-    endTime: endSlotPart,
-    formattedDate,
-    clientTimezone,
-    clientTimeLabel,
-    meetingUrl,
-    gcalUrl,
-    outlookUrl,
-    status: 'Audit Scheduled',
-    reminderSent: false,
-    internalNotes: '',
-    createdAt: new Date().toISOString(),
-  };
   recordBooking(bookingRecord);
   scheduleTwoHourReminderIfUpcoming(bookingRecord);
 
@@ -1548,7 +1625,7 @@ export async function handleBookingSubmission(body: BookingSubmissionBody): Prom
     ]
   );
 
-  if (!res.success) {
+  if (!res.success && body.source !== 'dashboard') {
     existing.delete(slotPart);
     return {
       status: 502,
@@ -1585,8 +1662,252 @@ export async function handleBookingSubmission(body: BookingSubmissionBody): Prom
 
   return {
     status: 200,
-    body: { ok: true, id: res.id, gcalUrl, outlookUrl, meetingUrl },
+    body: {
+      ok: true,
+      id: bookingRecord.id,
+      booking: bookingRecord,
+      gcalUrl,
+      outlookUrl,
+      meetingUrl,
+    },
   };
+}
+
+/**
+ * Builds an official Feyron branded HTML email for custom replies, follow-ups, scopes/quotes, and reschedule notes sent from the Team Dashboard.
+ */
+function buildCustomDashboardEmailHtml(opts: {
+  recipientName: string;
+  eyebrow: string;
+  headline: string;
+  subheadline?: string;
+  messageBody: string;
+  calloutTitle?: string;
+  calloutBody?: string;
+  ctaLabel?: string;
+  ctaUrl?: string;
+}): string {
+  const firstName = (opts.recipientName || 'there').split(/\s+/)[0] || 'there';
+  const safeFirstName = escapeHtml(firstName);
+  const safeEyebrow = escapeHtml(opts.eyebrow || 'Feyron Follow-Up');
+  const safeHeadline = escapeHtml(opts.headline || 'Technology that moves work forward.');
+  const safeSubheadline = escapeHtml(
+    opts.subheadline || 'Direct update from the Feyron engineering and automation team.'
+  );
+
+  const paragraphs = String(opts.messageBody || '')
+    .split(/\r?\n\r?\n/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+
+  const renderedParagraphs = paragraphs
+    .map(
+      (p) =>
+        `<p class="t-dark" style="margin:0 0 20px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:26px;color:#1E1E1E;">${escapeHtml(
+          p
+        ).replace(/\r?\n/g, '<br/>')}</p>`
+    )
+    .join('\n        ');
+
+  const hasCallout = Boolean(opts.calloutBody && opts.calloutBody.trim());
+  const safeCalloutTitle = escapeHtml(opts.calloutTitle || 'Summary & Next Steps');
+  const safeCalloutBody = escapeHtml(opts.calloutBody || '').replace(/\r?\n/g, '<br/>');
+
+  const ctaLabel = (opts.ctaLabel || 'Book or manage call').trim();
+  const ctaUrl = (opts.ctaUrl || 'https://feyron.site/contact').trim();
+
+  return `<!DOCTYPE html>
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="x-apple-disable-message-reformatting">
+<meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
+<meta name="color-scheme" content="light dark">
+<meta name="supported-color-schemes" content="light dark">
+<title>Feyron</title>
+<style>
+  html,body{margin:0 !important;padding:0 !important;width:100% !important;}
+  *{-ms-text-size-adjust:100%;-webkit-text-size-adjust:100%;}
+  table,td{mso-table-lspace:0pt;mso-table-rspace:0pt;}
+  table{border-collapse:collapse;}
+  img{border:0;outline:none;text-decoration:none;-ms-interpolation-mode:bicubic;}
+  a{text-decoration:none;}
+  @media only screen and (max-width:620px){
+    .container{width:100% !important;}
+    .px{padding-left:24px !important;padding-right:24px !important;}
+    .hero-h{font-size:30px !important;line-height:36px !important;}
+    .btn-td{display:block !important;}
+    .btn-a{display:block !important;text-align:center !important;}
+    .hide-m{display:none !important;max-height:0 !important;overflow:hidden !important;}
+  }
+  @media (prefers-color-scheme:dark){
+    .body-bg{background-color:#111111 !important;}
+    .card{background-color:#262626 !important;}
+    .t-dark{color:#E7E7E7 !important;}
+    .t-muted{color:#A9A9A9 !important;}
+    .callout{background-color:#1E1E1E !important;}
+    .rule{border-color:#3A3A3A !important;}
+  }
+</style>
+</head>
+<body id="body" class="body-bg" style="margin:0;padding:0;background-color:#E7E7E7;word-spacing:normal;">
+<div style="display:none;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;mso-hide:all;">
+  ${safeSubheadline}&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
+</div>
+<table role="presentation" class="body-bg" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#E7E7E7;">
+<tr>
+<td align="center" style="padding:28px 12px;">
+  <table role="presentation" class="container" width="600" cellpadding="0" cellspacing="0" border="0" style="width:600px;max-width:600px;">
+    <tr>
+      <td class="px" bgcolor="#1E1E1E" style="background-color:#1E1E1E;padding:26px 40px;border-radius:16px 16px 0 0;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td valign="middle" width="44" style="width:44px;">
+              <table role="presentation" width="44" height="44" cellpadding="0" cellspacing="0" border="0" bgcolor="#FEB47B" style="width:44px;height:44px;background-color:#FEB47B;border-radius:10px;">
+                <tr><td height="8" style="height:8px;font-size:0;line-height:0;">&nbsp;</td></tr>
+                <tr>
+                  <td align="center" valign="top" style="font-size:0;line-height:0;">
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <td width="9" height="18" bgcolor="#1E1E1E" style="width:9px;height:18px;background-color:#1E1E1E;border-radius:4px;font-size:0;line-height:0;">&nbsp;</td>
+                        <td width="8" style="width:8px;font-size:0;line-height:0;">&nbsp;</td>
+                        <td width="9" height="18" bgcolor="#1E1E1E" style="width:9px;height:18px;background-color:#1E1E1E;border-radius:4px;font-size:0;line-height:0;">&nbsp;</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr><td height="5" style="height:5px;font-size:0;line-height:0;">&nbsp;</td></tr>
+                <tr>
+                  <td align="center" valign="top" style="font-size:0;line-height:0;">
+                    <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                      <tr><td width="8" height="3" bgcolor="#1E1E1E" style="width:8px;height:3px;background-color:#1E1E1E;border-radius:2px;font-size:0;line-height:0;">&nbsp;</td></tr>
+                    </table>
+                  </td>
+                </tr>
+                <tr><td height="10" style="height:10px;font-size:0;line-height:0;">&nbsp;</td></tr>
+              </table>
+            </td>
+            <td valign="middle" style="padding-left:14px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:24px;line-height:28px;font-weight:700;letter-spacing:-0.5px;color:#FFFFFF;">
+              <a href="https://feyron.site" style="color:#FFFFFF;text-decoration:none;">Feyron</a>
+            </td>
+            <td align="right" valign="middle" class="hide-m" style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:12px;line-height:16px;letter-spacing:1.5px;text-transform:uppercase;color:#A9A9A9;">
+              AI Productivity &amp; Technology
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td style="font-size:0;line-height:0;">
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td width="34%" height="5" bgcolor="#FEB47B" style="height:5px;background-color:#FEB47B;font-size:0;line-height:0;">&nbsp;</td>
+            <td width="33%" height="5" bgcolor="#C084FC" style="height:5px;background-color:#C084FC;font-size:0;line-height:0;">&nbsp;</td>
+            <td width="33%" height="5" bgcolor="#4ADE80" style="height:5px;background-color:#4ADE80;font-size:0;line-height:0;">&nbsp;</td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td class="px" bgcolor="#1E1E1E" style="background-color:#1E1E1E;padding:52px 40px 56px 40px;">
+        <p style="margin:0 0 18px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:12px;line-height:16px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:#FEB47B;">${safeEyebrow}</p>
+        <h1 class="hero-h" style="margin:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:38px;line-height:44px;font-weight:700;letter-spacing:-1px;color:#FFFFFF;">${safeHeadline}</h1>
+        <p style="margin:20px 0 0 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:17px;line-height:27px;color:#E7E7E7;">${safeSubheadline}</p>
+      </td>
+    </tr>
+    <tr>
+      <td class="px card" bgcolor="#FFFFFF" style="background-color:#FFFFFF;padding:44px 40px 8px 40px;">
+        <h2 class="t-dark" style="margin:0 0 16px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:22px;line-height:28px;font-weight:700;letter-spacing:-0.3px;color:#1E1E1E;">Hi ${safeFirstName},</h2>
+        ${renderedParagraphs}
+        ${
+          hasCallout
+            ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:8px 0 28px 0;">
+          <tr>
+            <td class="callout" bgcolor="#F3F3F3" style="background-color:#F3F3F3;border-left:4px solid #FEB47B;border-radius:0 10px 10px 0;padding:20px 22px;">
+              <p class="t-muted" style="margin:0 0 6px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:12px;line-height:16px;letter-spacing:1.4px;text-transform:uppercase;font-weight:700;color:#5F5F5F;">${safeCalloutTitle}</p>
+              <p class="t-dark" style="margin:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:15px;line-height:24px;color:#1E1E1E;">${safeCalloutBody}</p>
+            </td>
+          </tr>
+        </table>`
+            : ''
+        }
+        <p class="t-dark" style="margin:0 0 30px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:15px;line-height:24px;color:#1E1E1E;">You can reply directly to this email or write to <a href="mailto:hello@feyron.site" style="color:#FEB47B;text-decoration:none;font-weight:600;">hello@feyron.site</a>.</p>
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 38px 0;">
+          <tr>
+            <td class="btn-td" bgcolor="#FEB47B" style="background-color:#FEB47B;border-radius:10px;">
+              <a class="btn-a" href="${escapeHtml(ctaUrl)}" style="display:inline-block;padding:15px 30px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:20px;font-weight:700;color:#1E1E1E;text-decoration:none;border-radius:10px;">${escapeHtml(ctaLabel)}</a>
+            </td>
+          </tr>
+        </table>
+        <p class="t-dark" style="margin:0 0 6px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:26px;color:#1E1E1E;">Best regards,</p>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:18px 0 0 0;">
+          <tr>
+            <td class="rule" style="border-top:1px solid #E7E7E7;padding:24px 0 36px 0;">
+              <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td valign="top" width="36" style="width:36px;">
+                    <table role="presentation" width="36" height="36" cellpadding="0" cellspacing="0" border="0" bgcolor="#FEB47B" style="width:36px;height:36px;background-color:#FEB47B;border-radius:8px;">
+                      <tr><td height="6" style="height:6px;font-size:0;line-height:0;">&nbsp;</td></tr>
+                      <tr>
+                        <td align="center" valign="top" style="font-size:0;line-height:0;">
+                          <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr>
+                            <td width="7" height="14" bgcolor="#1E1E1E" style="width:7px;height:14px;background-color:#1E1E1E;border-radius:3px;font-size:0;line-height:0;">&nbsp;</td>
+                            <td width="6" style="width:6px;font-size:0;line-height:0;">&nbsp;</td>
+                            <td width="7" height="14" bgcolor="#1E1E1E" style="width:7px;height:14px;background-color:#1E1E1E;border-radius:3px;font-size:0;line-height:0;">&nbsp;</td>
+                          </tr></table>
+                        </td>
+                      </tr>
+                      <tr><td height="4" style="height:4px;font-size:0;line-height:0;">&nbsp;</td></tr>
+                      <tr>
+                        <td align="center" valign="top" style="font-size:0;line-height:0;">
+                          <table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td width="6" height="3" bgcolor="#1E1E1E" style="width:6px;height:3px;background-color:#1E1E1E;border-radius:2px;font-size:0;line-height:0;">&nbsp;</td></tr></table>
+                        </td>
+                      </tr>
+                      <tr><td height="9" style="height:9px;font-size:0;line-height:0;">&nbsp;</td></tr>
+                    </table>
+                  </td>
+                  <td valign="middle" style="padding-left:14px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+                    <p class="t-dark" style="margin:0;font-size:16px;line-height:22px;font-weight:700;color:#1E1E1E;">Fredy</p>
+                    <p class="t-muted" style="margin:2px 0 0 0;font-size:14px;line-height:20px;color:#5F5F5F;">Feyron Team</p>
+                    <p class="t-muted" style="margin:2px 0 0 0;font-size:14px;line-height:20px;color:#5F5F5F;"><a href="mailto:hello@feyron.site" style="color:#5F5F5F;text-decoration:none;">hello@feyron.site</a> &nbsp;|&nbsp; <a href="https://feyron.site" style="color:#5F5F5F;text-decoration:none;">feyron.site</a></p>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+    <tr>
+      <td class="px" bgcolor="#1E1E1E" style="background-color:#1E1E1E;padding:36px 40px 40px 40px;border-radius:0 0 16px 16px;">
+        <p style="margin:0 0 6px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:18px;line-height:24px;font-weight:700;letter-spacing:-0.3px;color:#FFFFFF;">Feyron</p>
+        <p style="margin:0 0 22px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:14px;line-height:22px;color:#FEB47B;">Technology that moves work forward.</p>
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 22px 0;">
+          <tr>
+            <td style="padding-right:20px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:14px;line-height:20px;"><a href="https://feyron.site" style="color:#E7E7E7;text-decoration:underline;">Website</a></td>
+            <td style="padding-right:20px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:14px;line-height:20px;"><a href="mailto:hello@feyron.site" style="color:#E7E7E7;text-decoration:underline;">Contact</a></td>
+            <td style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:14px;line-height:20px;"><a href="https://feyron.site/privacy" style="color:#E7E7E7;text-decoration:underline;">Privacy</a></td>
+          </tr>
+        </table>
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <tr>
+            <td style="border-top:1px solid #3A3A3A;padding-top:20px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:12px;line-height:19px;color:#A9A9A9;">
+              Feyron Technologies &nbsp;|&nbsp; Lagos, Nigeria<br><br>
+              You are receiving this email because you contacted Feyron at feyron.site.<br><br>
+              &copy; 2026 Feyron. AI Productivity &amp; Technology.
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</td>
+</tr>
+</table>
+</body>
+</html>`.trim();
 }
 
 // ============================================================================
@@ -1601,10 +1922,14 @@ export function verifyDashboardAuth(passcode?: string | null): boolean {
 export function getDashboardData(): {
   enquiries: EnquiryRecord[];
   bookings: BookingRecord[];
+  blockedDates: string[];
+  blockedSlots: Record<string, string[]>;
 } {
   return {
     enquiries: memoryStore.enquiries,
     bookings: memoryStore.bookings,
+    blockedDates: memoryStore.blockedDates,
+    blockedSlots: memoryStore.blockedSlots,
   };
 }
 
@@ -1630,6 +1955,10 @@ export function updateDashboardRecord(body: {
       if (body.status === 'Archived') {
         const set = bookedSlotsByDate.get(item.date);
         if (set) set.delete(item.time);
+      } else {
+        const set = bookedSlotsByDate.get(item.date) || new Set<string>();
+        set.add(item.time);
+        bookedSlotsByDate.set(item.date, set);
       }
     }
     if (typeof body.internalNotes === 'string') item.internalNotes = body.internalNotes;
@@ -1647,4 +1976,403 @@ export async function triggerBookingReminder(bookingId: string): Promise<{
   if (!item) return { ok: false, error: 'Booking record not found.' };
   return sendBookingReminderEmail(item);
 }
+
+export async function handleDashboardAction(body: any): Promise<{
+  ok: boolean;
+  error?: string;
+  message?: string;
+  booking?: BookingRecord;
+  enquiry?: EnquiryRecord;
+  blockedDates?: string[];
+  blockedSlots?: Record<string, string[]>;
+}> {
+  const action = String(body?.action || 'remind').trim();
+
+  // 1. Send session reminder
+  if (action === 'remind') {
+    return triggerBookingReminder(String(body?.id || ''));
+  }
+
+  // 2. Send custom branded Feyron email directly from the dashboard
+  if (action === 'send_email') {
+    const recipientEmail = String(body?.to || '').trim();
+    const recipientName = String(body?.recipientName || 'there').trim();
+    const subject = String(body?.subject || '').trim();
+    const eyebrow = String(body?.eyebrow || 'Feyron Follow-Up').trim();
+    const headline = String(body?.headline || 'Technology that moves work forward.').trim();
+    const messageBody = String(body?.message || '').trim();
+    const calloutTitle = String(body?.calloutTitle || '').trim();
+    const calloutBody = String(body?.calloutBody || '').trim();
+    const ctaLabel = String(body?.ctaLabel || 'Book or manage call').trim();
+    const ctaUrl = String(body?.ctaUrl || 'https://feyron.site/contact').trim();
+
+    if (!isEmailAddress(recipientEmail) || !subject || !messageBody) {
+      return {
+        ok: false,
+        error: 'Recipient email, subject, and message body are required.',
+      };
+    }
+
+    const html = buildCustomDashboardEmailHtml({
+      recipientName,
+      eyebrow,
+      headline,
+      messageBody,
+      calloutTitle,
+      calloutBody,
+      ctaLabel,
+      ctaUrl,
+    });
+
+    const sendRes = await sendEmailViaResend({
+      to: [recipientEmail],
+      subject,
+      html,
+      text: [
+        `Hi ${recipientName.split(/\s+/)[0] || recipientName},`,
+        ``,
+        messageBody,
+        calloutBody ? `\n${calloutTitle || 'Summary'}:\n${calloutBody}` : '',
+        ``,
+        `— Fredy`,
+        `Feyron Team`,
+        `https://feyron.site | hello@feyron.site`,
+      ]
+        .filter(Boolean)
+        .join('\n'),
+      replyTo: getToEmail(),
+    });
+
+    if (!sendRes.success) {
+      return { ok: false, error: sendRes.error || 'Failed to dispatch email via Resend.' };
+    }
+
+    // Automatically log sent email in record's internal notes & update status if New
+    const recordId = String(body?.recordId || '').trim();
+    const recordType = String(body?.recordType || '').trim();
+    const stamp = new Date().toISOString().slice(0, 16).replace('T', ' ');
+    const logLine = `[Email sent ${stamp}: "${subject}"]`;
+
+    if (recordType === 'booking' && recordId) {
+      const bk = memoryStore.bookings.find((b) => b.id === recordId);
+      if (bk) {
+        bk.internalNotes = bk.internalNotes ? `${bk.internalNotes}\n${logLine}` : logLine;
+        if (body?.newStatus) bk.status = body.newStatus;
+        savePersistentStore();
+      }
+    } else if (recordType === 'enquiry' && recordId) {
+      const eq = memoryStore.enquiries.find((e) => e.id === recordId);
+      if (eq) {
+        eq.internalNotes = eq.internalNotes ? `${eq.internalNotes}\n${logLine}` : logLine;
+        if (body?.newStatus) {
+          eq.status = body.newStatus;
+        } else if (eq.status === 'New') {
+          eq.status = 'Contacted';
+        }
+        savePersistentStore();
+      }
+    }
+
+    return { ok: true, message: `Branded email sent to ${recipientEmail}.` };
+  }
+
+  // 3. Reschedule a booking (frees old slot, claims new slot, updates links, optionally notifies guest)
+  if (action === 'reschedule') {
+    const id = String(body?.id || '').trim();
+    const newDate = String(body?.date || '').trim();
+    const newTime = String(body?.time || '').trim();
+    const notifyGuest = body?.notifyGuest !== false;
+
+    const bk = memoryStore.bookings.find((b) => b.id === id);
+    if (!bk) return { ok: false, error: 'Booking record not found.' };
+    if (!newDate || !newTime) {
+      return { ok: false, error: 'Please select both a new date and time.' };
+    }
+
+    if (newDate !== bk.date || newTime !== bk.time) {
+      const targetSet = bookedSlotsByDate.get(newDate) || new Set<string>();
+      if (targetSet.has(newTime)) {
+        return { ok: false, error: `Slot ${newTime} on ${newDate} is already booked.` };
+      }
+      // Free old slot
+      const oldSet = bookedSlotsByDate.get(bk.date);
+      if (oldSet) oldSet.delete(bk.time);
+      // Claim new slot
+      targetSet.add(newTime);
+      bookedSlotsByDate.set(newDate, targetSet);
+    }
+
+    const endSlotPart = calculateEndSlot(newTime, 20);
+    const formattedDate = formatHumanDate(newDate);
+    const meetingUrl = generateMeetingLink(newDate, newTime, bk.name);
+    const gcalUrl = buildGoogleCalendarTemplateUrl(
+      newDate,
+      newTime,
+      endSlotPart,
+      bk.name,
+      bk.email,
+      bk.notes,
+      meetingUrl
+    );
+    const outlookUrl = buildOutlookCalendarUrl(
+      newDate,
+      newTime,
+      endSlotPart,
+      bk.name,
+      bk.email,
+      bk.notes,
+      meetingUrl
+    );
+
+    bk.date = newDate;
+    bk.time = newTime;
+    bk.endTime = endSlotPart;
+    bk.formattedDate = formattedDate;
+    bk.meetingUrl = meetingUrl;
+    bk.gcalUrl = gcalUrl;
+    bk.outlookUrl = outlookUrl;
+    bk.status = 'Audit Scheduled';
+    bk.reminderSent = false;
+    const stamp = new Date().toISOString().slice(0, 16).replace('T', ' ');
+    bk.internalNotes = bk.internalNotes
+      ? `${bk.internalNotes}\n[Rescheduled ${stamp} to ${formattedDate} at ${newTime} WAT]`
+      : `[Rescheduled ${stamp} to ${formattedDate} at ${newTime} WAT]`;
+    savePersistentStore();
+
+    if (notifyGuest && isEmailAddress(bk.email)) {
+      const icsContent = buildIcsCalendarInvite(
+        newDate,
+        newTime,
+        endSlotPart,
+        bk.name,
+        bk.email,
+        bk.notes,
+        meetingUrl
+      );
+      const icsBase64 = Buffer.from(icsContent, 'utf-8').toString('base64');
+      const guestHtml = buildBookingConfirmationHtml({
+        fullName: bk.name,
+        email: bk.email,
+        notes: bk.notes,
+        dateStr: newDate,
+        slotStr: newTime,
+        endSlotStr: endSlotPart,
+        formattedDate,
+        meetingUrl,
+        gcalUrl,
+        outlookUrl,
+        clientTimeLabel: '',
+        rescheduleUrl: 'https://feyron.site/contact',
+      });
+      await sendEmailViaResend({
+        to: [bk.email],
+        subject: `Updated time: Your call with Feyron — ${formattedDate} (${newTime} WAT)`,
+        html: guestHtml,
+        text: `Hi ${bk.name},\n\nYour 20-minute call with Feyron has been rescheduled to ${formattedDate} at ${newTime} WAT.\nJoin Video Meeting: ${meetingUrl}\nAdd to Google Calendar: ${gcalUrl}\n\n— Fredy\nFeyron Team`,
+        replyTo: getToEmail(),
+        attachments: [
+          {
+            filename: 'feyron-call-updated.ics',
+            content: icsBase64,
+            content_type: 'text/calendar; charset=utf-8; method=REQUEST',
+          },
+        ],
+      }).catch(() => {});
+    }
+
+    return {
+      ok: true,
+      message: `Booking moved to ${formattedDate} at ${newTime} WAT.`,
+      booking: bk,
+    };
+  }
+
+  // 4. Cancel a booking (frees slot on public calendar and marks Archived)
+  if (action === 'cancel') {
+    const id = String(body?.id || '').trim();
+    const notifyGuest = Boolean(body?.notifyGuest);
+    const bk = memoryStore.bookings.find((b) => b.id === id);
+    if (!bk) return { ok: false, error: 'Booking record not found.' };
+
+    const set = bookedSlotsByDate.get(bk.date);
+    if (set) set.delete(bk.time);
+    bk.status = 'Archived';
+    const stamp = new Date().toISOString().slice(0, 16).replace('T', ' ');
+    bk.internalNotes = bk.internalNotes
+      ? `${bk.internalNotes}\n[Slot cancelled & freed ${stamp}]`
+      : `[Slot cancelled & freed ${stamp}]`;
+    savePersistentStore();
+
+    if (notifyGuest && isEmailAddress(bk.email)) {
+      const cancelHtml = buildCustomDashboardEmailHtml({
+        recipientName: bk.name,
+        eyebrow: 'Call Update',
+        headline: 'Your call slot has been cancelled.',
+        subheadline: 'You can pick a new time whenever works best for your schedule.',
+        messageBody: `We have cancelled your scheduled 20-minute call on ${bk.formattedDate} at ${bk.time} WAT as requested.\n\nWhenever you are ready to pick a new time, you can book directly on our calendar using the link below.`,
+        ctaLabel: 'Pick a new time',
+        ctaUrl: 'https://feyron.site/contact',
+      });
+      await sendEmailViaResend({
+        to: [bk.email],
+        subject: `Cancelled: Your call with Feyron (${bk.formattedDate})`,
+        html: cancelHtml,
+        text: `Hi ${bk.name},\n\nWe have cancelled your scheduled call on ${bk.formattedDate} at ${bk.time} WAT.\nYou can book a new time whenever convenient at https://feyron.site/contact.\n\n— Fredy\nFeyron Team`,
+        replyTo: getToEmail(),
+      }).catch(() => {});
+    }
+
+    return { ok: true, message: 'Call slot cancelled and freed on calendar.', booking: bk };
+  }
+
+  // 5. Delete a booking or enquiry record permanently
+  if (action === 'delete') {
+    const id = String(body?.id || '').trim();
+    const type = String(body?.type || '').trim();
+    if (type === 'booking') {
+      const idx = memoryStore.bookings.findIndex((b) => b.id === id);
+      if (idx === -1) return { ok: false, error: 'Booking record not found.' };
+      const removed = memoryStore.bookings[idx];
+      const set = bookedSlotsByDate.get(removed.date);
+      if (set) set.delete(removed.time);
+      memoryStore.bookings.splice(idx, 1);
+      savePersistentStore();
+      return { ok: true, message: 'Booking deleted and calendar slot freed.' };
+    }
+    if (type === 'enquiry') {
+      const idx = memoryStore.enquiries.findIndex((e) => e.id === id);
+      if (idx === -1) return { ok: false, error: 'Enquiry record not found.' };
+      memoryStore.enquiries.splice(idx, 1);
+      savePersistentStore();
+      return { ok: true, message: 'Enquiry record deleted.' };
+    }
+    return { ok: false, error: 'Invalid record type to delete.' };
+  }
+
+  // 6. Block or unblock full dates or specific time slots
+  if (
+    action === 'block_date' ||
+    action === 'unblock_date' ||
+    action === 'block_slot' ||
+    action === 'unblock_slot'
+  ) {
+    const dateStr = String(body?.date || '').trim();
+    const slotStr = String(body?.slot || '').trim();
+    if (!dateStr) return { ok: false, error: 'Date (YYYY-MM-DD) is required.' };
+
+    if (action === 'block_date') {
+      if (!memoryStore.blockedDates.includes(dateStr)) {
+        memoryStore.blockedDates.push(dateStr);
+        memoryStore.blockedDates.sort();
+      }
+    } else if (action === 'unblock_date') {
+      memoryStore.blockedDates = memoryStore.blockedDates.filter((d) => d !== dateStr);
+    } else if (action === 'block_slot') {
+      if (!slotStr) return { ok: false, error: 'Time slot (HH:MM) is required.' };
+      const list = Array.isArray(memoryStore.blockedSlots[dateStr])
+        ? memoryStore.blockedSlots[dateStr]
+        : [];
+      if (!list.includes(slotStr)) {
+        list.push(slotStr);
+        list.sort();
+      }
+      memoryStore.blockedSlots[dateStr] = list;
+    } else if (action === 'unblock_slot') {
+      if (Array.isArray(memoryStore.blockedSlots[dateStr])) {
+        memoryStore.blockedSlots[dateStr] = memoryStore.blockedSlots[dateStr].filter(
+          (s) => s !== slotStr
+        );
+        if (memoryStore.blockedSlots[dateStr].length === 0) {
+          delete memoryStore.blockedSlots[dateStr];
+        }
+      }
+    }
+
+    savePersistentStore();
+    return {
+      ok: true,
+      blockedDates: memoryStore.blockedDates,
+      blockedSlots: memoryStore.blockedSlots,
+    };
+  }
+
+  // 7. Create a manual booking from the Team Dashboard
+  if (action === 'create_booking') {
+    const sendConfirmation = body?.sendConfirmation !== false;
+    const res = await handleBookingSubmission({
+      name: body?.name,
+      email: body?.email,
+      notes: body?.notes,
+      date: body?.date,
+      time: body?.time,
+      source: 'dashboard',
+      skipEmails: !sendConfirmation,
+      bypassBlockedCheck: true,
+    });
+    if (!res.body.ok) {
+      return { ok: false, error: res.body.error || 'Could not create booking.' };
+    }
+    return {
+      ok: true,
+      message: sendConfirmation
+        ? 'Booking created and confirmation email sent.'
+        : 'Booking logged without sending email.',
+      booking: res.body.booking,
+    };
+  }
+
+  // 8. Create a manual enquiry / lead from the Team Dashboard
+  if (action === 'create_enquiry') {
+    const name = String(body?.name || '').trim();
+    const email = String(body?.email || '').trim();
+    const company = String(body?.company || '').trim();
+    const interestKey = String(body?.interest || 'ai-automation').trim();
+    const interest = INTEREST_LABELS[interestKey] || interestKey || 'AI Automation';
+    const details = String(body?.details || '').trim();
+    const sendAutoResponder = Boolean(body?.sendAutoResponder);
+
+    if (!name || !isEmailAddress(email)) {
+      return { ok: false, error: 'Name and a valid email address are required.' };
+    }
+
+    const enquiryRecord: EnquiryRecord = {
+      id: `eq-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      name,
+      email,
+      company: company || 'Not specified',
+      interest,
+      details: details || 'Logged manually by Feyron Team.',
+      source: 'Team Dashboard',
+      status: (body?.status as LeadStatus) || 'New',
+      internalNotes: String(body?.internalNotes || '').trim(),
+      createdAt: new Date().toISOString(),
+    };
+    recordEnquiry(enquiryRecord);
+
+    if (sendAutoResponder) {
+      const visitorHtml = buildContactAutoResponderHtml({
+        fullName: name,
+        interest,
+        company,
+        details: enquiryRecord.details,
+      });
+      await sendEmailViaResend({
+        to: [email],
+        subject: `Thank you for reaching out — Feyron`,
+        html: visitorHtml,
+        text: `Hi ${name},\n\nThank you for reaching out to Feyron regarding ${interest}. Our team reviews every enquiry directly and will reply within one working day with practical next steps.\n\n— Fredy\nFeyron Team`,
+        replyTo: getToEmail(),
+      }).catch(() => {});
+    }
+
+    return {
+      ok: true,
+      message: 'Enquiry lead created.',
+      enquiry: enquiryRecord,
+    };
+  }
+
+  return { ok: false, error: `Unknown dashboard action: ${action}` };
+}
+
 

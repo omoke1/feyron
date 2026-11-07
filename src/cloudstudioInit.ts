@@ -234,6 +234,32 @@ function setupPostMountEnhancements() {
     tickParallax();
   }
 
+  // 2b. Selected Work division filter tabs
+  const workFilterBtns = Array.from(
+    document.querySelectorAll('#cs-work-filters [data-work-filter]')
+  ) as HTMLElement[];
+  if (workFilterBtns.length > 0) {
+    workFilterBtns.forEach((btn) => {
+      btn.onclick = () => {
+        const selected = btn.getAttribute('data-work-filter') || 'all';
+        workFilterBtns.forEach((b) => {
+          const isCurrent = (b.getAttribute('data-work-filter') || 'all') === selected;
+          b.style.background = isCurrent ? 'var(--ink, #1E1E1E)' : 'var(--paper, #E7E7E7)';
+          b.style.color = isCurrent ? 'var(--accent, #D4F534)' : 'var(--ink, #1E1E1E)';
+        });
+
+        const workCards = Array.from(
+          document.querySelectorAll('.cs-wgrid > a[data-work-cat]')
+        ) as HTMLElement[];
+        workCards.forEach((card) => {
+          const cat = card.getAttribute('data-work-cat') || '';
+          const match = selected === 'all' || cat === selected;
+          card.style.display = match ? '' : 'none';
+        });
+      };
+    });
+  }
+
   // 3. Interactive Lottie & Physics Pill harmonic sound triggers
   document.querySelectorAll('#cs-physics-box [data-pill]').forEach((pill, i) => {
     pill.addEventListener('pointerdown', () => {

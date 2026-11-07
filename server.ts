@@ -7,6 +7,7 @@ import {
   getDashboardData,
   handleBookingSubmission,
   handleContactSubmission,
+  handleDashboardAction,
   triggerBookingReminder,
   updateDashboardRecord,
   verifyDashboardAuth,
@@ -79,6 +80,21 @@ async function startServer() {
     }
     const result = updateDashboardRecord(req.body || {});
     res.status(result.ok ? 200 : 400).json(result);
+  });
+
+  app.post('/api/dashboard', async (req, res) => {
+    const passcode = String(req.headers['x-feyron-passcode'] || req.body?.passcode || '');
+    if (!verifyDashboardAuth(passcode)) {
+      res.status(401).json({ ok: false, error: 'Invalid access code.' });
+      return;
+    }
+    try {
+      const result = await handleDashboardAction(req.body || {});
+      res.status(result.ok ? 200 : 400).json(result);
+    } catch (err) {
+      console.error('POST /api/dashboard error:', err);
+      res.status(500).json({ ok: false, error: 'Dashboard action failed.' });
+    }
   });
 
   app.post('/api/dashboard/remind', async (req, res) => {

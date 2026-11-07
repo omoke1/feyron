@@ -68,6 +68,7 @@ html{background:var(--bg)}
   --ok:#4ADE80;
   --org-a:#2d3612; --org-b:#0A0A0A;
   --org-glow-a:#e7f890; --org-glow-b:#D4F534;
+  --cs-portfolio-hue:0deg;
 }
 :root[data-theme="cielo"]{
   --bg:#818CF8; --bg-rgb:129,140,248;
@@ -76,6 +77,7 @@ html{background:var(--bg)}
   --ink-soft:#252845; --ink-mute:#686c8f;
   --org-a:#1e2246; --org-b:#0A0A0A;
   --org-glow-a:#c7d2fe; --org-glow-b:#60A5FA;
+  --cs-portfolio-hue:144deg;
 }
 :root[data-theme="electrico"]{
   --bg:#E7E7E7; --bg-rgb:231,231,231;
@@ -84,6 +86,7 @@ html{background:var(--bg)}
   --ink-soft:#333333; --ink-mute:#737373;
   --org-a:#2d3612; --org-b:#0A0A0A;
   --org-glow-a:#D4F534; --org-glow-b:#5A8D0E;
+  --cs-portfolio-hue:0deg;
 }
 #cs-physics-box, #cs-physics-box *{user-select:none;-webkit-user-select:none}
 #cs-physics-box [data-pill]{cursor:grab}
@@ -98,6 +101,7 @@ html{background:var(--bg)}
   --ink-soft:#42231b; --ink-mute:#8f655b;
   --org-a:#3f1b13; --org-b:#0A0A0A;
   --org-glow-a:#fecdd3; --org-glow-b:#FF7E5F;
+  --cs-portfolio-hue:-61deg;
 }
 :root[data-theme="menta"]{
   --bg:#4ADE80; --bg-rgb:74,222,128;
@@ -106,6 +110,7 @@ html{background:var(--bg)}
   --ink-soft:#1c3d28; --ink-mute:#5c856b;
   --org-a:#143822; --org-b:#0A0A0A;
   --org-glow-a:#bbf7d0; --org-glow-b:#4ADE80;
+  --cs-portfolio-hue:69deg;
 }
 :root[data-theme="rosa"]{
   --bg:#C084FC; --bg-rgb:192,132,252;
@@ -114,6 +119,7 @@ html{background:var(--bg)}
   --ink-soft:#352246; --ink-mute:#7e6691;
   --org-a:#321d46; --org-b:#0A0A0A;
   --org-glow-a:#e9d5ff; --org-glow-b:#C084FC;
+  --cs-portfolio-hue:197deg;
 }
 :root[data-theme="melocoton"]{
   --bg:#FEB47B; --bg-rgb:254,180,123;
@@ -122,6 +128,7 @@ html{background:var(--bg)}
   --ink-soft:#402e20; --ink-mute:#8c7462;
   --org-a:#3d2614; --org-b:#0A0A0A;
   --org-glow-a:#fed7aa; --org-glow-b:#FEB47B;
+  --cs-portfolio-hue:-47deg;
 }
 :root[data-theme="hielo"]{
   --bg:#67E8F9; --bg-rgb:103,232,249;
@@ -130,6 +137,7 @@ html{background:var(--bg)}
   --ink-soft:#1e3a40; --ink-mute:#5c7c85;
   --org-a:#163840; --org-b:#0A0A0A;
   --org-glow-a:#a5f3fc; --org-glow-b:#22D3EE;
+  --cs-portfolio-hue:115deg;
 }
 
 [data-item] img{filter:grayscale(1) contrast(1.06) brightness(1.03);transition:filter .5s ease}
@@ -137,7 +145,7 @@ html{background:var(--bg)}
 [data-item]:hover [data-tint]{opacity:0}
 .cs-wgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px;padding:0;background:var(--ink)}
 .cs-wgrid>*{cursor:none;position:relative;display:block;overflow:hidden;aspect-ratio:16/10;background:var(--ink);text-decoration:none;color:#fff}
-.cs-wgrid .wimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:saturate(1.06) contrast(1.05);transform:translateY(var(--py,0)) scale(1.09);transition:filter .55s ease,transform .9s cubic-bezier(.16,1,.3,1);will-change:transform}
+.cs-wgrid .wimg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:hue-rotate(var(--cs-portfolio-hue,0deg)) saturate(1.06) contrast(1.05);transform:translateY(var(--py,0)) scale(1.09);transition:filter .55s ease,transform .9s cubic-bezier(.16,1,.3,1);will-change:transform}
 /* spotlight: every plate is alive at rest — hovering one steps the others back */
 .cs-wgrid:hover>*:not(:hover) .wimg{filter:grayscale(1) contrast(1.04) brightness(.78)}
 .cs-wgrid:hover>*:not(:hover) .wtint{opacity:.5}
@@ -895,111 +903,109 @@ try {
   </section>
 
   <!-- SELECTED WORK — full-bleed grid -->
-  <section data-screen-label="Selected work" style="background:var(--bg);padding:clamp(60px,9vw,140px) 0;overflow:hidden">
+  <section id="selected-work" data-screen-label="Selected work" style="background:var(--bg);padding:clamp(60px,9vw,140px) 0;overflow:hidden">
     <div style="max-width:1320px;margin:0 auto;padding:0 clamp(18px,4vw,44px)">
-      <div data-reveal="" style="opacity:0;transform:translateY(26px);transition:transform .8s cubic-bezier(.16,1,.3,1);display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:20px;margin-bottom:clamp(30px,4vw,56px)">
-        <h2 style="margin:0;font-weight:700;font-size:clamp(2.2rem,5.6vw,5rem);line-height:.96;letter-spacing:-.035em"><span style="display:inline-block;overflow:hidden;vertical-align:top"><span data-reveal="" data-reveal-delay="0" style="display:inline-block;transform:translateY(110%);transition:transform .8s cubic-bezier(.16,1,.3,1)">Selected</span></span> <span style="display:inline-block;overflow:hidden;vertical-align:top"><span data-reveal="" data-reveal-delay="80" style="display:inline-block;transform:translateY(110%);transition:transform .8s cubic-bezier(.16,1,.3,1)">work</span></span></h2>
-        <span style="font-family:'Geist Mono',monospace;font-size:13px;font-weight:500;max-width:300px;text-align:right">Real products we shipped — the list keeps growing</span>
+      <div data-reveal="" style="opacity:0;transform:translateY(26px);transition:transform .8s cubic-bezier(.16,1,.3,1);display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;gap:20px;margin-bottom:clamp(24px,3vw,36px)">
+        <div>
+          <div style="font-family:'Geist Mono',monospace;font-size:12.5px;letter-spacing:.14em;text-transform:uppercase;margin-bottom:14px">Portfolio · Selected Client Work</div>
+          <h2 style="margin:0;font-weight:700;font-size:clamp(2.2rem,5.6vw,5rem);line-height:.96;letter-spacing:-.035em"><span style="display:inline-block;overflow:hidden;vertical-align:top"><span data-reveal="" data-reveal-delay="0" style="display:inline-block;transform:translateY(110%);transition:transform .8s cubic-bezier(.16,1,.3,1)">Selected</span></span> <span style="display:inline-block;overflow:hidden;vertical-align:top"><span data-reveal="" data-reveal-delay="80" style="display:inline-block;transform:translateY(110%);transition:transform .8s cubic-bezier(.16,1,.3,1)">work</span></span></h2>
+        </div>
+        <span style="font-family:'Geist Mono',monospace;font-size:13px;font-weight:600;max-width:360px;text-align:right">Websites, platforms and automated systems we designed, built and shipped</span>
+      </div>
+
+      <div id="cs-work-filters" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:clamp(24px,3vw,40px)">
+        <button type="button" data-work-filter="all" style="cursor:pointer;font-family:'Geist Mono',monospace;font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:10px 18px;border-radius:100px;border:2px solid var(--ink);background:var(--ink);color:var(--accent)">All Work (06)</button>
+        <button type="button" data-work-filter="ai-automation" style="cursor:pointer;font-family:'Geist Mono',monospace;font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:10px 18px;border-radius:100px;border:2px solid var(--ink);background:var(--paper);color:var(--ink)">AI Automation</button>
+        <button type="button" data-work-filter="websites-platforms" style="cursor:pointer;font-family:'Geist Mono',monospace;font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:10px 18px;border-radius:100px;border:2px solid var(--ink);background:var(--paper);color:var(--ink)">Websites &amp; Platforms</button>
+        <button type="button" data-work-filter="integrations-payments" style="cursor:pointer;font-family:'Geist Mono',monospace;font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:10px 18px;border-radius:100px;border:2px solid var(--ink);background:var(--paper);color:var(--ink)">Integrations &amp; Payments</button>
       </div>
     </div>
 
     <div class="cs-wgrid">
 
-      <a href="/work/agents" data-cursor-label="case study" data-reveal="" style="opacity:0;transform:translateY(30px);transition:transform .8s cubic-bezier(.16,1,.3,1)">
-        <img class="wimg" src="/site/assets/work/agents.webp" alt="Cloudstudio Agents — AI workers platform" loading="lazy">
+      <a href="/work/froodi" data-work-cat="ai-automation" data-cursor-label="view project" data-reveal="" style="opacity:0;transform:translateY(30px);transition:transform .8s cubic-bezier(.16,1,.3,1)">
+        <img class="wimg" src="/site/assets/work/portfolio-froodi.jpg" alt="Froodi — Automated order dispatch, live rider routing, and merchant payouts" loading="lazy">
         <div class="wtint"></div>
         <div class="wgrad"></div>
-        <span class="wix">01</span>
+        <span class="wix">01 · Logistics &amp; Dispatch Platform</span>
         <span class="wgo">↗</span>
-        <span class="wfloat" style="--t:24%;--l:7%;--r:-3deg" data-wfloat="-0.14"><i><b></b>Engine online</i></span>
-        <span class="wfloat wfloat--2" style="--t:56%;--l:64%;--r:2deg" data-wfloat="-0.08"><i>$0.0142 / run</i></span>
         <div class="wcap">
-          <div><span class="wname">Agents</span><span class="wtag">AI workers · Orchestration</span></div>
-          <div class="wstat"><b><span data-count="100">0</span></b><span>avg run score · 474 runs</span></div>
+          <div><span class="wname">Froodi</span><span class="wtag">Order Dispatch · Rider Routing · Vendor Payouts</span></div>
+          <div class="wstat"><b><span data-count="42">0</span>s</b><span>avg dispatch time</span></div>
         </div>
       </a>
 
-      <a href="/work/moneyincheck" data-cursor-label="case study" data-reveal="" data-reveal-delay="80" style="opacity:0;transform:translateY(30px);transition:transform .8s cubic-bezier(.16,1,.3,1)">
-        <img class="wimg" src="/site/assets/work/moneyincheck.webp" alt="Money in Check — interactive editorial site for the novel by Óscar Pérez" loading="lazy">
+      <a href="/work/qreva" data-work-cat="integrations-payments" data-cursor-label="view project" data-reveal="" data-reveal-delay="80" style="opacity:0;transform:translateY(30px);transition:transform .8s cubic-bezier(.16,1,.3,1)">
+        <img class="wimg" src="/site/assets/work/portfolio-qreva.jpg" alt="Qreva — Social commerce storefront and instant payment verification" loading="lazy">
         <div class="wtint"></div>
         <div class="wgrad"></div>
-        <span class="wix">02</span>
+        <span class="wix">02 · Fintech &amp; Social Commerce</span>
         <span class="wgo">↗</span>
-        <span class="wfloat" style="--t:20%;--l:6%;--r:-2deg" data-wfloat="-0.13"><i>1. e4 — the brief</i></span>
-        <span class="wfloat wfloat--2" style="--t:62%;--l:70%;--r:2deg" data-wfloat="-0.07"><i>Qxf7# — shipped</i></span>
         <div class="wcap">
-          <div><span class="wname">Money in Check</span><span class="wtag">Editorial · Interactive</span></div>
-          <div class="wstat"><b><span data-count="2026">0</span></b><span>edition · The Invisible Rules of Wealth</span></div>
+          <div><span class="wname">Qreva</span><span class="wtag">Storefront · Instant Checkout · Payment Webhooks</span></div>
+          <div class="wstat"><b>+<span data-count="38">0</span>%</b><span>checkout conversion</span></div>
         </div>
       </a>
 
-      <a href="/work/phopet" data-cursor-label="case study" data-reveal="" data-reveal-delay="120" style="opacity:0;transform:translateY(30px);transition:transform .8s cubic-bezier(.16,1,.3,1)">
-        <img class="wimg" src="/site/assets/work/phopet.webp" alt="Phopet — AI pet portrait studio" loading="lazy">
+      <a href="/work/phovify" data-work-cat="ai-automation" data-cursor-label="view project" data-reveal="" data-reveal-delay="120" style="opacity:0;transform:translateY(30px);transition:transform .8s cubic-bezier(.16,1,.3,1)">
+        <img class="wimg" src="/site/assets/work/portfolio-phovify.jpg" alt="Phovify & WaCRM — WhatsApp CRM and client booking portal" loading="lazy">
         <div class="wtint"></div>
         <div class="wgrad"></div>
-        <span class="wix">03</span>
+        <span class="wix">03 · CRM &amp; Booking Platform</span>
         <span class="wgo">↗</span>
-        <span class="wfloat" style="--t:24%;--l:7%;--r:-3deg" data-wfloat="-0.12"><i>50 photos · 9.90€</i></span>
-        <span class="wfloat wfloat--2" style="--t:56%;--l:68%;--r:2deg" data-wfloat="-0.07"><i>40+ albums</i></span>
         <div class="wcap">
-          <div><span class="wname">Phopet</span><span class="wtag">AI agents · Image gen</span></div>
-          <div class="wstat"><b><span data-count="10">0</span>K+</b><span>images processed</span></div>
+          <div><span class="wname">Phovify &amp; WaCRM</span><span class="wtag">WhatsApp Pipeline · Booking &amp; Deposits</span></div>
+          <div class="wstat"><b>+<span data-count="64">0</span>%</b><span>qualified bookings</span></div>
         </div>
       </a>
 
-      <a href="/work/workee" data-cursor-label="case study" data-reveal="" data-reveal-delay="160" style="opacity:0;transform:translateY(30px);transition:transform .8s cubic-bezier(.16,1,.3,1)">
-        <img class="wimg" src="/site/assets/work/workee.webp" alt="Workee — AI staffing coverage platform" loading="lazy">
+      <a href="/work/flowpay" data-work-cat="integrations-payments" data-cursor-label="view project" data-reveal="" data-reveal-delay="160" style="opacity:0;transform:translateY(30px);transition:transform .8s cubic-bezier(.16,1,.3,1)">
+        <img class="wimg" src="/site/assets/work/portfolio-flowpay.jpg" alt="FlowPay — Multi-currency invoicing and treasury reconciliation" loading="lazy">
         <div class="wtint"></div>
         <div class="wgrad"></div>
-        <span class="wix">04</span>
+        <span class="wix">04 · B2B Billing &amp; Treasury</span>
         <span class="wgo">↗</span>
-        <span class="wfloat" style="--t:22%;--l:7%;--r:-2deg" data-wfloat="-0.13"><i><b></b>Cobertura cerrada</i></span>
-        <span class="wfloat wfloat--2" style="--t:60%;--l:64%;--r:2deg" data-wfloat="-0.07"><i>0,8 km · sin conflicto</i></span>
         <div class="wcap">
-          <div><span class="wname">Workee</span><span class="wtag">AI matching · Staffing</span></div>
-          <div class="wstat"><b><span data-count="5">0</span></b><span>signals per match · AI-ranked</span></div>
+          <div><span class="wname">FlowPay</span><span class="wtag">Multi-Currency Invoicing · Auto-Reconciliation</span></div>
+          <div class="wstat"><b><span data-count="94">0</span>%</b><span>auto-matched payments</span></div>
         </div>
       </a>
 
-      <a href="/work/firevalle" data-cursor-label="case study" data-reveal="" data-reveal-delay="200" style="opacity:0;transform:translateY(30px);transition:transform .8s cubic-bezier(.16,1,.3,1)">
-        <img class="wimg" src="/site/assets/work/firevalle.webp" alt="Firevalle — FIRE app where your net worth is a low-poly valley" loading="lazy">
+      <a href="/work/propledger" data-work-cat="websites-platforms" data-cursor-label="view project" data-reveal="" data-reveal-delay="200" style="opacity:0;transform:translateY(30px);transition:transform .8s cubic-bezier(.16,1,.3,1)">
+        <img class="wimg" src="/site/assets/work/portfolio-propledger.jpg" alt="PropLedger Estates — Property management and service-charge portal" loading="lazy">
         <div class="wtint"></div>
         <div class="wgrad"></div>
-        <span class="wix">05</span>
+        <span class="wix">05 · PropTech &amp; Facility Portal</span>
         <span class="wgo">↗</span>
-        <span class="wfloat" style="--t:22%;--l:6%;--r:-3deg" data-wfloat="-0.13"><i><b></b>Paseo de hoy · racha 6</i></span>
-        <span class="wfloat wfloat--2" style="--t:58%;--l:66%;--r:2deg" data-wfloat="-0.07"><i>104.800 € cultivados</i></span>
         <div class="wcap">
-          <div><span class="wname">Firevalle</span><span class="wtag">iOS app · 3D product</span></div>
-          <div class="wstat"><b><span data-count="0">0</span></b><span>bytes of your data leave the phone</span></div>
+          <div><span class="wname">PropLedger Estates</span><span class="wtag">Lease Ledger · Service Charges · Maintenance</span></div>
+          <div class="wstat"><b>+<span data-count="46">0</span>%</b><span>on-time collection</span></div>
         </div>
       </a>
 
-      <a href="/work/hq" data-cursor-label="case study" data-reveal="" data-reveal-delay="220" style="opacity:0;transform:translateY(30px);transition:transform .8s cubic-bezier(.16,1,.3,1)">
-        <img class="wimg" src="/site/assets/work/hq.webp" alt="HQ — a whole infrastructure as a low-poly colony on Mars" loading="lazy">
+      <a href="/work/workverify" data-work-cat="websites-platforms" data-cursor-label="view project" data-reveal="" data-reveal-delay="220" style="opacity:0;transform:translateY(30px);transition:transform .8s cubic-bezier(.16,1,.3,1)">
+        <img class="wimg" src="/site/assets/work/portfolio-workverify.jpg" alt="WorkVerify & MintNG — Employee onboarding and identity verification portal" loading="lazy">
         <div class="wtint"></div>
         <div class="wgrad"></div>
-        <span class="wix">06</span>
+        <span class="wix">06 · HR Tech &amp; Compliance</span>
         <span class="wgo">↗</span>
-        <span class="wfloat" style="--t:20%;--l:7%;--r:-2deg" data-wfloat="-0.12"><i><b></b>Coolify · connection refused</i></span>
-        <span class="wfloat wfloat--2" style="--t:60%;--l:63%;--r:3deg" data-wfloat="-0.07"><i>TLS expires in 12 days</i></span>
         <div class="wcap">
-          <div><span class="wname">HQ</span><span class="wtag">Real-time monitor · WebGL</span></div>
-          <div class="wstat"><b><span data-count="0">0</span></b><span>buildings without real data behind them</span></div>
+          <div><span class="wname">WorkVerify &amp; MintNG</span><span class="wtag">Employee Onboarding · KYC Verification</span></div>
+          <div class="wstat"><b><span data-count="14">0</span>m</b><span>end-to-end onboarding</span></div>
         </div>
       </a>
 
       <a href="#contact" data-lead="" class="wmore" data-cursor-label="book a call" data-reveal="" data-reveal-delay="240" style="opacity:0;transform:translateY(30px);transition:transform .8s cubic-bezier(.16,1,.3,1)">
         <div class="wmore__fill"></div>
-        <span class="wix">( next )</span>
+        <span class="wix">( next project )</span>
         <span class="wgo">&#8599;</span>
         <div class="wmore__in">
-          <span class="wmore__k">Slot 06 &#183; open</span>
-          <p class="wmore__h">Your product<br>on this wall.</p>
+          <span class="wmore__k">Fixed scope &#183; Clear timeline</span>
+          <p class="wmore__h">Your system<br>built to ship.</p>
         </div>
         <div class="wcap">
-          <div><span class="wname">Book a call</span><span class="wtag">Fixed scope &#183; live in weeks</span></div>
-          <div class="wstat"><b>30&#8202;<span style="font-size:.52em">min</span></b><span>and you'll know if it's buildable</span></div>
+          <div><span class="wname">Book a 20-min call</span><span class="wtag">Audit &#183; Design &#183; Build &#183; Launch</span></div>
+          <div class="wstat"><b>20&#8202;<span style="font-size:.52em">min</span></b><span>and you'll have a clear plan</span></div>
         </div>
       </a>
 

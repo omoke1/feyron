@@ -1,21 +1,46 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 750">
-    <rect width="1200" height="750" fill="#161b18"/>
-    <rect x="130" y="95" width="940" height="515" rx="24" fill="#1E1E1E" stroke="rgba(74,222,128,0.35)" stroke-width="2"/>
-    <text x="180" y="155" fill="#4ADE80" font-family="monospace" font-size="13" font-weight="700" letter-spacing="2">PHOVIFY (WACRM) · WHATSAPP CRM &amp; PIPELINE AUTOMATION</text>
-    <text x="180" y="208" fill="#FFFFFF" font-family="sans-serif" font-size="38" font-weight="800">Shared Inbox, Sales Pipelines &amp; Auto-Broadcasts</text>
-    <rect x="180" y="250" width="265" height="285" rx="16" fill="#252926" stroke="rgba(255,255,255,0.12)"/>
-    <text x="205" y="288" fill="#4ADE80" font-family="monospace" font-size="12">STAGE 01 · NEW LEADS (28)</text>
-    <rect x="205" y="310" width="215" height="82" rx="12" fill="#1b1e1c"/>
-    <text x="222" y="342" fill="#FFF" font-family="sans-serif" font-size="16" font-weight="700">Inbound WhatsApp</text>
-    <text x="222" y="368" fill="#9ca39f" font-family="monospace" font-size="12">Auto-tagged &amp; assigned</text>
-    <rect x="468" y="250" width="265" height="285" rx="16" fill="#252926" stroke="rgba(254,180,123,0.3)"/>
-    <text x="493" y="288" fill="#FEB47B" font-family="monospace" font-size="12">STAGE 02 · QUALIFIED (14)</text>
-    <rect x="493" y="310" width="215" height="82" rx="12" fill="#1b1e1c"/>
-    <text x="510" y="342" fill="#FFF" font-family="sans-serif" font-size="16" font-weight="700">No-Code Flow Active</text>
-    <text x="510" y="368" fill="#9ca39f" font-family="monospace" font-size="12">Quote + booking sent</text>
-    <rect x="756" y="250" width="265" height="285" rx="16" fill="#252926" stroke="rgba(192,132,252,0.3)"/>
-    <text x="781" y="288" fill="#C084FC" font-family="monospace" font-size="12">STAGE 03 · CLOSED WON</text>
-    <rect x="781" y="310" width="215" height="82" rx="12" fill="#1b1e1c"/>
-    <text x="798" y="342" fill="#FFF" font-family="sans-serif" font-size="16" font-weight="700">Payment Confirmed</text>
-    <text x="798" y="368" fill="#9ca39f" font-family="monospace" font-size="12">Synced to CRM &amp; ERP</text>
-  </svg>
+  <defs>
+    <pattern id="grid-phovify" width="40" height="40" patternUnits="userSpaceOnUse">
+      <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(212,245,52,0.08)" stroke-width="1"/>
+    </pattern>
+  </defs>
+  <rect width="1200" height="750" fill="#141413"/>
+  <rect width="1200" height="750" fill="url(#grid-phovify)"/>
+  <rect x="90" y="75" width="1020" height="540" rx="22" fill="#1E1E1E" stroke="#D4F534" stroke-width="2.5"/>
+  <rect x="90" y="75" width="1020" height="54" rx="22" fill="#262624"/>
+  <text x="130" y="108" fill="#D4F534" font-family="monospace" font-size="13" font-weight="700" letter-spacing="2">03 · PHOVIFY (WACRM) · WHATSAPP CRM &amp; SALES PIPELINE ENGINE</text>
+  <rect x="895" y="88" width="185" height="28" rx="14" fill="#D4F534"/>
+  <text x="920" y="107" fill="#1E1E1E" font-family="monospace" font-size="12" font-weight="700">REPLY UNDER 3 SEC</text>
+
+  <!-- Column 1 -->
+  <rect x="130" y="165" width="295" height="405" rx="18" fill="#252522" stroke="#E7E7E7" stroke-width="2"/>
+  <text x="158" y="206" fill="#D4F534" font-family="monospace" font-size="12" font-weight="700">01 · INBOUND WHATSAPP (42)</text>
+  <rect x="158" y="232" width="239" height="110" rx="14" fill="#161614" stroke="rgba(231,231,231,0.2)"/>
+  <text x="178" y="268" fill="#FFFFFF" font-family="sans-serif" font-size="17" font-weight="800">Lead Captured &amp; Tagged</text>
+  <text x="178" y="296" fill="#CFCFC4" font-family="monospace" font-size="12">Intent extracted · Owner assigned</text>
+  <text x="178" y="322" fill="#D4F534" font-family="monospace" font-size="12">Zero missed chats</text>
+  <rect x="158" y="362" width="239" height="90" rx="14" fill="#161614"/>
+  <text x="178" y="400" fill="#FFFFFF" font-family="sans-serif" font-size="16" font-weight="700">Shared Team Inbox</text>
+  <text x="178" y="426" fill="#CFCFC4" font-family="monospace" font-size="12">Role-based routing</text>
+
+  <!-- Column 2 -->
+  <rect x="452" y="165" width="295" height="405" rx="18" fill="#252522" stroke="#D4F534" stroke-width="2.5"/>
+  <text x="480" y="206" fill="#D4F534" font-family="monospace" font-size="12" font-weight="700">02 · QUALIFIED &amp; QUOTED (19)</text>
+  <rect x="480" y="232" width="239" height="110" rx="14" fill="#161614" stroke="#D4F534" stroke-width="1.5"/>
+  <text x="500" y="268" fill="#FFFFFF" font-family="sans-serif" font-size="17" font-weight="800">Automated Follow-Up</text>
+  <text x="500" y="296" fill="#CFCFC4" font-family="monospace" font-size="12">Drafts quote + booking link</text>
+  <text x="500" y="322" fill="#D4F534" font-family="monospace" font-size="12">3.4x pipeline velocity</text>
+  <rect x="480" y="362" width="239" height="90" rx="14" fill="#161614"/>
+  <text x="500" y="400" fill="#FFFFFF" font-family="sans-serif" font-size="16" font-weight="700">Scheduled Reminders</text>
+  <text x="500" y="426" fill="#CFCFC4" font-family="monospace" font-size="12">24h / 72h smart nudges</text>
+
+  <!-- Column 3 -->
+  <rect x="774" y="165" width="295" height="405" rx="18" fill="#D4F534" stroke="#1E1E1E" stroke-width="2.5"/>
+  <text x="802" y="206" fill="#1E1E1E" font-family="monospace" font-size="12" font-weight="700">03 · CLOSED &amp; SYNCED</text>
+  <rect x="802" y="232" width="239" height="125" rx="14" fill="#FFFFFF" stroke="#1E1E1E" stroke-width="2"/>
+  <text x="822" y="270" fill="#1E1E1E" font-family="sans-serif" font-size="18" font-weight="800">CRM &amp; Invoice Synced</text>
+  <text x="822" y="298" fill="#1E1E1E" font-family="monospace" font-size="12">18 hrs/wk saved per rep</text>
+  <text x="822" y="326" fill="#1E1E1E" font-family="monospace" font-size="12" font-weight="700">100% conversation history</text>
+  <rect x="802" y="382" width="239" height="52" rx="26" fill="#1E1E1E"/>
+  <text x="840" y="414" fill="#D4F534" font-family="sans-serif" font-size="15" font-weight="800">Pipeline Converted</text>
+</svg>
