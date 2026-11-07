@@ -11,7 +11,7 @@ declare global {
     __CS_RAW_XDC_INNER?: string;
     __resources?: Record<string, string>;
     __csPlayLottieSound?: (kind?: string, isClick?: boolean) => void;
-    openBooking?: (opts?: { name?: string; lang?: string; source?: string }) => void;
+    openBooking?: (opts?: { name?: string; notes?: string; lang?: string; source?: string }) => void;
   }
 }
 
@@ -304,6 +304,298 @@ function setupPostMountEnhancements() {
       primaryCta.parentElement.appendChild(bookBtn);
     }
   }
+
+  // 8. Inject Interactive Workflow Estimator & Before/After Architecture on Homepage
+  if (contactSection && !document.getElementById('cs-workflow-interactive')) {
+    const interactiveSec = document.createElement('section');
+    interactiveSec.id = 'cs-workflow-interactive';
+    interactiveSec.style.cssText =
+      'background:var(--paper,#E7E7E7);color:var(--ink,#1E1E1E);padding:clamp(48px,7vw,96px) clamp(18px,4vw,44px);border-top:2.5px solid var(--ink,#1E1E1E)';
+
+    interactiveSec.innerHTML = `
+      <div style="max-width:1160px;margin:0 auto;display:grid;gap:clamp(28px,4vw,44px)">
+        <!-- Before & After Interactive Visualizer -->
+        <div style="background:#fff;border:2.5px solid var(--ink,#1E1E1E);border-radius:24px;padding:clamp(24px,3.5vw,42px);box-shadow:6px 6px 0 rgba(30,30,30,0.88)">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:16px;margin-bottom:20px">
+            <div>
+              <div style="font-family:'Geist Mono',monospace;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:#5a5a48;margin-bottom:8px">Interactive Architecture · Before &amp; After</div>
+              <h2 style="margin:0;font-weight:800;font-size:clamp(1.55rem,3vw,2.35rem);line-height:1.05;letter-spacing:-.025em">How work moves before and after Feyron</h2>
+            </div>
+            <div style="display:inline-flex;background:var(--paper,#E7E7E7);border:2px solid var(--ink,#1E1E1E);border-radius:100px;padding:4px;gap:4px">
+              <button type="button" data-wf-mode="before" style="cursor:pointer;border:none;border-radius:100px;padding:9px 18px;font-family:'Geist Mono',monospace;font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:transparent;color:var(--ink,#1E1E1E)">Manual (Before)</button>
+              <button type="button" data-wf-mode="after" style="cursor:pointer;border:none;border-radius:100px;padding:9px 18px;font-family:'Geist Mono',monospace;font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:var(--ink,#1E1E1E);color:var(--accent,#D4F534)">Feyron System (After)</button>
+            </div>
+          </div>
+
+          <!-- Open customer workflow input + quick presets -->
+          <div style="background:var(--paper,#E7E7E7);border:2px solid var(--ink,#1E1E1E);border-radius:16px;padding:16px 18px;margin-bottom:20px;display:grid;gap:12px">
+            <label style="display:grid;gap:6px;font-weight:700;font-size:14px">
+              <span>Describe any workflow or task your team handles (or choose an example below)</span>
+              <input
+                id="cs-wf-custom-input"
+                type="text"
+                placeholder="Type anything — e.g. Real estate tenant screening, Logistics dispatch, Hospital billing, Vendor payouts…"
+                style="padding:11px 14px;border-radius:12px;border:2px solid var(--ink,#1E1E1E);background:#fff;font-family:inherit;font-size:14.5px;font-weight:600;color:var(--ink,#1E1E1E)"
+              />
+            </label>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+              <span style="font-family:'Geist Mono',monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#5a5a48;margin-right:4px">Examples:</span>
+              <button type="button" data-wf-preset="Customer Enquiries & Follow-ups" style="cursor:pointer;font-family:inherit;font-weight:700;font-size:12.5px;padding:6px 13px;border-radius:100px;border:1.5px solid var(--ink,#1E1E1E);background:#fff;color:var(--ink,#1E1E1E)">Customer Enquiries &amp; Follow-ups</button>
+              <button type="button" data-wf-preset="Invoice & Document Processing" style="cursor:pointer;font-family:inherit;font-weight:700;font-size:12.5px;padding:6px 13px;border-radius:100px;border:1.5px solid var(--ink,#1E1E1E);background:#fff;color:var(--ink,#1E1E1E)">Invoice &amp; Document Processing</button>
+              <button type="button" data-wf-preset="Client Onboarding & KYC Intake" style="cursor:pointer;font-family:inherit;font-weight:700;font-size:12.5px;padding:6px 13px;border-radius:100px;border:1.5px solid var(--ink,#1E1E1E);background:#fff;color:var(--ink,#1E1E1E)">Client Onboarding &amp; KYC Intake</button>
+              <button type="button" data-wf-preset="Weekly Reporting & Operations Sync" style="cursor:pointer;font-family:inherit;font-weight:700;font-size:12.5px;padding:6px 13px;border-radius:100px;border:1.5px solid var(--ink,#1E1E1E);background:#fff;color:var(--ink,#1E1E1E)">Weekly Reporting &amp; Operations Sync</button>
+            </div>
+          </div>
+
+          <div id="cs-wf-steps" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px"></div>
+        </div>
+
+        <!-- Workflow Time & Capacity Estimator -->
+        <div style="background:#fff;border:2.5px solid var(--ink,#1E1E1E);border-radius:24px;padding:clamp(24px,3.5vw,42px);box-shadow:6px 6px 0 rgba(30,30,30,0.88)">
+          <div style="font-family:'Geist Mono',monospace;font-size:11.5px;letter-spacing:.14em;text-transform:uppercase;color:#5a5a48;margin-bottom:8px">Workflow Audit Estimator · Time &amp; Capacity</div>
+          <h2 style="margin:0 0 18px;font-weight:800;font-size:clamp(1.55rem,3vw,2.35rem);line-height:1.05;letter-spacing:-.025em">Estimate what automating your workflow saves your team</h2>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:22px;align-items:stretch">
+            <div style="background:var(--paper,#E7E7E7);border:2px solid var(--ink,#1E1E1E);border-radius:18px;padding:20px 22px;display:grid;gap:16px">
+              <div style="display:grid;gap:8px">
+                <label for="cs-roi-wf" style="font-weight:700;font-size:14.5px">
+                  What workflow or process do you want to automate?
+                </label>
+                <input
+                  id="cs-roi-wf"
+                  type="text"
+                  value="Customer enquiries & follow-ups"
+                  placeholder="Type anything — e.g. Order fulfilment, Claims processing, HR onboarding…"
+                  style="padding:11px 14px;border-radius:12px;border:2px solid var(--ink,#1E1E1E);background:#fff;font-family:inherit;font-size:14.5px;font-weight:600;color:var(--ink,#1E1E1E)"
+                />
+                <div style="display:flex;gap:6px;flex-wrap:wrap">
+                  <button type="button" data-roi-chip="Customer enquiries & follow-ups" style="cursor:pointer;font-family:'Geist Mono',monospace;font-size:10.5px;font-weight:700;padding:4px 10px;border-radius:100px;border:1.5px solid var(--ink,#1E1E1E);background:var(--ink,#1E1E1E);color:var(--accent,#D4F534)">Customer enquiries &amp; follow-ups</button>
+                  <button type="button" data-roi-chip="Invoice & document processing" style="cursor:pointer;font-family:'Geist Mono',monospace;font-size:10.5px;font-weight:700;padding:4px 10px;border-radius:100px;border:1.5px solid var(--ink,#1E1E1E);background:#fff;color:var(--ink,#1E1E1E)">Invoice &amp; document processing</button>
+                  <button type="button" data-roi-chip="Client onboarding & KYC intake" style="cursor:pointer;font-family:'Geist Mono',monospace;font-size:10.5px;font-weight:700;padding:4px 10px;border-radius:100px;border:1.5px solid var(--ink,#1E1E1E);background:#fff;color:var(--ink,#1E1E1E)">Client onboarding &amp; KYC intake</button>
+                  <button type="button" data-roi-chip="Inventory & order sync" style="cursor:pointer;font-family:'Geist Mono',monospace;font-size:10.5px;font-weight:700;padding:4px 10px;border-radius:100px;border:1.5px solid var(--ink,#1E1E1E);background:#fff;color:var(--ink,#1E1E1E)">Inventory &amp; order sync</button>
+                </div>
+              </div>
+
+              <label style="display:grid;gap:6px;font-weight:700;font-size:14.5px">
+                <span>Tools or channels currently used (optional)</span>
+                <input
+                  id="cs-roi-tools"
+                  type="text"
+                  placeholder="e.g. WhatsApp, Gmail, Excel, Google Sheets, Paystack, Slack, Custom ERP…"
+                  style="padding:10px 14px;border-radius:12px;border:2px solid var(--ink,#1E1E1E);background:#fff;font-family:inherit;font-size:14px;font-weight:500;color:var(--ink,#1E1E1E)"
+                />
+              </label>
+
+              <label style="display:grid;gap:6px;font-weight:700;font-size:14.5px">
+                <div style="display:flex;justify-content:space-between"><span>Team members involved</span><span id="cs-roi-team-val" style="font-family:'Geist Mono',monospace;font-size:13px">4 people</span></div>
+                <input id="cs-roi-team" type="range" min="1" max="40" value="4" style="accent-color:#1E1E1E;width:100%;cursor:pointer" />
+              </label>
+
+              <label style="display:grid;gap:6px;font-weight:700;font-size:14.5px">
+                <div style="display:flex;justify-content:space-between"><span>Hours spent per person / week</span><span id="cs-roi-hrs-val" style="font-family:'Geist Mono',monospace;font-size:13px">8 hrs / wk</span></div>
+                <input id="cs-roi-hrs" type="range" min="2" max="30" value="8" style="accent-color:#1E1E1E;width:100%;cursor:pointer" />
+              </label>
+
+              <label style="display:grid;gap:6px;font-weight:700;font-size:14.5px">
+                <div style="display:flex;justify-content:space-between"><span>Hourly operational cost (USD)</span><span id="cs-roi-rate-val" style="font-family:'Geist Mono',monospace;font-size:13px">$35 / hr</span></div>
+                <input id="cs-roi-rate" type="range" min="15" max="150" step="5" value="35" style="accent-color:#1E1E1E;width:100%;cursor:pointer" />
+              </label>
+            </div>
+
+            <div style="background:var(--bg,#D4F534);border:2px solid var(--ink,#1E1E1E);border-radius:18px;padding:22px 24px;display:flex;flex-direction:column;justify-content:space-between;gap:16px">
+              <div>
+                <div id="cs-roi-out-kicker" style="font-family:'Geist Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;margin-bottom:14px">Estimated Monthly Impact · Customer enquiries &amp; follow-ups</div>
+                <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:14px">
+                  <div style="background:#fff;border:2px solid var(--ink,#1E1E1E);border-radius:14px;padding:14px">
+                    <div style="font-family:'Geist Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#5a5a48">Time Reclaimed</div>
+                    <div id="cs-roi-out-hrs" style="font-size:28px;font-weight:800;line-height:1.1;margin-top:4px">100 hrs</div>
+                    <div style="font-family:'Geist Mono',monospace;font-size:11px;color:#555;margin-top:2px">per month</div>
+                  </div>
+                  <div style="background:#fff;border:2px solid var(--ink,#1E1E1E);border-radius:14px;padding:14px">
+                    <div style="font-family:'Geist Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#5a5a48">Capacity Unlocked</div>
+                    <div id="cs-roi-out-val" style="font-size:28px;font-weight:800;line-height:1.1;margin-top:4px">$3,500</div>
+                    <div style="font-family:'Geist Mono',monospace;font-size:11px;color:#555;margin-top:2px">monthly value</div>
+                  </div>
+                </div>
+                <div id="cs-roi-out-pkg" style="padding:10px 14px;border-radius:12px;background:rgba(255,255,255,0.65);border:1.5px solid var(--ink,#1E1E1E);font-size:13.5px;font-weight:600">
+                  Recommended scope: Function Agent — begins with a fixed-scope workflow audit.
+                </div>
+              </div>
+              <div>
+                <button type="button" id="cs-roi-book-btn" style="cursor:pointer;font-family:inherit;font-weight:800;font-size:15px;background:var(--ink,#1E1E1E);color:var(--accent,#D4F534);border:2px solid var(--ink,#1E1E1E);padding:14px 24px;border-radius:100px">Book a 20-min call for this workflow →</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    `;
+
+    contactSection.parentElement?.insertBefore(interactiveSec, contactSection);
+
+    const wfStepsContainer = document.getElementById('cs-wf-steps');
+    const wfCustomInput = document.getElementById('cs-wf-custom-input') as HTMLInputElement | null;
+    let currentWfMode: 'before' | 'after' = 'after';
+
+    const getDynamicSteps = (mode: 'before' | 'after', customTopic: string) => {
+      const cleaned = customTopic.trim();
+      if (!cleaned) {
+        return mode === 'after'
+          ? [
+              { num: '01', title: 'Structured instant capture', text: 'The Feyron system captures incoming requests or documents immediately, extracts fields and logs every detail.' },
+              { num: '02', title: 'Policy check & preparation', text: 'Your rules are verified automatically, replies or records are drafted, and exceptions are flagged cleanly.' },
+              { num: '03', title: 'Human approval & execution', text: 'Your team approves key actions in one click while calendar invites, meeting links and updates run automatically.' },
+            ]
+          : [
+              { num: '01', title: 'Scattered manual intake', text: 'Messages, documents and forms arrive across email, WhatsApp and spreadsheets. Staff copy and paste details by hand.' },
+              { num: '02', title: 'Repetitive verification', text: 'Team members spend hours cross-checking rules, chasing missing fields and updating disconnected tools.' },
+              { num: '03', title: 'Slow follow-ups', text: 'Clients wait hours or days for next steps while critical tasks depend on manual memory.' },
+            ];
+      }
+      return mode === 'after'
+        ? [
+            { num: '01', title: `Automated intake for ${cleaned}`, text: `Feyron captures every incoming request, document or trigger for "${cleaned}" and structures the data automatically.` },
+            { num: '02', title: 'Rules check & system preparation', text: `Your business rules for "${cleaned}" are verified in seconds, records are updated across your tools, and next actions are prepared.` },
+            { num: '03', title: 'One-click human approval & completion', text: `Your team approves edge cases in one click while confirmations, notifications and audit logs run automatically.` },
+          ]
+        : [
+            { num: '01', title: `Manual intake for ${cleaned}`, text: `Requests and files for "${cleaned}" arrive across scattered messages, emails or spreadsheets and require manual entry.` },
+            { num: '02', title: 'Manual cross-checking & follow-up', text: `Team members spend hours verifying details for "${cleaned}", chasing missing information and updating separate tools by hand.` },
+            { num: '03', title: 'Delays & handoff bottlenecks', text: `Progress on "${cleaned}" stalls whenever key staff are busy, leading to slow turnaround and missed updates.` },
+          ];
+    };
+
+    const renderWfMode = (m: 'before' | 'after') => {
+      currentWfMode = m;
+      if (!wfStepsContainer) return;
+      const customText = wfCustomInput?.value || '';
+      const list = getDynamicSteps(m, customText);
+      wfStepsContainer.innerHTML = list
+        .map(
+          (st) => `
+          <div style="background:${m === 'after' ? 'var(--bg,#D4F534)' : 'var(--paper,#E7E7E7)'};border:2px solid var(--ink,#1E1E1E);border-radius:18px;padding:20px 22px">
+            <div style="font-family:'Geist Mono',monospace;font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:700;margin-bottom:8px">${m === 'after' ? 'Automated Step ' : 'Manual Step '}${st.num}</div>
+            <h3 style="margin:0 0 8px;font-size:18.5px;font-weight:800">${st.title}</h3>
+            <p style="margin:0;font-size:14.5px;line-height:1.55;font-weight:500">${st.text}</p>
+          </div>
+        `
+        )
+        .join('');
+
+      interactiveSec.querySelectorAll('[data-wf-mode]').forEach((btn) => {
+        const bMode = btn.getAttribute('data-wf-mode');
+        const el = btn as HTMLElement;
+        if (bMode === m) {
+          el.style.background = 'var(--ink,#1E1E1E)';
+          el.style.color = m === 'after' ? 'var(--accent,#D4F534)' : '#fff';
+        } else {
+          el.style.background = 'transparent';
+          el.style.color = 'var(--ink,#1E1E1E)';
+        }
+      });
+    };
+
+    renderWfMode('after');
+    interactiveSec.querySelectorAll('[data-wf-mode]').forEach((btn) => {
+      (btn as HTMLElement).onclick = () => {
+        renderWfMode((btn.getAttribute('data-wf-mode') as 'before' | 'after') || 'after');
+      };
+    });
+
+    const wfSel = document.getElementById('cs-roi-wf') as HTMLInputElement | null;
+    const wfTools = document.getElementById('cs-roi-tools') as HTMLInputElement | null;
+    const outKicker = document.getElementById('cs-roi-out-kicker');
+    const teamInput = document.getElementById('cs-roi-team') as HTMLInputElement | null;
+    const hrsInput = document.getElementById('cs-roi-hrs') as HTMLInputElement | null;
+    const rateInput = document.getElementById('cs-roi-rate') as HTMLInputElement | null;
+    const teamVal = document.getElementById('cs-roi-team-val');
+    const hrsVal = document.getElementById('cs-roi-hrs-val');
+    const rateVal = document.getElementById('cs-roi-rate-val');
+    const outHrs = document.getElementById('cs-roi-out-hrs');
+    const outVal = document.getElementById('cs-roi-out-val');
+    const outPkg = document.getElementById('cs-roi-out-pkg');
+    const roiBookBtn = document.getElementById('cs-roi-book-btn');
+
+    if (wfCustomInput) {
+      wfCustomInput.addEventListener('input', () => {
+        renderWfMode(currentWfMode);
+        if (wfSel && wfCustomInput.value.trim()) {
+          wfSel.value = wfCustomInput.value.trim();
+          updateRoi();
+        }
+      });
+    }
+
+    interactiveSec.querySelectorAll('[data-wf-preset]').forEach((btn) => {
+      (btn as HTMLElement).onclick = () => {
+        const preset = btn.getAttribute('data-wf-preset') || '';
+        if (wfCustomInput) wfCustomInput.value = preset;
+        if (wfSel && preset) wfSel.value = preset;
+        renderWfMode(currentWfMode);
+        updateRoi();
+      };
+    });
+
+    const updateRoi = () => {
+      const wfText = (wfSel?.value || '').trim() || 'Custom business workflow';
+      const t = Number(teamInput?.value || 4);
+      const h = Number(hrsInput?.value || 8);
+      const r = Number(rateInput?.value || 35);
+      if (outKicker) outKicker.textContent = `Estimated Monthly Impact · ${wfText}`;
+      if (teamVal) teamVal.textContent = `${t} ${t === 1 ? 'person' : 'people'}`;
+      if (hrsVal) hrsVal.textContent = `${h} hrs / wk`;
+      if (rateVal) rateVal.textContent = `$${r} / hr`;
+      const monthlyHrs = Math.round(Math.round(t * h * 0.72) * 4.33);
+      const monthlyUsd = Math.round(monthlyHrs * r);
+      const pkg =
+        monthlyHrs <= 65
+          ? 'Workflow Sprint (2 to 4 weeks)'
+          : monthlyHrs <= 180
+            ? 'Function Agent (Dedicated workflow owner)'
+            : 'Business Agent Suite (3 to 5 connected workflows)';
+      if (outHrs) outHrs.textContent = `${monthlyHrs} hrs`;
+      if (outVal) outVal.textContent = `$${monthlyUsd.toLocaleString()}`;
+      if (outPkg) outPkg.textContent = `Recommended scope: ${pkg} — begins with a fixed-scope workflow audit.`;
+
+      interactiveSec.querySelectorAll('[data-roi-chip]').forEach((chip) => {
+        const val = chip.getAttribute('data-roi-chip') || '';
+        const el = chip as HTMLElement;
+        const active = (wfSel?.value || '').trim().toLowerCase() === val.toLowerCase();
+        el.style.background = active ? 'var(--ink,#1E1E1E)' : '#fff';
+        el.style.color = active ? 'var(--accent,#D4F534)' : 'var(--ink,#1E1E1E)';
+      });
+    };
+
+    interactiveSec.querySelectorAll('[data-roi-chip]').forEach((chip) => {
+      (chip as HTMLElement).onclick = () => {
+        const val = chip.getAttribute('data-roi-chip') || '';
+        if (wfSel) wfSel.value = val;
+        updateRoi();
+      };
+    });
+
+    [wfSel, wfTools, teamInput, hrsInput, rateInput].forEach((el) => {
+      el?.addEventListener('input', updateRoi);
+      el?.addEventListener('change', updateRoi);
+    });
+    updateRoi();
+
+    if (roiBookBtn) {
+      roiBookBtn.onclick = () => {
+        const wf = (wfSel?.value || '').trim() || 'Custom business workflow';
+        const tools = (wfTools?.value || '').trim();
+        const t = Number(teamInput?.value || 4);
+        const h = Number(hrsInput?.value || 8);
+        const r = Number(rateInput?.value || 35);
+        const monthlyHrs = Math.round(Math.round(t * h * 0.72) * 4.33);
+        const monthlyUsd = Math.round(monthlyHrs * r);
+        const toolsPart = tools ? ` | Current tools: ${tools}` : '';
+        const summary = `Workflow Audit Estimate — Focus: ${wf}${toolsPart} | Team size: ${t} | Est. time saved: ${monthlyHrs} hrs/month ($${monthlyUsd.toLocaleString()}/mo capacity)`;
+        if (window.openBooking) {
+          window.openBooking({ notes: summary, source: 'homepage-roi-calculator' });
+        }
+      };
+    }
+  }
 }
 
 function setupMainMobileMenu() {
@@ -530,10 +822,19 @@ export async function bootCloudstudio() {
   await loadExternalScript('/game.js');
   await loadExternalScript('/site/js/booking.js');
 
-  // Wait for #cs-root to appear then run post-mount enhancements
+  // Wait for #cs-root to appear then run post-mount enhancements,
+  // and re-run if dc-runtime.js replaces #cs-root after fetching dc-source.html
   const checkMounted = () => {
-    if (document.getElementById('cs-root')) {
+    const csRoot = document.getElementById('cs-root');
+    if (csRoot) {
       setupPostMountEnhancements();
+      const dcRoot = document.getElementById('dc-root') || document.body;
+      const obs = new MutationObserver(() => {
+        if (document.getElementById('cs-root') && !document.getElementById('cs-workflow-interactive')) {
+          setupPostMountEnhancements();
+        }
+      });
+      obs.observe(dcRoot, { childList: true, subtree: true });
     } else {
       setTimeout(checkMounted, 60);
     }

@@ -6,11 +6,16 @@
 import React, { useEffect, useState } from 'react';
 import { bootCloudstudio } from './cloudstudioInit';
 import { FEYRON_PAGES, FeyronPageData } from './feyronPages';
+import {
+  TeamDashboardSection,
+  WorkflowRoiCalculatorCard,
+  WorkflowVisualizerCard,
+} from './FeyronInteractiveTools';
 
 declare global {
   interface Window {
     __feyronOpenLeadModal?: () => void;
-    openBooking?: (opts?: { name?: string; lang?: string; source?: string }) => void;
+    openBooking?: (opts?: { name?: string; notes?: string; lang?: string; source?: string }) => void;
   }
 }
 
@@ -63,8 +68,23 @@ function normalizeSubpagePath(pathname: string): string | null {
 
 function resolveFeyronPage(pathname: string): FeyronPageData | null {
   const clean = pathname.replace(/^\/+|\/+$/g, '').toLowerCase();
-  if (!clean) return null;
-  return FEYRON_PAGES[clean] || null;
+  if (clean && FEYRON_PAGES[clean]) {
+    return FEYRON_PAGES[clean];
+  }
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const pageParam = (params.get('page') || '').trim().toLowerCase();
+    if (pageParam && FEYRON_PAGES[pageParam]) {
+      return FEYRON_PAGES[pageParam];
+    }
+    const hashClean = (window.location.hash || '').replace(/^#+|\/+$/g, '').toLowerCase();
+    if (hashClean && FEYRON_PAGES[hashClean]) {
+      return FEYRON_PAGES[hashClean];
+    }
+  } catch {
+    // ignore URL parsing errors
+  }
+  return null;
 }
 
 export default function App() {
@@ -217,6 +237,29 @@ export default function App() {
       window.removeEventListener('keydown', onKeyDown);
     };
   }, [subpageSrc, feyronPage]);
+
+  useEffect(() => {
+    const syncOverlayLock = () => {
+      const gate = document.querySelector('.cs-guide-gate') as HTMLElement | null;
+      if (feyronPage || subpageSrc) {
+        document.documentElement.classList.remove('cs-guide-locked');
+        document.body.style.position = '';
+        document.body.style.overflow = '';
+        if (gate) {
+          gate.style.display = 'none';
+        }
+      } else if (gate && !gate.classList.contains('is-hidden')) {
+        gate.style.display = '';
+      }
+    };
+    syncOverlayLock();
+    const timer1 = setTimeout(syncOverlayLock, 120);
+    const timer2 = setTimeout(syncOverlayLock, 500);
+    return () => {
+      clearTimeout(timer1);
+      clearTimeout(timer2);
+    };
+  }, [feyronPage, subpageSrc]);
 
   const handleCtaAction = (action?: string) => {
     if (!action) return;
@@ -668,7 +711,7 @@ export default function App() {
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 2147482600,
+        zIndex: 2147483150,
         background: 'var(--paper, #E7E7E7)',
         color: 'var(--ink, #1E1E1E)',
         overflowY: 'auto',
@@ -1175,11 +1218,16 @@ export default function App() {
                     />
                   </label>
 
-                  <label style={{ display: 'grid', gap: '7px', fontWeight: 700, fontSize: '14.5px' }}>
-                    What do you need help with?
-                    <select
+                  <div style={{ display: 'grid', gap: '7px', fontWeight: 700, fontSize: '14.5px' }}>
+                    <label htmlFor="feyron-contact-interest">
+                      What workflow, system or project do you want to automate or build?
+                    </label>
+                    <input
+                      id="feyron-contact-interest"
+                      type="text"
                       value={contactInterest}
                       onChange={(e) => setContactInterest(e.target.value)}
+                      placeholder="Type anything — e.g. AI workflow automation, custom portal, payment sync…"
                       style={{
                         padding: '13px 15px',
                         borderRadius: '12px',
@@ -1187,17 +1235,42 @@ export default function App() {
                         background: 'var(--paper, #E7E7E7)',
                         fontFamily: 'inherit',
                         fontSize: '15px',
+                        color: 'var(--ink, #1E1E1E)',
                       }}
-                    >
-                      <option value="AI Automation">AI Automation</option>
-                      <option value="Website Development">Website Development</option>
-                      <option value="Software & Platform Development">Software &amp; Platform Development</option>
-                      <option value="API & Systems Integration">API &amp; Systems Integration</option>
-                      <option value="Payment & Fintech Integration">Payment &amp; Fintech Integration</option>
-                      <option value="Product Development">Product Development</option>
-                      <option value="Not sure yet">Not sure yet</option>
-                    </select>
-                  </label>
+                    />
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', marginTop: '2px' }}>
+                      {[
+                        'AI Automation',
+                        'Custom Workflow Agent',
+                        'Website Development',
+                        'Software & Platform Development',
+                        'API & Systems Integration',
+                        'Payment & Fintech Integration',
+                      ].map((tag) => {
+                        const active = contactInterest.trim().toLowerCase() === tag.toLowerCase();
+                        return (
+                          <button
+                            key={tag}
+                            type="button"
+                            onClick={() => setContactInterest(tag)}
+                            style={{
+                              cursor: 'pointer',
+                              fontFamily: "'Geist Mono', monospace",
+                              fontSize: '10.5px',
+                              fontWeight: 700,
+                              padding: '4px 10px',
+                              borderRadius: '100px',
+                              border: '1.5px solid var(--ink, #1E1E1E)',
+                              background: active ? 'var(--ink, #1E1E1E)' : '#fff',
+                              color: active ? 'var(--accent, #D4F534)' : 'var(--ink, #1E1E1E)',
+                            }}
+                          >
+                            {tag}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
                 </div>
 
                 <label style={{ display: 'grid', gap: '7px', fontWeight: 700, fontSize: '14.5px' }}>
@@ -1259,6 +1332,31 @@ export default function App() {
               </form>
             )}
           </section>
+        )}
+
+        {/* Team Operations Dashboard on /dashboard */}
+        {feyronPage.isDashboardPage && <TeamDashboardSection />}
+
+        {/* Interactive Before & After Workflow Visualizer */}
+        {(feyronPage.slug === 'solutions' ||
+          feyronPage.slug === 'ai-automation' ||
+          feyronPage.slug === 'how-we-work') && <WorkflowVisualizerCard />}
+
+        {/* Interactive Workflow ROI & Time-Saved Calculator */}
+        {(feyronPage.slug === 'solutions' ||
+          feyronPage.slug === 'ai-automation' ||
+          feyronPage.slug === 'how-we-work' ||
+          feyronPage.isContactPage) && (
+          <WorkflowRoiCalculatorCard
+            onBookWithContext={(summary) => {
+              setContactTime(summary);
+              if (!feyronPage.isContactPage) {
+                navigateToPath('/contact');
+              } else {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }
+            }}
+          />
         )}
 
         {feyronPage.sections.map((sec, idx) => (

@@ -1,23 +1,36 @@
 /* ==========================================================================
    BOOK A CALL — Feyron's Cal.com-style 20-minute scheduling widget.
-   Zero login required: pick a day, pick a 20-min slot (Lagos WAT), enter
-   name & email, and immediately receive a confirmed meeting link + calendar
-   invite via email (Resend) & Telegram.
-   Usage: window.openBooking({ name, lang, source })
+   Zero login required: pick a day, pick a 20-min slot (with automatic client
+   timezone detection + selector), enter name & email, and immediately receive
+   a confirmed meeting link + calendar invite via email (Resend) & Telegram.
+   Usage: window.openBooking({ name, notes, lang, source })
    ========================================================================== */
 (function () {
   "use strict";
 
-  var TZ_NOTE = "Lagos (WAT)";
-  var DAY_START = 10 * 60;        // 10:00
-  var DAY_END = 18 * 60;          // last slot 17:40
+  var DAY_START = 10 * 60;        // 10:00 WAT (Africa/Lagos, UTC+1)
+  var DAY_END = 18 * 60;          // last slot 17:40 WAT
   var STEP = 20;
   var DAYS_AHEAD = 21;
+
+  var TIMEZONE_OPTIONS = [
+    { id: "Africa/Lagos", label: "West Africa Time (Lagos · WAT)" },
+    { id: "Europe/London", label: "UK / Ireland (London · GMT/BST)" },
+    { id: "Europe/Paris", label: "Central Europe (Paris / Berlin · CET)" },
+    { id: "America/New_York", label: "Eastern Time (New York · ET)" },
+    { id: "America/Chicago", label: "Central Time (Chicago · CT)" },
+    { id: "America/Los_Angeles", label: "Pacific Time (Los Angeles · PT)" },
+    { id: "Asia/Dubai", label: "Gulf Standard Time (Dubai · GST)" },
+    { id: "Africa/Johannesburg", label: "South Africa Time (SAST)" },
+    { id: "Africa/Nairobi", label: "East Africa Time (Nairobi · EAT)" },
+    { id: "Asia/Singapore", label: "Singapore / HK (SGT)" }
+  ];
 
   var I18N = {
     en: {
       title: "Book a 20-min call",
       sub: "20 minutes · Video meeting link included · {tz}",
+      tzLabel: "Timezone",
       pickDay: "1. Pick a day",
       pickSlot: "2. Pick a time",
       none: "No slots left this day — try another one",
@@ -32,18 +45,20 @@
       joinMeet: "Open Meeting Link",
       copyMeet: "Copy link",
       copiedMeet: "Copied!",
-      gcalDirect: "+ Add to Google Calendar",
-      ics: "Download .ics",
+      gcalDirect: "+ Google Calendar",
+      outlookDirect: "+ Outlook",
+      ics: "Apple / .ics",
       back: "Done",
       taken: "Someone just took that slot — pick another one.",
       error: "Couldn't book right now — email us at hello@feyron.site",
       days: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
       months: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-      eventTitle: "Call — {name} × Feyron",
+      eventTitle: "Call — {name} × Feyron"
     },
     es: {
       title: "Reserva una llamada",
       sub: "20 minutos · Enlace de videollamada incluido · {tz}",
+      tzLabel: "Zona horaria",
       pickDay: "1. Elige un día",
       pickSlot: "2. Elige una hora",
       none: "No quedan huecos ese día — prueba otro",
@@ -58,16 +73,58 @@
       joinMeet: "Abrir reunión",
       copyMeet: "Copiar enlace",
       copiedMeet: "¡Copiado!",
-      gcalDirect: "+ Añadir a Google Calendar",
-      ics: "Descargar .ics",
+      gcalDirect: "+ Google Calendar",
+      outlookDirect: "+ Outlook",
+      ics: "Apple / .ics",
       back: "Listo",
       taken: "Alguien acaba de pillar ese hueco — elige otro.",
       error: "No se pudo reservar — escríbenos a hello@feyron.site",
       days: ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"],
       months: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
-      eventTitle: "Llamada — {name} × Feyron",
-    },
+      eventTitle: "Llamada — {name} × Feyron"
+    }
   };
+
+  function detectUserTimezone() {
+    try {
+      var tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      if (tz && typeof tz === "string") return tz;
+    } catch (e) {}
+    return "Africa/Lagos";
+  }
+
+  /**
+   * Converts a canonical Lagos (Africa/Lagos, UTC+1) date + minutes-from-midnight
+   * into a formatted HH:MM string in the target IANA timezone.
+   */
+  function formatSlotInTimezone(dateObj, lagosMinutes, targetTz) {
+    if (!targetTz || targetTz === "Africa/Lagos") {
+      return pad(Math.floor(lagosMinutes / 60)) + ":" + pad(lagosMinutes % 60);
+    }
+    try {
+      var y = dateObj.getFullYear();
+      var m = dateObj.getMonth();
+      var d = dateObj.getDate();
+      var hh = Math.floor(lagosMinutes / 60);
+      var mm = lagosMinutes % 60;
+      // Lagos is UTC+1 year-round
+      var utcDate = new Date(Date.UTC(y, m, d, hh - 1, mm, 0));
+      var parts = new Intl.DateTimeFormat("en-GB", {
+        timeZone: targetTz,
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      }).formatToParts(utcDate);
+      var outH = "00", outM = "00";
+      for (var i = 0; i < parts.length; i++) {
+        if (parts[i].type === "hour") outH = parts[i].value === "24" ? "00" : parts[i].value;
+        if (parts[i].type === "minute") outM = parts[i].value;
+      }
+      return outH + ":" + outM;
+    } catch (e) {
+      return pad(Math.floor(lagosMinutes / 60)) + ":" + pad(lagosMinutes % 60);
+    }
+  }
 
   function injectCss() {
     if (document.getElementById("cs-booking-css")) return;
@@ -81,7 +138,10 @@
       ".cs-book__x{position:absolute;top:10px;right:12px;border:0;background:transparent;color:#cfcfc4;font-size:26px;line-height:1;cursor:pointer;padding:4px 8px}" +
       ".cs-book__x:hover{color:var(--accent,#fff48d)}" +
       ".cs-book h3{margin:0 0 6px;font-size:24px;font-weight:800;letter-spacing:-.02em}" +
-      ".cs-book__sub{margin:0 0 16px;font-family:'Geist Mono',ui-monospace,monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#8f8f80}" +
+      ".cs-book__sub{margin:0 0 12px;font-family:'Geist Mono',ui-monospace,monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:#8f8f80}" +
+      ".cs-book__tzrow{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:0 0 12px;padding:8px 12px;border:1.5px solid rgba(255,244,141,.22);border-radius:12px;background:rgba(255,255,255,.04)}" +
+      ".cs-book__tzlbl{font-family:'Geist Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:#cfcfc4}" +
+      ".cs-book__tzsel{background:#0e0e0c;color:var(--accent,#fff48d);border:1px solid rgba(255,244,141,.35);border-radius:100px;padding:5px 12px;font-family:'Geist Mono',monospace;font-size:11px;cursor:pointer;outline:none;max-width:100%}" +
       ".cs-book__label{display:block;margin:14px 0 8px;font-family:'Geist Mono',monospace;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:#cfcfc4}" +
       ".cs-book__days{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;scrollbar-width:none}" +
       ".cs-book__days::-webkit-scrollbar{display:none}" +
@@ -130,14 +190,32 @@
     injectCss();
     if (document.querySelector(".cs-book")) return;
 
-    var picked = { date: null, slot: null };
+    var detectedTz = detectUserTimezone();
+    var tzOptionsList = TIMEZONE_OPTIONS.slice();
+    var hasDetected = tzOptionsList.some(function (o) { return o.id === detectedTz; });
+    if (!hasDetected && detectedTz) {
+      tzOptionsList.unshift({ id: detectedTz, label: detectedTz.replace(/_/g, " ") + " (Local)" });
+    }
+
+    var selectedTz = detectedTz || "Africa/Lagos";
+    var cachedTakenByDate = {};
+    var picked = { date: null, slot: null, displaySlot: null };
+
+    var tzOptionsHtml = tzOptionsList.map(function (o) {
+      return '<option value="' + o.id + '"' + (o.id === selectedTz ? " selected" : "") + ">" + o.label + "</option>";
+    }).join("");
+
     var wrap = document.createElement("div");
     wrap.className = "cs-book";
     wrap.innerHTML =
       '<div class="cs-book__card" role="dialog" aria-modal="true" aria-label="' + T.title + '">' +
       '<button type="button" class="cs-book__x" aria-label="Close">×</button>' +
       "<h3>" + T.title + "</h3>" +
-      '<p class="cs-book__sub">' + T.sub.replace("{tz}", TZ_NOTE) + "</p>" +
+      '<p class="cs-book__sub" data-tz-sub>' + T.sub.replace("{tz}", selectedTz.replace(/_/g, " ")) + "</p>" +
+      '<div class="cs-book__tzrow">' +
+      '<span class="cs-book__tzlbl">' + T.tzLabel + "</span>" +
+      '<select class="cs-book__tzsel" aria-label="' + T.tzLabel + '">' + tzOptionsHtml + "</select>" +
+      "</div>" +
       '<span class="cs-book__label">' + T.pickDay + "</span>" +
       '<div class="cs-book__days"></div>' +
       '<span class="cs-book__label">' + T.pickSlot + "</span>" +
@@ -155,6 +233,8 @@
     requestAnimationFrame(function () { requestAnimationFrame(function () { wrap.classList.add("is-in"); }); });
 
     var card = wrap.querySelector(".cs-book__card");
+    var subEl = wrap.querySelector("[data-tz-sub]");
+    var tzSel = wrap.querySelector(".cs-book__tzsel");
     var daysEl = wrap.querySelector(".cs-book__days");
     var slotsEl = wrap.querySelector(".cs-book__slots");
     var form = wrap.querySelector("form");
@@ -163,7 +243,19 @@
     if (opts.name) {
       form.querySelector('[name="name"]').value = opts.name;
     }
+    if (opts.notes) {
+      form.querySelector('[name="notes"]').value = opts.notes;
+    }
     goBtn.textContent = T.confirm.replace(/\s*[—–-]?\s*\{slot\}/, "");
+
+    tzSel.addEventListener("change", function () {
+      selectedTz = tzSel.value || "Africa/Lagos";
+      subEl.textContent = T.sub.replace("{tz}", selectedTz.replace(/_/g, " "));
+      if (picked.date) {
+        var dk = dateKey(picked.date);
+        renderSlots(picked.date, cachedTakenByDate[dk] || []);
+      }
+    });
 
     function close() {
       window.removeEventListener("keydown", onKey, true);
@@ -199,6 +291,7 @@
         b.classList.add("is-on");
         picked.date = d;
         picked.slot = null;
+        picked.displaySlot = null;
         form.hidden = true;
         loadSlots(d);
       });
@@ -210,11 +303,13 @@
 
     function loadSlots(d) {
       renderSlots(d, null);
-      fetch("/api/bookings?date=" + dateKey(d))
+      var dk = dateKey(d);
+      fetch("/api/bookings?date=" + dk)
         .then(function (r) { return r.ok ? r.json() : { taken: [] }; })
         .catch(function () { return { taken: [] }; })
         .then(function (json) {
-          if (picked.date === d) renderSlots(d, json.taken || []);
+          cachedTakenByDate[dk] = json.taken || [];
+          if (picked.date === d) renderSlots(d, cachedTakenByDate[dk]);
         });
     }
 
@@ -227,23 +322,30 @@
       var any = false;
       for (var m = DAY_START; m < DAY_END; m += STEP) {
         var hh = pad(Math.floor(m / 60)), mm = pad(m % 60);
-        var label = hh + ":" + mm;
+        var canonicalWatLabel = hh + ":" + mm;
+        var displayLabel = formatSlotInTimezone(d, m, selectedTz);
         var b = document.createElement("button");
         b.type = "button";
         b.className = "cs-book__slot";
-        b.textContent = label;
+        b.textContent = displayLabel;
+        if (picked.slot === canonicalWatLabel) {
+          b.classList.add("is-on");
+          picked.displaySlot = displayLabel;
+          goBtn.textContent = T.confirm.replace("{slot}", niceSlot());
+        }
         if (loading) {
           b.disabled = true;
           b.classList.add("is-loading");
-        } else if (taken.indexOf(label) !== -1 || (isToday && m <= nowMin + 30)) {
+        } else if (taken.indexOf(canonicalWatLabel) !== -1 || (isToday && m <= nowMin + 30)) {
           b.disabled = true;
         } else {
           any = true;
-          (function (label, btn) {
+          (function (watSlot, dispSlot, btn) {
             btn.addEventListener("click", function () {
               slotsEl.querySelectorAll(".is-on").forEach(function (x) { x.classList.remove("is-on"); });
               btn.classList.add("is-on");
-              picked.slot = label;
+              picked.slot = watSlot;
+              picked.displaySlot = dispSlot;
               form.hidden = false;
               goBtn.textContent = T.confirm.replace("{slot}", niceSlot());
               var nameInput = form.querySelector('[name="name"]');
@@ -251,7 +353,7 @@
               if (nameInput && !nameInput.value) nameInput.focus();
               else if (emailInput) emailInput.focus();
             });
-          })(label, b);
+          })(canonicalWatLabel, displayLabel, b);
         }
         slotsEl.appendChild(b);
       }
@@ -259,7 +361,8 @@
     }
 
     function niceSlot() {
-      return T.days[picked.date.getDay()] + " " + picked.date.getDate() + " " + T.months[picked.date.getMonth()] + " · " + picked.slot;
+      var shownTime = picked.displaySlot || picked.slot;
+      return T.days[picked.date.getDay()] + " " + picked.date.getDate() + " " + T.months[picked.date.getMonth()] + " · " + shownTime;
     }
 
     form.addEventListener("submit", function (e) {
@@ -274,13 +377,15 @@
         email: form.email.value.trim(),
         notes: form.notes.value ? form.notes.value.trim() : null,
         starts_at: dateKey(picked.date) + " " + picked.slot,
+        client_timezone: selectedTz,
+        client_time_label: (picked.displaySlot || picked.slot) + " (" + selectedTz.replace(/_/g, " ") + ")",
         lang: (opts.lang || "en"),
-        source: opts.source || "site",
+        source: opts.source || "site"
       };
       fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify(payload),
+        body: JSON.stringify(payload)
       }).then(function (r) {
         if (r.status === 409) throw { taken: true };
         if (!r.ok) throw new Error("http " + r.status);
@@ -300,13 +405,41 @@
       var slotTxt = niceSlot();
       var meetingUrl = resData.meetingUrl || ("https://meet.jit.si/Feyron-" + Date.now());
       var gcalUrl = resData.gcalUrl || "#";
+      var outlookUrl = resData.outlookUrl || "#";
       var ics = buildIcs(payload, opts, T, meetingUrl);
+      var tzDisplay = selectedTz.replace(/_/g, " ");
+
+      try {
+        var existingBks = JSON.parse(localStorage.getItem("feyron-bookings") || "[]");
+        var parts = String(payload.starts_at || "").split(" ");
+        existingBks.unshift({
+          id: resData.bookingId || ("bk_" + Date.now()),
+          name: payload.name,
+          email: payload.email,
+          notes: payload.notes || null,
+          startsAt: payload.starts_at,
+          date: parts[0] || "",
+          time: parts[1] || "",
+          formattedDate: slotTxt,
+          clientTimezone: selectedTz,
+          clientTimeLabel: payload.client_time_label || "",
+          meetingUrl: meetingUrl,
+          gcalUrl: gcalUrl,
+          outlookUrl: outlookUrl,
+          source: payload.source || "site",
+          status: "Audit Scheduled",
+          internalNotes: "",
+          reminderSent: false,
+          createdAt: new Date().toISOString()
+        });
+        localStorage.setItem("feyron-bookings", JSON.stringify(existingBks));
+      } catch (err) {}
 
       card.innerHTML =
         '<button type="button" class="cs-book__x" aria-label="Close">×</button>' +
         '<div class="cs-book__done">' +
         "<h3>" + T.booked + ' <svg style="width:.9em;height:.9em;vertical-align:-.08em;color:#4ade80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.6 12.8 L9.4 18.2 C12 12 16 6.8 20.6 4.6"/></svg></h3>' +
-        "<p>" + T.bookedSub.replace("{slot}", slotTxt).replace("{tz}", TZ_NOTE) + "</p>" +
+        "<p>" + T.bookedSub.replace("{slot}", slotTxt).replace("{tz}", tzDisplay) + "</p>" +
         '<div class="cs-book__meet-box">' +
         '<span class="cs-book__meet-kicker">' + T.meetingLabel + "</span>" +
         '<div class="cs-book__meet-row">' +
@@ -314,8 +447,9 @@
         '<button type="button" class="cs-book__ghostbtn" style="padding:6px 14px;font-size:12px" data-copy-meet>' + T.copyMeet + "</button>" +
         "</div>" +
         "</div>" +
-        '<div style="display:flex;flex-wrap:wrap;justify-content:center;gap:10px">' +
+        '<div style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px">' +
         '<a class="cs-book__go" href="' + gcalUrl + '" target="_blank" rel="noopener">' + T.gcalDirect + "</a>" +
+        '<a class="cs-book__ghostbtn" href="' + outlookUrl + '" target="_blank" rel="noopener">' + T.outlookDirect + "</a>" +
         '<a class="cs-book__ghostbtn" download="feyron-call.ics" href="' + ics + '">' + T.ics + "</a>" +
         '<button type="button" class="cs-book__ghostbtn" data-close>' + T.back + "</button>" +
         "</div>" +
@@ -353,7 +487,7 @@
         "SUMMARY:" + title,
         "LOCATION:" + (meetingUrl || "https://feyron.site"),
         "DESCRIPTION:Join Video Meeting: " + (meetingUrl || "") + "\\nhello@feyron.site",
-        "END:VEVENT", "END:VCALENDAR",
+        "END:VEVENT", "END:VCALENDAR"
       ].join("\r\n");
       return "data:text/calendar;charset=utf-8," + encodeURIComponent(body);
     }

@@ -1,4 +1,6 @@
 import dotenv from 'dotenv';
+import fs from 'fs';
+import path from 'path';
 
 dotenv.config();
 
@@ -26,14 +28,25 @@ function getTelegramChatId(): string {
   return (process.env.TELEGRAM_CHAT_ID || '').trim();
 }
 
+export function getDashboardPasscode(): string {
+  return (process.env.DASHBOARD_PASSCODE || 'feyron2026').trim();
+}
+
 let cachedAutoTelegramChatId = '';
+
+export interface TelegramButton {
+  text: string;
+  url: string;
+}
 
 /**
  * Sends a real-time notification message to Telegram via Bot API.
- * If TELEGRAM_CHAT_ID is not explicitly set, automatically inspects the latest
- * bot `/start` message via getUpdates so setup is effortless.
+ * Supports optional inline action buttons.
  */
-export async function sendTelegramNotification(htmlMessage: string): Promise<void> {
+export async function sendTelegramNotification(
+  htmlMessage: string,
+  inlineButtons?: TelegramButton[][]
+): Promise<void> {
   const token = getTelegramBotToken();
   if (!token) return;
 
@@ -61,15 +74,23 @@ export async function sendTelegramNotification(htmlMessage: string): Promise<voi
 
     if (!chatId) return;
 
+    const payload: Record<string, any> = {
+      chat_id: chatId,
+      text: htmlMessage,
+      parse_mode: 'HTML',
+      disable_web_page_preview: true,
+    };
+
+    if (inlineButtons && inlineButtons.length > 0) {
+      payload.reply_markup = {
+        inline_keyboard: inlineButtons,
+      };
+    }
+
     await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: chatId,
-        text: htmlMessage,
-        parse_mode: 'HTML',
-        disable_web_page_preview: true,
-      }),
+      body: JSON.stringify(payload),
     });
   } catch (err) {
     console.error('Telegram notification error (non-blocking):', err);
@@ -493,22 +514,52 @@ function buildContactAutoResponderHtml(opts: {
 function buildBookingConfirmationHtml(opts: {
   fullName: string;
   email: string;
+  notes?: string;
   dateStr: string;
   slotStr: string;
   endSlotStr: string;
   formattedDate: string;
   meetingUrl: string;
   gcalUrl: string;
+  outlookUrl?: string;
+  clientTimeLabel?: string;
   rescheduleUrl: string;
+  isReminder?: boolean;
+  isInternal?: boolean;
 }): string {
   const firstName = opts.fullName.split(/\s+/)[0] || opts.fullName;
   const safeFirstName = escapeHtml(firstName);
+  const safeFullName = escapeHtml(opts.fullName);
+  const safeEmail = escapeHtml(opts.email);
+  const safeNotes = opts.notes ? escapeHtml(opts.notes).replace(/\r?\n/g, '<br/>') : '';
   const safeDate = escapeHtml(opts.formattedDate);
   const safeStart = escapeHtml(opts.slotStr);
   const safeEnd = escapeHtml(opts.endSlotStr);
   const safeMeetingUrl = escapeHtml(opts.meetingUrl);
   const safeGcalUrl = escapeHtml(opts.gcalUrl);
+  const safeOutlookUrl = opts.outlookUrl ? escapeHtml(opts.outlookUrl) : '';
+  const safeClientTime = opts.clientTimeLabel ? escapeHtml(opts.clientTimeLabel) : '';
   const safeRescheduleUrl = escapeHtml(opts.rescheduleUrl);
+  const heroBadge = opts.isInternal
+    ? 'New Meeting Booked'
+    : opts.isReminder
+      ? 'Upcoming Call Reminder'
+      : 'Meeting Confirmed';
+  const heroHeadline = opts.isInternal
+    ? `New call booked with ${opts.fullName}.`
+    : opts.isReminder
+      ? 'Your call with Feyron starts soon.'
+      : 'Your call with Feyron is confirmed.';
+  const emailTitle = opts.isInternal
+    ? `New call booked with ${safeFullName} | Feyron`
+    : opts.isReminder
+      ? 'Reminder: Your call with Feyron | Feyron'
+      : 'Your call with Feyron is confirmed | Feyron';
+  const heroIntro = opts.isInternal
+    ? `${safeFullName} (<a href="mailto:${safeEmail}" style="color:#FEB47B;text-decoration:underline;">${safeEmail}</a>) scheduled a 20-minute call for ${safeDate} at ${safeStart} WAT. The direct video meeting link and session details are below.`
+    : opts.isReminder
+      ? `Hi ${safeFirstName}, this is a quick reminder for your upcoming 20-minute call with Feyron. Your direct video meeting link is below.`
+      : `Hi ${safeFirstName}, thank you for scheduling a 20-minute call with Feyron. Your session details and direct video meeting link are below.`;
 
   return `<!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -520,7 +571,7 @@ function buildBookingConfirmationHtml(opts: {
 <meta name="format-detection" content="telephone=no, date=no, address=no, email=no">
 <meta name="color-scheme" content="light dark">
 <meta name="supported-color-schemes" content="light dark">
-<title>Your workflow audit is booked | Feyron</title>
+<title>${emailTitle}</title>
 <!--[if mso]>
 <noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>
 <style>table,td,div,p,a,span{font-family:Arial,Helvetica,sans-serif !important;}</style>
@@ -608,9 +659,9 @@ function buildBookingConfirmationHtml(opts: {
   <!-- HERO -->
   <tr>
     <td class="px" bgcolor="#1E1E1E" style="background-color:#1E1E1E;padding:48px 40px 52px 40px;">
-      <p style="margin:0 0 18px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:12px;line-height:16px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:#4ADE80;">Booking confirmed</p>
-      <h1 class="hero-h" style="margin:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:36px;line-height:42px;font-weight:700;letter-spacing:-1px;color:#FFFFFF;">Your workflow audit is booked.</h1>
-      <p style="margin:20px 0 0 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:17px;line-height:27px;color:#E7E7E7;">Hi ${safeFirstName}, thank you for booking. In a few days we will map one process, find where time is lost and give you a written plan with a scope and a price.</p>
+      <p style="margin:0 0 18px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:12px;line-height:16px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:#4ADE80;">${escapeHtml(heroBadge)}</p>
+      <h1 class="hero-h" style="margin:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:36px;line-height:42px;font-weight:700;letter-spacing:-1px;color:#FFFFFF;">${escapeHtml(heroHeadline)}</h1>
+      <p style="margin:20px 0 0 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:17px;line-height:27px;color:#E7E7E7;">${heroIntro}</p>
     </td>
   </tr>
  
@@ -618,29 +669,45 @@ function buildBookingConfirmationHtml(opts: {
   <tr>
     <td class="px card" bgcolor="#FFFFFF" style="background-color:#FFFFFF;padding:40px 40px 8px 40px;">
  
-      <h3 class="t-dark" style="margin:0 0 16px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:13px;line-height:18px;letter-spacing:1.6px;text-transform:uppercase;font-weight:700;color:#1E1E1E;">Your session</h3>
+      <h3 class="t-dark" style="margin:0 0 16px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:13px;line-height:18px;letter-spacing:1.6px;text-transform:uppercase;font-weight:700;color:#1E1E1E;">Session details</h3>
  
       <!-- DETAILS CARD -->
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 32px 0;">
         <tr>
           <td class="callout" bgcolor="#F3F3F3" style="background-color:#F3F3F3;border-left:4px solid #FEB47B;border-radius:0 10px 10px 0;padding:22px 24px;">
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+              ${
+                opts.isInternal
+                  ? `<tr>
+                <td class="lbl t-muted" width="110" valign="top" style="width:110px;padding:0 0 12px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:14px;line-height:22px;color:#5F5F5F;">Guest</td>
+                <td class="val t-dark" valign="top" style="padding:0 0 12px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:22px;font-weight:700;color:#1E1E1E;">${safeFullName} (${safeEmail})</td>
+              </tr>`
+                  : ''
+              }
               <tr>
                 <td class="lbl t-muted" width="110" valign="top" style="width:110px;padding:0 0 12px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:14px;line-height:22px;color:#5F5F5F;">Date</td>
                 <td class="val t-dark" valign="top" style="padding:0 0 12px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:22px;font-weight:700;color:#1E1E1E;">${safeDate}</td>
               </tr>
               <tr>
                 <td class="lbl t-muted" width="110" valign="top" style="width:110px;padding:0 0 12px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:14px;line-height:22px;color:#5F5F5F;">Time</td>
-                <td class="val t-dark" valign="top" style="padding:0 0 12px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:22px;font-weight:700;color:#1E1E1E;">${safeStart} to ${safeEnd} (West Africa Time)</td>
+                <td class="val t-dark" valign="top" style="padding:0 0 12px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:22px;font-weight:700;color:#1E1E1E;">${safeStart} to ${safeEnd} (West Africa Time)${safeClientTime ? `<br><span style="font-size:13px;font-weight:500;color:#5F5F5F;">Local time: ${safeClientTime}</span>` : ''}</td>
               </tr>
               <tr>
                 <td class="lbl t-muted" width="110" valign="top" style="width:110px;padding:0 0 12px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:14px;line-height:22px;color:#5F5F5F;">Format</td>
-                <td class="val t-dark" valign="top" style="padding:0 0 12px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:22px;font-weight:700;color:#1E1E1E;">Video call (<a href="${safeMeetingUrl}" style="color:#1E1E1E;text-decoration:underline;">Meeting room link</a>)</td>
+                <td class="val t-dark" valign="top" style="padding:0 0 12px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:22px;font-weight:700;color:#1E1E1E;">20-minute video call (<a href="${safeMeetingUrl}" style="color:#1E1E1E;text-decoration:underline;">Meeting room link</a>)</td>
               </tr>
               <tr>
-                <td class="lbl t-muted" width="110" valign="top" style="width:110px;padding:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:14px;line-height:22px;color:#5F5F5F;">With</td>
-                <td class="val t-dark" valign="top" style="padding:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:22px;font-weight:700;color:#1E1E1E;">Fredy, Feyron Team</td>
+                <td class="lbl t-muted" width="110" valign="top" style="width:110px;padding:${safeNotes ? '0 0 12px 0' : '0'};font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:14px;line-height:22px;color:#5F5F5F;">With</td>
+                <td class="val t-dark" valign="top" style="padding:${safeNotes ? '0 0 12px 0' : '0'};font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:22px;font-weight:700;color:#1E1E1E;">Fredy, Feyron Team</td>
               </tr>
+              ${
+                safeNotes
+                  ? `<tr>
+                <td class="lbl t-muted" width="110" valign="top" style="width:110px;padding:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:14px;line-height:22px;color:#5F5F5F;">Topic / Notes</td>
+                <td class="val t-dark" valign="top" style="padding:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:15px;line-height:22px;font-weight:500;color:#1E1E1E;">${safeNotes}</td>
+              </tr>`
+                  : ''
+              }
             </table>
           </td>
         </tr>
@@ -651,41 +718,41 @@ function buildBookingConfirmationHtml(opts: {
         <tr>
           <td class="btn-td" bgcolor="#FEB47B" style="background-color:#FEB47B;border-radius:10px;">
             <!--[if mso]>
-            <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="${safeMeetingUrl}" style="height:50px;v-text-anchor:middle;width:200px;" arcsize="20%" stroke="f" fillcolor="#FEB47B"><w:anchorlock/><center style="color:#1E1E1E;font-family:Arial,sans-serif;font-size:16px;font-weight:bold;">Join the session</center></v:roundrect>
+            <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="${safeMeetingUrl}" style="height:50px;v-text-anchor:middle;width:200px;" arcsize="20%" stroke="f" fillcolor="#FEB47B"><w:anchorlock/><center style="color:#1E1E1E;font-family:Arial,sans-serif;font-size:16px;font-weight:bold;">Join the call</center></v:roundrect>
             <![endif]-->
             <!--[if !mso]><!-- -->
-            <a class="btn-a" href="${safeMeetingUrl}" style="display:inline-block;padding:15px 30px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:20px;font-weight:700;color:#1E1E1E;text-decoration:none;border-radius:10px;">Join the session</a>
+            <a class="btn-a" href="${safeMeetingUrl}" style="display:inline-block;padding:15px 30px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:20px;font-weight:700;color:#1E1E1E;text-decoration:none;border-radius:10px;">Join the call</a>
             <!--<![endif]-->
           </td>
         </tr>
       </table>
       <p class="t-muted" style="margin:0 0 36px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:14px;line-height:22px;color:#5F5F5F;">
-        <a href="${safeGcalUrl}" style="color:#1E1E1E;text-decoration:underline;" class="t-dark">Add to Google Calendar</a> &nbsp;|&nbsp;
+        <a href="${safeGcalUrl}" style="color:#1E1E1E;text-decoration:underline;" class="t-dark">Add to Google Calendar</a>${safeOutlookUrl ? ` &nbsp;|&nbsp; <a href="${safeOutlookUrl}" style="color:#1E1E1E;text-decoration:underline;" class="t-dark">Add to Outlook</a>` : ''} &nbsp;|&nbsp;
         <a href="${safeRescheduleUrl}" style="color:#1E1E1E;text-decoration:underline;" class="t-dark">Reschedule</a>
       </p>
  
       <!-- PREPARE -->
-      <h3 class="t-dark" style="margin:0 0 18px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:13px;line-height:18px;letter-spacing:1.6px;text-transform:uppercase;font-weight:700;color:#1E1E1E;">How to prepare</h3>
+      <h3 class="t-dark" style="margin:0 0 18px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:13px;line-height:18px;letter-spacing:1.6px;text-transform:uppercase;font-weight:700;color:#1E1E1E;">What we will cover</h3>
  
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 32px 0;">
         <tr>
           <td valign="top" width="14" style="width:14px;padding-top:6px;"><table role="presentation" width="12" cellpadding="0" cellspacing="0" border="0"><tr><td width="12" height="12" bgcolor="#FEB47B" style="width:12px;height:12px;background-color:#FEB47B;border-radius:3px;font-size:0;line-height:0;">&nbsp;</td></tr></table></td>
-          <td class="t-dark" style="padding:0 0 16px 14px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:25px;color:#1E1E1E;"><strong>Pick one process.</strong> The task that takes the most time each week, such as handling enquiries, documents or follow-ups.</td>
+          <td class="t-dark" style="padding:0 0 16px 14px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:25px;color:#1E1E1E;"><strong>Your goals &amp; priorities.</strong> What you are looking to build, automate, integrate or improve for your team or customers.</td>
         </tr>
         <tr>
           <td valign="top" width="14" style="width:14px;padding-top:6px;"><table role="presentation" width="12" cellpadding="0" cellspacing="0" border="0"><tr><td width="12" height="12" bgcolor="#C084FC" style="width:12px;height:12px;background-color:#C084FC;border-radius:3px;font-size:0;line-height:0;">&nbsp;</td></tr></table></td>
-          <td class="t-dark" style="padding:0 0 16px 14px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:25px;color:#1E1E1E;"><strong>List the tools involved.</strong> Email, WhatsApp, spreadsheets, accounting or CRM software, and anything else the work touches.</td>
+          <td class="t-dark" style="padding:0 0 16px 14px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:25px;color:#1E1E1E;"><strong>Current setup &amp; tools.</strong> Any existing websites, software platforms, communication channels or workflows your team uses today.</td>
         </tr>
         <tr>
           <td valign="top" width="14" style="width:14px;padding-top:6px;"><table role="presentation" width="12" cellpadding="0" cellspacing="0" border="0"><tr><td width="12" height="12" bgcolor="#4ADE80" style="width:12px;height:12px;background-color:#4ADE80;border-radius:3px;font-size:0;line-height:0;">&nbsp;</td></tr></table></td>
-          <td class="t-dark" style="padding:0 0 0 14px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:25px;color:#1E1E1E;"><strong>Bring an example.</strong> A recent enquiry, document or report, with private details removed, and the person who does this work if possible.</td>
+          <td class="t-dark" style="padding:0 0 0 14px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:25px;color:#1E1E1E;"><strong>Practical next steps.</strong> Clear recommendations on architecture, scope, delivery timeline and how we can move your project forward.</td>
         </tr>
       </table>
  
       <!-- WHAT HAPPENS AFTER -->
-      <h3 class="t-dark" style="margin:0 0 12px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:13px;line-height:18px;letter-spacing:1.6px;text-transform:uppercase;font-weight:700;color:#1E1E1E;">After the session</h3>
-      <p class="t-dark" style="margin:0 0 20px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:26px;color:#1E1E1E;">Within 2 working days you will receive a written plan: how the work moves today, what we would build, where a person approves, the timeline and the price. If you decide to build with us within 30 days, the audit fee counts towards the project.</p>
-      <p class="t-dark" style="margin:0 0 30px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:26px;color:#1E1E1E;">Need to change anything? Reply directly to this email or use the reschedule link above.</p>
+      <h3 class="t-dark" style="margin:0 0 12px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:13px;line-height:18px;letter-spacing:1.6px;text-transform:uppercase;font-weight:700;color:#1E1E1E;">After the call</h3>
+      <p class="t-dark" style="margin:0 0 20px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:26px;color:#1E1E1E;">Following our conversation, we will send you a clear written summary outlining what we recommend building, how it connects to your operations, the delivery timeline and transparent pricing.</p>
+      <p class="t-dark" style="margin:0 0 30px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:26px;color:#1E1E1E;">Need to share anything ahead of time or adjust your slot? Reply directly to this email or use the reschedule link above.</p>
  
       <p class="t-dark" style="margin:0 0 6px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:26px;color:#1E1E1E;">Best regards,</p>
  
@@ -711,7 +778,7 @@ function buildBookingConfirmationHtml(opts: {
         <tr>
           <td style="border-top:1px solid #3A3A3A;padding-top:18px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:12px;line-height:19px;color:#A9A9A9;">
             Feyron Technologies &nbsp;|&nbsp; Lagos, Nigeria<br><br>
-            You are receiving this email because you booked a workflow audit with Feyron at feyron.site.
+            You are receiving this email because you scheduled a call with Feyron at feyron.site.
             <a href="https://feyron.site/privacy" style="color:#E7E7E7;text-decoration:underline;">Privacy</a><br><br>
             &copy; 2026 Feyron. AI Productivity &amp; Technology.
           </td>
@@ -871,18 +938,39 @@ export async function handleContactSubmission(body: ContactSubmissionBody): Prom
     replyTo: rawEmail,
   });
 
-  // Also dispatch real-time Telegram Bot notification
+  // Persist enquiry record for the Team Dashboard
+  const enquiryId = `enq-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+  recordEnquiry({
+    id: enquiryId,
+    name: rawName,
+    email: rawEmail,
+    company: rawCompany || 'Not specified',
+    interest: interestLabel,
+    details: rawMessage,
+    source,
+    status: 'New',
+    internalNotes: '',
+    createdAt: new Date().toISOString(),
+  });
+
+  // Also dispatch real-time Telegram Bot notification (zero emojis, clean typography + inline action buttons)
   await sendTelegramNotification(
     [
-      `🔔 <b>New Feyron Lead (${safeInterest})</b>`,
-      `👤 <b>Name:</b> ${safeName}`,
-      `📧 <b>Email:</b> ${safeEmail}`,
-      `🏢 <b>Company:</b> ${safeCompany}`,
-      `📍 <b>Source:</b> ${safeSource}`,
+      `<b>NEW FEYRON ENQUIRY — ${safeInterest.toUpperCase()}</b>`,
+      `<b>Name:</b> ${safeName}`,
+      `<b>Email:</b> ${safeEmail}`,
+      `<b>Company:</b> ${safeCompany}`,
+      `<b>Source:</b> ${safeSource}`,
       ``,
-      `💬 <b>Details:</b>`,
+      `<b>Details:</b>`,
       escapeHtml(rawMessage),
-    ].join('\n')
+    ].join('\n'),
+    [
+      [
+        { text: 'Open Team Dashboard', url: 'https://feyron.site/dashboard' },
+        { text: 'Visit feyron.site', url: 'https://feyron.site' },
+      ],
+    ]
   );
 
   if (!internalResult.success) {
@@ -923,8 +1011,112 @@ export async function handleContactSubmission(body: ContactSubmissionBody): Prom
   };
 }
 
+// ============================================================================
+// Persistent Lead & Booking Store (data/feyron-store.json + in-memory cache)
+// ============================================================================
+
+export type LeadStatus = 'New' | 'Contacted' | 'Audit Scheduled' | 'Proposal Sent' | 'Archived';
+
+export interface EnquiryRecord {
+  id: string;
+  name: string;
+  email: string;
+  company: string;
+  interest: string;
+  details: string;
+  source: string;
+  status: LeadStatus;
+  internalNotes: string;
+  createdAt: string;
+}
+
+export interface BookingRecord {
+  id: string;
+  name: string;
+  email: string;
+  notes: string;
+  date: string;
+  time: string;
+  endTime: string;
+  formattedDate: string;
+  clientTimezone: string;
+  clientTimeLabel: string;
+  meetingUrl: string;
+  gcalUrl: string;
+  outlookUrl: string;
+  status: LeadStatus;
+  reminderSent: boolean;
+  internalNotes: string;
+  createdAt: string;
+}
+
+interface FeyronDataStore {
+  enquiries: EnquiryRecord[];
+  bookings: BookingRecord[];
+}
+
+const STORE_FILE = path.join(process.cwd(), 'data', 'feyron-store.json');
+
+const memoryStore: FeyronDataStore = {
+  enquiries: [],
+  bookings: [],
+};
+
 // In-memory store for booked 20-min call slots per date (YYYY-MM-DD -> Set of "HH:MM")
 const bookedSlotsByDate = new Map<string, Set<string>>();
+
+function loadPersistentStore(): FeyronDataStore {
+  try {
+    if (fs.existsSync(STORE_FILE)) {
+      const raw = fs.readFileSync(STORE_FILE, 'utf-8');
+      const parsed = JSON.parse(raw);
+      if (parsed && typeof parsed === 'object') {
+        memoryStore.enquiries = Array.isArray(parsed.enquiries) ? parsed.enquiries : [];
+        memoryStore.bookings = Array.isArray(parsed.bookings) ? parsed.bookings : [];
+        for (const b of memoryStore.bookings) {
+          if (b.date && b.time && b.status !== 'Archived') {
+            const set = bookedSlotsByDate.get(b.date) || new Set<string>();
+            set.add(b.time);
+            bookedSlotsByDate.set(b.date, set);
+          }
+        }
+      }
+    }
+  } catch {
+    // Fallback to in-memory store if filesystem is read-only
+  }
+  return memoryStore;
+}
+
+function savePersistentStore(): void {
+  try {
+    const dir = path.dirname(STORE_FILE);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    fs.writeFileSync(STORE_FILE, JSON.stringify(memoryStore, null, 2), 'utf-8');
+  } catch {
+    // Ignore write errors in read-only serverless environments
+  }
+}
+
+loadPersistentStore();
+
+function recordEnquiry(item: EnquiryRecord): void {
+  memoryStore.enquiries.unshift(item);
+  if (memoryStore.enquiries.length > 500) {
+    memoryStore.enquiries.length = 500;
+  }
+  savePersistentStore();
+}
+
+function recordBooking(item: BookingRecord): void {
+  memoryStore.bookings.unshift(item);
+  if (memoryStore.bookings.length > 500) {
+    memoryStore.bookings.length = 500;
+  }
+  savePersistentStore();
+}
 
 export function getBookedSlotsForDate(dateStr: string): { taken: string[] } {
   const clean = String(dateStr || '').trim();
@@ -966,6 +1158,16 @@ function calculateEndSlot(slotPart: string, durationMinutes = 20): string {
   return `${endHH}:${endMM}`;
 }
 
+/**
+ * Converts a Lagos (Africa/Lagos, UTC+1) date + HH:MM into a UTC Date instance.
+ */
+function lagosSlotToUtcDate(datePart: string, slotPart: string): Date {
+  const [y, m, d] = datePart.split('-').map(Number);
+  const [hh, mm] = slotPart.split(':').map(Number);
+  // Lagos is UTC+1 year-round (no DST)
+  return new Date(Date.UTC(y, m - 1, d, hh - 1, mm, 0));
+}
+
 function buildGoogleCalendarTemplateUrl(
   datePart: string,
   slotPart: string,
@@ -996,6 +1198,38 @@ function buildGoogleCalendarTemplateUrl(
       .join('\n'),
   });
   return `https://calendar.google.com/calendar/render?${params.toString()}`;
+}
+
+function buildOutlookCalendarUrl(
+  datePart: string,
+  slotPart: string,
+  endSlotPart: string,
+  guestName: string,
+  guestEmail: string,
+  notes: string,
+  meetingUrl: string
+): string {
+  const startUtc = lagosSlotToUtcDate(datePart, slotPart).toISOString().replace(/\.\d+Z$/, 'Z');
+  const endUtc = lagosSlotToUtcDate(datePart, endSlotPart).toISOString().replace(/\.\d+Z$/, 'Z');
+
+  const params = new URLSearchParams({
+    path: '/calendar/action/compose',
+    rru: 'addevent',
+    subject: `Call — ${guestName} × Feyron`,
+    startdt: startUtc,
+    enddt: endUtc,
+    location: meetingUrl,
+    body: [
+      `20-minute Feyron Workflow Audit & Discovery Call`,
+      `Join Video Session: ${meetingUrl}`,
+      `Guest: ${guestName} (${guestEmail})`,
+      notes ? `Notes: ${notes}` : '',
+      `https://feyron.site | hello@feyron.site`,
+    ]
+      .filter(Boolean)
+      .join('\n'),
+  });
+  return `https://outlook.live.com/calendar/0/deeplink/compose?${params.toString()}`;
 }
 
 function buildIcsCalendarInvite(
@@ -1038,6 +1272,83 @@ function buildIcsCalendarInvite(
   ].join('\r\n');
 }
 
+export async function sendBookingReminderEmail(booking: BookingRecord): Promise<{
+  ok: boolean;
+  error?: string;
+}> {
+  const rescheduleUrl = 'https://feyron.site/contact';
+  const reminderHtml = buildBookingConfirmationHtml({
+    fullName: booking.name,
+    email: booking.email,
+    notes: booking.notes,
+    dateStr: booking.date,
+    slotStr: booking.time,
+    endSlotStr: booking.endTime,
+    formattedDate: booking.formattedDate,
+    meetingUrl: booking.meetingUrl,
+    gcalUrl: booking.gcalUrl,
+    outlookUrl: booking.outlookUrl,
+    clientTimeLabel: booking.clientTimeLabel,
+    rescheduleUrl,
+    isReminder: true,
+  });
+
+  const res = await sendEmailViaResend({
+    to: [booking.email],
+    subject: `Reminder: Your call with Feyron (${booking.formattedDate} at ${booking.time} WAT)`,
+    html: reminderHtml,
+    text: [
+      `Hi ${booking.name},`,
+      ``,
+      `This is a reminder for your upcoming 20-minute call with Feyron.`,
+      `Date: ${booking.formattedDate}`,
+      `Time: ${booking.time} to ${booking.endTime} (West Africa Time)${booking.clientTimeLabel ? ` / ${booking.clientTimeLabel}` : ''}`,
+      `Join Video Meeting: ${booking.meetingUrl}`,
+      ``,
+      `— Fredy`,
+      `Feyron Team`,
+      `https://feyron.site | hello@feyron.site`,
+    ].join('\n'),
+    replyTo: getToEmail(),
+  });
+
+  await sendTelegramNotification(
+    [
+      `<b>REMINDER DISPATCHED — FEYRON CALL</b>`,
+      `<b>Guest:</b> ${escapeHtml(booking.name)} (${escapeHtml(booking.email)})`,
+      `<b>When:</b> ${escapeHtml(booking.formattedDate)} at ${escapeHtml(booking.time)} WAT`,
+      `<b>Meeting Link:</b> <a href="${escapeHtml(booking.meetingUrl)}">${escapeHtml(booking.meetingUrl)}</a>`,
+    ].join('\n'),
+    [
+      [
+        { text: 'Open Meeting Room', url: booking.meetingUrl },
+        { text: 'Open Team Dashboard', url: 'https://feyron.site/dashboard' },
+      ],
+    ]
+  );
+
+  if (res.success) {
+    booking.reminderSent = true;
+    savePersistentStore();
+    return { ok: true };
+  }
+  return { ok: false, error: res.error || 'Could not send reminder email.' };
+}
+
+function scheduleTwoHourReminderIfUpcoming(booking: BookingRecord): void {
+  const startUtcMs = lagosSlotToUtcDate(booking.date, booking.time).getTime();
+  const twoHoursBeforeMs = startUtcMs - 2 * 60 * 60 * 1000;
+  const delayMs = twoHoursBeforeMs - Date.now();
+  // Schedule in-memory timer if the reminder window is in the future and within 7 days
+  if (delayMs > 60 * 1000 && delayMs < 7 * 24 * 60 * 60 * 1000) {
+    setTimeout(() => {
+      if (!booking.reminderSent && booking.status !== 'Archived') {
+        sendBookingReminderEmail(booking).catch(() => {});
+      }
+    }, delayMs);
+  }
+}
+
 export interface BookingSubmissionBody {
   website?: string;
   name?: string;
@@ -1046,6 +1357,8 @@ export interface BookingSubmissionBody {
   starts_at?: string;
   date?: string;
   time?: string;
+  client_timezone?: string;
+  client_time_label?: string;
   lang?: string;
   source?: string;
 }
@@ -1057,6 +1370,7 @@ export async function handleBookingSubmission(body: BookingSubmissionBody): Prom
     error?: string;
     id?: string;
     gcalUrl?: string;
+    outlookUrl?: string;
     meetingUrl?: string;
   };
 }> {
@@ -1067,6 +1381,8 @@ export async function handleBookingSubmission(body: BookingSubmissionBody): Prom
   const name = String(body.name || '').trim();
   const email = String(body.email || '').trim();
   const notes = String(body.notes || '').trim();
+  const clientTimezone = String(body.client_timezone || 'Africa/Lagos').trim();
+  const clientTimeLabel = String(body.client_time_label || '').trim();
   const startsAt = String(
     body.starts_at || (body.date && body.time ? `${body.date} ${body.time}` : '')
   ).trim(); // "YYYY-MM-DD HH:MM"
@@ -1109,6 +1425,15 @@ export async function handleBookingSubmission(body: BookingSubmissionBody): Prom
     notes,
     meetingUrl
   );
+  const outlookUrl = buildOutlookCalendarUrl(
+    datePart,
+    slotPart,
+    endSlotPart,
+    name,
+    email,
+    notes,
+    meetingUrl
+  );
   const rescheduleUrl = 'https://feyron.site/contact';
 
   const icsContent = buildIcsCalendarInvite(
@@ -1122,17 +1447,37 @@ export async function handleBookingSubmission(body: BookingSubmissionBody): Prom
   );
   const icsBase64 = Buffer.from(icsContent, 'utf-8').toString('base64');
 
-  // Build the official Feyron Booking Email HTML
+  // Build the official Feyron Booking Email HTML for the guest
   const guestBookingHtml = buildBookingConfirmationHtml({
     fullName: name,
     email,
+    notes,
     dateStr: datePart,
     slotStr: slotPart,
     endSlotStr: endSlotPart,
     formattedDate,
     meetingUrl,
     gcalUrl,
+    outlookUrl,
+    clientTimeLabel,
     rescheduleUrl,
+  });
+
+  // Build the internal notification HTML for the Feyron team inbox
+  const internalBookingHtml = buildBookingConfirmationHtml({
+    fullName: name,
+    email,
+    notes,
+    dateStr: datePart,
+    slotStr: slotPart,
+    endSlotStr: endSlotPart,
+    formattedDate,
+    meetingUrl,
+    gcalUrl,
+    outlookUrl,
+    clientTimeLabel,
+    rescheduleUrl,
+    isInternal: true,
   });
 
   const attachments: ResendAttachment[] = [
@@ -1146,32 +1491,61 @@ export async function handleBookingSubmission(body: BookingSubmissionBody): Prom
   // Send confirmation to internal inbox
   const res = await sendEmailViaResend({
     to: [getToEmail()],
-    subject: `[Feyron Call Booked] ${name} — ${formattedDate} (${slotPart} WAT)`,
-    html: guestBookingHtml,
+    subject: `[Feyron] New call booked with ${name} — ${formattedDate} (${slotPart} WAT)`,
+    html: internalBookingHtml,
     text: [
-      `New 20-min workflow audit call booked on feyron.site`,
+      `New 20-minute call booked on feyron.site`,
       `Guest: ${name} (${email})`,
       `Date: ${formattedDate}`,
-      `Time: ${slotPart} to ${endSlotPart} (West Africa Time)`,
+      `Time: ${slotPart} to ${endSlotPart} (West Africa Time)${clientTimeLabel ? ` / Guest local: ${clientTimeLabel}` : ''}`,
       `Join Video Meeting: ${meetingUrl}`,
       `Notes: ${notes || 'None'}`,
       `Add to Google Calendar: ${gcalUrl}`,
+      `Add to Outlook: ${outlookUrl}`,
     ].join('\n'),
     replyTo: email,
     attachments,
   });
 
-  // Also dispatch real-time Telegram Bot alert with the meeting link
+  const bookingRecord: BookingRecord = {
+    id: `bk-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    name,
+    email,
+    notes,
+    date: datePart,
+    time: slotPart,
+    endTime: endSlotPart,
+    formattedDate,
+    clientTimezone,
+    clientTimeLabel,
+    meetingUrl,
+    gcalUrl,
+    outlookUrl,
+    status: 'Audit Scheduled',
+    reminderSent: false,
+    internalNotes: '',
+    createdAt: new Date().toISOString(),
+  };
+  recordBooking(bookingRecord);
+  scheduleTwoHourReminderIfUpcoming(bookingRecord);
+
+  // Dispatch real-time Telegram Bot alert (zero emojis, clean typography + inline action buttons)
   await sendTelegramNotification(
     [
-      `📅 <b>New 20-Min Call Booked on Feyron!</b>`,
-      `👤 <b>Guest:</b> ${escapeHtml(name)}`,
-      `📧 <b>Email:</b> ${escapeHtml(email)}`,
-      `🕒 <b>When:</b> ${escapeHtml(formattedDate)} at ${escapeHtml(slotPart)} (WAT)`,
-      `🎥 <b>Meeting Link:</b> <a href="${safeMeetingUrl}">${safeMeetingUrl}</a>`,
-      `📝 <b>Notes:</b> ${escapeHtml(notes || 'None')}`,
-      `🔗 <a href="${escapeHtml(gcalUrl)}">+ Add to Google Calendar</a>`,
-    ].join('\n')
+      `<b>NEW 20-MIN CALL BOOKED — FEYRON</b>`,
+      `<b>Guest:</b> ${escapeHtml(name)}`,
+      `<b>Email:</b> ${escapeHtml(email)}`,
+      `<b>When:</b> ${escapeHtml(formattedDate)} at ${escapeHtml(slotPart)} (WAT)${clientTimeLabel ? ` · ${escapeHtml(clientTimeLabel)}` : ''}`,
+      `<b>Meeting Link:</b> <a href="${safeMeetingUrl}">${safeMeetingUrl}</a>`,
+      `<b>Notes:</b> ${escapeHtml(notes || 'None')}`,
+    ].join('\n'),
+    [
+      [
+        { text: 'Open Meeting Room', url: meetingUrl },
+        { text: 'Add to Google Calendar', url: gcalUrl },
+      ],
+      [{ text: 'Open Team Dashboard', url: 'https://feyron.site/dashboard' }],
+    ]
   );
 
   if (!res.success) {
@@ -1185,28 +1559,92 @@ export async function handleBookingSubmission(body: BookingSubmissionBody): Prom
   // Send the official Feyron Booking confirmation email to the guest
   await sendEmailViaResend({
     to: [email],
-    subject: `Your workflow audit is booked | Feyron`,
+    subject: `Your call with Feyron is confirmed — ${formattedDate} (${slotPart} WAT)`,
     html: guestBookingHtml,
     text: [
       `Hi ${name},`,
       ``,
-      `Your workflow audit is booked!`,
+      `Your 20-minute call with Feyron is confirmed.`,
       `Date: ${formattedDate}`,
-      `Time: ${slotPart} to ${endSlotPart} (West Africa Time)`,
+      `Time: ${slotPart} to ${endSlotPart} (West Africa Time)${clientTimeLabel ? ` / Local time: ${clientTimeLabel}` : ''}`,
+      notes ? `Topic / Notes: ${notes}` : '',
       `Join Video Meeting: ${meetingUrl}`,
       `Add to Google Calendar: ${gcalUrl}`,
+      `Add to Outlook: ${outlookUrl}`,
       `Reschedule: ${rescheduleUrl}`,
       ``,
       `— Fredy`,
       `Feyron Team`,
       `https://feyron.site | hello@feyron.site`,
-    ].join('\n'),
+    ]
+      .filter(Boolean)
+      .join('\n'),
     replyTo: getToEmail(),
     attachments,
   }).catch(() => {});
 
   return {
     status: 200,
-    body: { ok: true, id: res.id, gcalUrl, meetingUrl },
+    body: { ok: true, id: res.id, gcalUrl, outlookUrl, meetingUrl },
   };
 }
+
+// ============================================================================
+// Team Dashboard API Handlers
+// ============================================================================
+
+export function verifyDashboardAuth(passcode?: string | null): boolean {
+  const expected = getDashboardPasscode();
+  return Boolean(passcode && passcode.trim() === expected);
+}
+
+export function getDashboardData(): {
+  enquiries: EnquiryRecord[];
+  bookings: BookingRecord[];
+} {
+  return {
+    enquiries: memoryStore.enquiries,
+    bookings: memoryStore.bookings,
+  };
+}
+
+export function updateDashboardRecord(body: {
+  type: 'enquiry' | 'booking';
+  id: string;
+  status?: LeadStatus;
+  internalNotes?: string;
+}): { ok: boolean; error?: string } {
+  if (body.type === 'enquiry') {
+    const item = memoryStore.enquiries.find((e) => e.id === body.id);
+    if (!item) return { ok: false, error: 'Enquiry record not found.' };
+    if (body.status) item.status = body.status;
+    if (typeof body.internalNotes === 'string') item.internalNotes = body.internalNotes;
+    savePersistentStore();
+    return { ok: true };
+  }
+  if (body.type === 'booking') {
+    const item = memoryStore.bookings.find((b) => b.id === body.id);
+    if (!item) return { ok: false, error: 'Booking record not found.' };
+    if (body.status) {
+      item.status = body.status;
+      if (body.status === 'Archived') {
+        const set = bookedSlotsByDate.get(item.date);
+        if (set) set.delete(item.time);
+      }
+    }
+    if (typeof body.internalNotes === 'string') item.internalNotes = body.internalNotes;
+    savePersistentStore();
+    return { ok: true };
+  }
+  return { ok: false, error: 'Invalid record type.' };
+}
+
+export async function triggerBookingReminder(bookingId: string): Promise<{
+  ok: boolean;
+  error?: string;
+}> {
+  const item = memoryStore.bookings.find((b) => b.id === bookingId);
+  if (!item) return { ok: false, error: 'Booking record not found.' };
+  return sendBookingReminderEmail(item);
+}
+

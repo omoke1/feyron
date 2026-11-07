@@ -4,8 +4,12 @@ import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import {
   getBookedSlotsForDate,
+  getDashboardData,
   handleBookingSubmission,
   handleContactSubmission,
+  triggerBookingReminder,
+  updateDashboardRecord,
+  verifyDashboardAuth,
 } from './src/server/emailService';
 
 dotenv.config();
@@ -56,6 +60,36 @@ async function startServer() {
 
   app.post('/api/bookings', handlePostBooking);
   app.post('/bookings', handlePostBooking);
+
+  // Team Dashboard API endpoints
+  app.get('/api/dashboard', (req, res) => {
+    const passcode = String(req.headers['x-feyron-passcode'] || req.query.passcode || '');
+    if (!verifyDashboardAuth(passcode)) {
+      res.status(401).json({ ok: false, error: 'Invalid access code.' });
+      return;
+    }
+    res.status(200).json({ ok: true, ...getDashboardData() });
+  });
+
+  app.patch('/api/dashboard', (req, res) => {
+    const passcode = String(req.headers['x-feyron-passcode'] || req.body?.passcode || '');
+    if (!verifyDashboardAuth(passcode)) {
+      res.status(401).json({ ok: false, error: 'Invalid access code.' });
+      return;
+    }
+    const result = updateDashboardRecord(req.body || {});
+    res.status(result.ok ? 200 : 400).json(result);
+  });
+
+  app.post('/api/dashboard/remind', async (req, res) => {
+    const passcode = String(req.headers['x-feyron-passcode'] || req.body?.passcode || '');
+    if (!verifyDashboardAuth(passcode)) {
+      res.status(401).json({ ok: false, error: 'Invalid access code.' });
+      return;
+    }
+    const result = await triggerBookingReminder(String(req.body?.id || ''));
+    res.status(result.ok ? 200 : 400).json(result);
+  });
 
   if (process.env.NODE_ENV !== 'production') {
     const { createServer: createViteServer } = await import('vite');

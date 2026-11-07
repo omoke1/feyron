@@ -22,6 +22,7 @@ export interface FeyronPageData {
   primaryCta: { label: string; action: 'contact' | 'audit' | string };
   isProductsPage?: boolean;
   isContactPage?: boolean;
+  isDashboardPage?: boolean;
 }
 
 export const FEYRON_PAGES: Record<string, FeyronPageData> = {
@@ -902,6 +903,20 @@ export const FEYRON_PAGES: Record<string, FeyronPageData> = {
     ],
     closingLine: 'Questions about our privacy or storage practices?',
     primaryCta: { label: 'Talk to our team', action: 'contact' },
+  },
+
+  dashboard: {
+    slug: 'dashboard',
+    title: 'Team Dashboard',
+    metaTitle: 'Team Dashboard | Feyron',
+    metaDescription: 'Internal Feyron dashboard for managing booked calls and client enquiries.',
+    kicker: 'Internal Operations · Feyron Team',
+    headline: 'Lead & booking operations',
+    subheading:
+      'Review booked calls, manage incoming client enquiries, update status stages, and dispatch session reminders.',
+    sections: [],
+    primaryCta: { label: 'Book a 20-min call', action: 'audit' },
+    isDashboardPage: true,
   },
 };
 
