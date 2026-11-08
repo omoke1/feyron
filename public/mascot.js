@@ -2231,7 +2231,7 @@
       favLink = document.createElement("link");
       favLink.rel = "icon";
       favLink.type = "image/svg+xml";
-      favLink.href = "data:image/svg+xml;utf8," + encodeURIComponent(favSvg);
+      favLink.href = "data:image/svg+xml," + encodeURIComponent(favSvg);
       document.head.appendChild(favLink);
     } catch (e) {}
     if (typeof window.__csRefreshTokens === "function") window.__csRefreshTokens();

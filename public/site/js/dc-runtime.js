@@ -359,7 +359,31 @@
   }
   function cssToObj(css) {
     const o = {};
-    for (const decl of css.split(";")) {
+    const decls = [];
+    let cur = "", paren = 0, quote = "";
+    for (let i = 0; i < css.length; i++) {
+      const ch = css[i];
+      if (quote) {
+        if (ch === quote) quote = "";
+        cur += ch;
+      } else if (ch === '"' || ch === "'") {
+        quote = ch;
+        cur += ch;
+      } else if (ch === "(") {
+        paren++;
+        cur += ch;
+      } else if (ch === ")") {
+        if (paren > 0) paren--;
+        cur += ch;
+      } else if (ch === ";" && paren === 0) {
+        decls.push(cur);
+        cur = "";
+      } else {
+        cur += ch;
+      }
+    }
+    if (cur) decls.push(cur);
+    for (const decl of decls) {
       const i = decl.indexOf(":");
       if (i < 0) continue;
       const prop = decl.slice(0, i).trim();

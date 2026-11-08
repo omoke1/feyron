@@ -974,39 +974,31 @@ export async function handleContactSubmission(body: ContactSubmissionBody): Prom
   );
 
   if (!internalResult.success) {
-    return {
-      status: 502,
-      body: {
-        ok: false,
-        error:
-          internalResult.error ||
-          'Could not deliver email right now. Please write to hello@feyron.site.',
-      },
-    };
+    console.warn('Contact email delivery notice:', internalResult.error);
+  } else {
+    // Send the official Feyron branded auto-responder template to visitor
+    const visitorHtml = buildContactAutoResponderHtml({
+      fullName: rawName,
+      interest: interestLabel,
+      company: rawCompany,
+      details: rawMessage,
+    });
+
+    await sendEmailViaResend({
+      to: [rawEmail],
+      subject: `Thank you for reaching out — Feyron`,
+      html: visitorHtml,
+      text: `Hi ${rawName},\n\nThank you for reaching out to Feyron regarding ${interestLabel}. Our team reviews every enquiry directly and will reply within one working day with practical next steps.\n\nYour summary\n${rawMessage}\n\nNeed to add anything in the meantime? Simply reply to this email or write to hello@feyron.site.\n\n— Fredy\nFeyron Team\nhttps://feyron.site | hello@feyron.site`,
+      replyTo: getToEmail(),
+    }).catch(() => {});
   }
-
-  // Send the official Feyron branded auto-responder template to visitor
-  const visitorHtml = buildContactAutoResponderHtml({
-    fullName: rawName,
-    interest: interestLabel,
-    company: rawCompany,
-    details: rawMessage,
-  });
-
-  await sendEmailViaResend({
-    to: [rawEmail],
-    subject: `Thank you for reaching out — Feyron`,
-    html: visitorHtml,
-    text: `Hi ${rawName},\n\nThank you for reaching out to Feyron regarding ${interestLabel}. Our team reviews every enquiry directly and will reply within one working day with practical next steps.\n\nYour summary\n${rawMessage}\n\nNeed to add anything in the meantime? Simply reply to this email or write to hello@feyron.site.\n\n— Fredy\nFeyron Team\nhttps://feyron.site | hello@feyron.site`,
-    replyTo: getToEmail(),
-  }).catch(() => {});
 
   return {
     status: 200,
     body: {
       ok: true,
       message: 'Enquiry sent successfully.',
-      id: internalResult.id,
+      id: internalResult.id || enquiryId,
     },
   };
 }
@@ -1078,7 +1070,9 @@ export const ALL_WAT_SLOTS = [
   '17:30',
 ];
 
-const STORE_FILE = path.join(process.cwd(), 'data', 'feyron-store.json');
+const STORE_FILE = process.env.VERCEL
+  ? '/tmp/feyron-store.json'
+  : path.join(process.cwd(), 'data', 'feyron-store.json');
 
 const memoryStore: FeyronDataStore = {
   enquiries: [],
@@ -1625,40 +1619,36 @@ export async function handleBookingSubmission(body: BookingSubmissionBody): Prom
     ]
   );
 
-  if (!res.success && body.source !== 'dashboard') {
-    existing.delete(slotPart);
-    return {
-      status: 502,
-      body: { ok: false, error: res.error || 'Could not confirm booking right now.' },
-    };
+  if (!res.success) {
+    console.warn('Booking email delivery notice:', res.error);
+  } else {
+    // Send the official Feyron Booking confirmation email to the guest
+    await sendEmailViaResend({
+      to: [email],
+      subject: `Your call with Feyron is confirmed — ${formattedDate} (${slotPart} WAT)`,
+      html: guestBookingHtml,
+      text: [
+        `Hi ${name},`,
+        ``,
+        `Your 20-minute call with Feyron is confirmed.`,
+        `Date: ${formattedDate}`,
+        `Time: ${slotPart} to ${endSlotPart} (West Africa Time)${clientTimeLabel ? ` / Local time: ${clientTimeLabel}` : ''}`,
+        notes ? `Topic / Notes: ${notes}` : '',
+        `Join Video Meeting: ${meetingUrl}`,
+        `Add to Google Calendar: ${gcalUrl}`,
+        `Add to Outlook: ${outlookUrl}`,
+        `Reschedule: ${rescheduleUrl}`,
+        ``,
+        `— Fredy`,
+        `Feyron Team`,
+        `https://feyron.site | hello@feyron.site`,
+      ]
+        .filter(Boolean)
+        .join('\n'),
+      replyTo: getToEmail(),
+      attachments,
+    }).catch(() => {});
   }
-
-  // Send the official Feyron Booking confirmation email to the guest
-  await sendEmailViaResend({
-    to: [email],
-    subject: `Your call with Feyron is confirmed — ${formattedDate} (${slotPart} WAT)`,
-    html: guestBookingHtml,
-    text: [
-      `Hi ${name},`,
-      ``,
-      `Your 20-minute call with Feyron is confirmed.`,
-      `Date: ${formattedDate}`,
-      `Time: ${slotPart} to ${endSlotPart} (West Africa Time)${clientTimeLabel ? ` / Local time: ${clientTimeLabel}` : ''}`,
-      notes ? `Topic / Notes: ${notes}` : '',
-      `Join Video Meeting: ${meetingUrl}`,
-      `Add to Google Calendar: ${gcalUrl}`,
-      `Add to Outlook: ${outlookUrl}`,
-      `Reschedule: ${rescheduleUrl}`,
-      ``,
-      `— Fredy`,
-      `Feyron Team`,
-      `https://feyron.site | hello@feyron.site`,
-    ]
-      .filter(Boolean)
-      .join('\n'),
-    replyTo: getToEmail(),
-    attachments,
-  }).catch(() => {});
 
   return {
     status: 200,
