@@ -2106,27 +2106,23 @@
   .cs-sound-chip {
     left: 14px;
     bottom: calc(14px + env(safe-area-inset-bottom, 0px));
-    width: 46px;
+    width: auto;
     height: 46px;
-    padding: 0;
+    padding: 0 16px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    border-radius: 50%;
+    border-radius: 100px;
     background: var(--ink, #0e0e0c);
     color: var(--accent, #D4F534);
+    font-size: 12px;
+    font-weight: 700;
     box-shadow: 0 4px 18px rgba(var(--ink-rgb, 14, 14, 12), 0.25);
     opacity: 1;
   }
 
   .cs-sound-chip .cs-chip-label {
-    display: none;
-  }
-
-  .cs-sound-chip .cs-chip-ico {
-    display: block;
-    width: 20px;
-    height: 20px;
+    display: inline;
   }
 
   /* the play chip IS the tour transport on mobile — the floating skip chip

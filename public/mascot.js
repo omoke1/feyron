@@ -5384,11 +5384,6 @@
     soundChip.setAttribute("data-sound-toggle", "");
     soundChip.setAttribute("aria-label", "Toggle sound");
     soundChip.innerHTML =
-      '<svg class="cs-chip-ico" viewBox="0 0 24 24" aria-hidden="true">' +
-      '<path d="M4 9v6h4l5 4V5L8 9H4z" fill="currentColor"/>' +
-      '<g class="cs-ico-on" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M16.5 8.5a5 5 0 0 1 0 7"/><path d="M19 6a8.5 8.5 0 0 1 0 12"/></g>' +
-      '<path class="cs-ico-off" d="M16 9.5 21 14.5M21 9.5 16 14.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>' +
-      "</svg>" +
       '<span class="cs-chip-label" data-sound-label>sound: ' + (sound.enabled ? "on" : "off") + "</span>";
     soundChip.setAttribute("aria-pressed", sound.enabled ? "true" : "false");
     soundChip.addEventListener("click", function () { setSound(!sound.enabled); });
