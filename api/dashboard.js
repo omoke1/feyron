@@ -3,13 +3,14 @@ import {
   handleDashboardAction,
   updateDashboardRecord,
   verifyDashboardAuth,
-} from '../src/server/emailService';
+} from './_emailService.js';
 
-export default async function handler(req: any, res: any) {
+export default async function handler(req, res) {
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, PATCH, POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-feyron-passcode');
+
   if (req.method === 'OPTIONS') {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, PATCH, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, x-feyron-passcode');
     return res.status(204).end();
   }
 
@@ -23,7 +24,10 @@ export default async function handler(req: any, res: any) {
   }
 
   const passcode = String(
-    req.headers?.['x-feyron-passcode'] || req.query?.passcode || body?.passcode || ''
+    (req.headers && req.headers['x-feyron-passcode']) ||
+      (req.query && req.query.passcode) ||
+      (body && body.passcode) ||
+      ''
   );
 
   if (!verifyDashboardAuth(passcode)) {

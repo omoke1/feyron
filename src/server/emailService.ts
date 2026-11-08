@@ -1,8 +1,20 @@
-import dotenv from 'dotenv';
 import fs from 'fs';
 import path from 'path';
 
-dotenv.config();
+try {
+  const envPath = path.join(process.cwd(), '.env');
+  if (fs.existsSync(envPath)) {
+    const lines = fs.readFileSync(envPath, 'utf-8').split(/\r?\n/);
+    for (const line of lines) {
+      const m = line.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*)\s*$/);
+      if (m && process.env[m[1]] === undefined) {
+        process.env[m[1]] = m[2].replace(/^['"]|['"]$/g, '');
+      }
+    }
+  }
+} catch {
+  // Ignore .env read errors in serverless runtime
+}
 
 function getResendApiKey(): string {
   return (process.env.RESEND_API_KEY || '').trim();
@@ -1372,16 +1384,20 @@ export async function sendBookingReminderEmail(booking: BookingRecord): Promise<
 }
 
 function scheduleTwoHourReminderIfUpcoming(booking: BookingRecord): void {
+  if (process.env.VERCEL) return;
   const startUtcMs = lagosSlotToUtcDate(booking.date, booking.time).getTime();
   const twoHoursBeforeMs = startUtcMs - 2 * 60 * 60 * 1000;
   const delayMs = twoHoursBeforeMs - Date.now();
   // Schedule in-memory timer if the reminder window is in the future and within 7 days
   if (delayMs > 60 * 1000 && delayMs < 7 * 24 * 60 * 60 * 1000) {
-    setTimeout(() => {
+    const timer = setTimeout(() => {
       if (!booking.reminderSent && booking.status !== 'Archived') {
         sendBookingReminderEmail(booking).catch(() => {});
       }
     }, delayMs);
+    if (typeof (timer as any)?.unref === 'function') {
+      (timer as any).unref();
+    }
   }
 }
 
