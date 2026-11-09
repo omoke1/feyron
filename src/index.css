@@ -305,9 +305,51 @@ html, body {
   padding: 4px 0;
 }
 
-@media (max-width: 768px) {
+/* Mobile Responsiveness & iOS iPhone Optimization */
+@supports (padding: env(safe-area-inset-top)) {
+  body {
+    padding-left: env(safe-area-inset-left, 0px);
+    padding-right: env(safe-area-inset-right, 0px);
+  }
+}
+
+.feyron-mobile-scroll {
+  display: flex !important;
+  overflow-x: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  scrollbar-width: none !important;
+  white-space: nowrap !important;
+}
+.feyron-mobile-scroll::-webkit-scrollbar {
+  display: none !important;
+}
+
+@media (max-width: 860px) {
   input, select, textarea {
     font-size: 16px !important;
+  }
+  .feyron-desktop-only {
+    display: none !important;
+  }
+  .feyron-mobile-only {
+    display: flex !important;
+  }
+  .feyron-mobile-stack {
+    flex-direction: column !important;
+    align-items: stretch !important;
+  }
+  .feyron-mobile-full {
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  .feyron-mobile-grid-1 {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+@media (min-width: 861px) {
+  .feyron-mobile-only {
+    display: none !important;
   }
 }
 

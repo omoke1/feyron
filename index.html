@@ -2,7 +2,7 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, viewport-fit=cover" />
     <title>Feyron | AI Productivity &amp; Technology</title>
     <meta name="description" content="Feyron builds AI agents, websites, software platforms and integrations that help businesses and individuals work more productively." />
     <meta name="theme-color" content="#FEB47B" />
@@ -117,7 +117,8 @@
       .feyron-intro-controls {
         position: fixed;
         right: clamp(18px, 3vw, 36px);
-        bottom: clamp(18px, 3vh, 32px);
+        bottom: max(clamp(18px, 3vh, 32px), env(safe-area-inset-bottom, 18px));
+        right: max(clamp(18px, 3vw, 36px), env(safe-area-inset-right, 18px));
         z-index: 3;
         display: inline-flex;
         align-items: center;

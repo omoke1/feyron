@@ -647,7 +647,7 @@ export function WorkflowRoiCalculatorCard({
       <div
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(290px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(260px, 1fr))',
           gap: '22px',
           alignItems: 'stretch',
         }}
@@ -2506,7 +2506,7 @@ export function TeamDashboardSection() {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
             gap: '14px',
             marginBottom: '22px',
           }}
@@ -2581,7 +2581,7 @@ export function TeamDashboardSection() {
             justifyContent: 'space-between',
           }}
         >
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <div className="feyron-mobile-scroll" style={{ display: 'flex', gap: '8px', overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: '4px', maxWidth: '100%' }}>
             {[
               { id: 'all', label: 'All Records' },
               { id: 'bookings', label: `Bookings (${bookings.length})` },
@@ -2595,6 +2595,8 @@ export function TeamDashboardSection() {
                 onClick={() => setActiveTab(tab.id as any)}
                 style={{
                   cursor: 'pointer',
+                  flexShrink: 0,
+                  minHeight: '40px',
                   border: '2px solid var(--ink, #1E1E1E)',
                   borderRadius: '100px',
                   padding: '8px 16px',
@@ -2647,7 +2649,8 @@ export function TeamDashboardSection() {
                 background: 'var(--paper, #E7E7E7)',
                 fontFamily: 'inherit',
                 fontSize: '14px',
-                minWidth: '220px',
+                minWidth: '0',
+                flex: '1 1 180px',
               }}
             />
           </div>
@@ -2855,7 +2858,8 @@ export function TeamDashboardSection() {
                         }
                         placeholder="Add internal team notes, call outcome, or follow-up log…"
                         style={{
-                          flex: '1 1 260px',
+                          flex: '1 1 160px',
+                          minWidth: '0',
                           padding: '8px 12px',
                           borderRadius: '10px',
                           border: '1.5px solid var(--ink, #1E1E1E)',
@@ -3778,7 +3782,8 @@ export function TeamDashboardSection() {
                         }
                         placeholder="Add internal team notes or follow-up log…"
                         style={{
-                          flex: '1 1 260px',
+                          flex: '1 1 160px',
+                          minWidth: '0',
                           padding: '8px 12px',
                           borderRadius: '10px',
                           border: '1.5px solid var(--ink, #1E1E1E)',

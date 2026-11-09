@@ -57,6 +57,7 @@ export function ClientMaterialsStudio({
 }: ClientMaterialsStudioProps) {
   const [docType, setDocType] = useState<DocType>('milestones');
   const [selectedLeadId, setSelectedLeadId] = useState<string>('');
+  const [mobileTab, setMobileTab] = useState<'form' | 'preview'>('form');
 
   // Core Document Header Fields
   const [clientName, setClientName] = useState('Sarah Jenkins');
@@ -581,6 +582,64 @@ export function ClientMaterialsStudio({
         </div>
       </div>
 
+      {/* Mobile Segmented Toggle (Edit vs Live Preview on phones) */}
+      <div
+        className="feyron-mobile-only"
+        style={{
+          display: 'none',
+          width: '100%',
+          background: 'var(--paper, #E7E7E7)',
+          padding: '4px',
+          borderRadius: '100px',
+          border: '2px solid var(--ink, #1E1E1E)',
+          marginBottom: '16px',
+          gap: '4px',
+        }}
+      >
+        <button
+          type="button"
+          onClick={() => setMobileTab('form')}
+          style={{
+            flex: 1,
+            minHeight: '44px',
+            padding: '10px 14px',
+            borderRadius: '100px',
+            border: 'none',
+            cursor: 'pointer',
+            fontFamily: "'Geist Mono', monospace",
+            fontSize: '12px',
+            fontWeight: 800,
+            textTransform: 'uppercase',
+            background: mobileTab === 'form' ? 'var(--ink, #1E1E1E)' : 'transparent',
+            color: mobileTab === 'form' ? 'var(--accent, #D4F534)' : 'var(--ink, #1E1E1E)',
+            transition: 'all 0.15s ease',
+          }}
+        >
+          ✏️ Edit Document
+        </button>
+        <button
+          type="button"
+          onClick={() => setMobileTab('preview')}
+          style={{
+            flex: 1,
+            minHeight: '44px',
+            padding: '10px 14px',
+            borderRadius: '100px',
+            border: 'none',
+            cursor: 'pointer',
+            fontFamily: "'Geist Mono', monospace",
+            fontSize: '12px',
+            fontWeight: 800,
+            textTransform: 'uppercase',
+            background: mobileTab === 'preview' ? 'var(--ink, #1E1E1E)' : 'transparent',
+            color: mobileTab === 'preview' ? 'var(--accent, #D4F534)' : 'var(--ink, #1E1E1E)',
+            transition: 'all 0.15s ease',
+          }}
+        >
+          👁️ Live Preview
+        </button>
+      </div>
+
       {/* Select Document Type Tabs */}
       <div style={{ marginBottom: '20px' }}>
         <div
@@ -596,7 +655,7 @@ export function ClientMaterialsStudio({
         >
           Select Document Template:
         </div>
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+        <div className="feyron-mobile-scroll" style={{ display: 'flex', gap: '8px', overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: '6px' }}>
           {[
             { id: 'milestones', label: 'Milestones & Deliverables Roadmap' },
             { id: 'invoice', label: 'Commercial Invoice' },
@@ -622,6 +681,7 @@ export function ClientMaterialsStudio({
                 background: docType === item.id ? 'var(--ink, #1E1E1E)' : '#FAF9F5',
                 color: docType === item.id ? 'var(--accent, #D4F534)' : '#1E1E1E',
                 transition: 'all 0.15s ease',
+                flexShrink: 0,
               }}
             >
               {item.label}
@@ -754,6 +814,7 @@ export function ClientMaterialsStudio({
 
       {/* Main Split Layout: Form Controls on Left, Live Preview on Right */}
       <div
+        className="feyron-mobile-grid-1"
         style={{
           display: 'grid',
           gridTemplateColumns: previewMode === 'split' ? '1fr 1fr' : '1fr',
@@ -761,7 +822,7 @@ export function ClientMaterialsStudio({
         }}
       >
         {/* LEFT COLUMN: Customizable Form Fields */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div className={`feyron-studio-form-col ${mobileTab === 'preview' ? 'feyron-desktop-only' : ''}`} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           <div
             style={{
               fontFamily: "'Geist Mono', monospace",
@@ -777,7 +838,7 @@ export function ClientMaterialsStudio({
             1. Document &amp; Client Details
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
             <label style={{ display: 'grid', gap: '4px', fontSize: '12px', fontWeight: 700 }}>
               Client Name *
               <input
@@ -809,7 +870,7 @@ export function ClientMaterialsStudio({
             </label>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px' }}>
             <label style={{ display: 'grid', gap: '4px', fontSize: '12px', fontWeight: 700 }}>
               Company / Organization
               <input
@@ -841,7 +902,7 @@ export function ClientMaterialsStudio({
             </label>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr', gap: '12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '12px' }}>
             <label style={{ display: 'grid', gap: '4px', fontSize: '12px', fontWeight: 700 }}>
               Project Title
               <input
@@ -909,7 +970,7 @@ export function ClientMaterialsStudio({
             </label>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px' }}>
             <label style={{ display: 'grid', gap: '4px', fontSize: '12px', fontWeight: 700 }}>
               Issue Date
               <input
@@ -1072,7 +1133,7 @@ export function ClientMaterialsStudio({
                       }}
                     />
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr 1fr', gap: '6px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '6px' }}>
                       <input
                         type="text"
                         value={m.dependencies}
@@ -1134,7 +1195,7 @@ export function ClientMaterialsStudio({
             3. SLAs, Warranty &amp; Signatures
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
             <label style={{ display: 'grid', gap: '4px', fontSize: '12px', fontWeight: 700 }}>
               Review SLA Turnaround
               <input
@@ -1166,7 +1227,7 @@ export function ClientMaterialsStudio({
             </label>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
             <label style={{ display: 'grid', gap: '4px', fontSize: '12px', fontWeight: 700 }}>
               Feyron Signatory Name
               <input
@@ -1200,7 +1261,7 @@ export function ClientMaterialsStudio({
         </div>
 
         {/* RIGHT COLUMN: Live In-Browser Document Preview */}
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
+        <div className={`feyron-studio-preview-col ${mobileTab === 'form' ? 'feyron-desktop-only' : ''}`} style={{ display: 'flex', flexDirection: 'column' }}>
           <div
             style={{
               display: 'flex',
@@ -1246,7 +1307,8 @@ export function ClientMaterialsStudio({
           <div
             style={{
               width: '100%',
-              height: '780px',
+              height: 'min(780px, 76vh)',
+              WebkitOverflowScrolling: 'touch',
               border: '2px solid #1E1E1E',
               borderRadius: '12px',
               overflow: 'hidden',

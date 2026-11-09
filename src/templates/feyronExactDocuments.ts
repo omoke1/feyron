@@ -75,15 +75,65 @@ p { margin: 0; font-size: 13px; line-height: 1.5; }
 .bx { background: #F3F3F3; border-radius: 10px; padding: 12px 16px; min-height: 46px; }
 .k { flex: 1; border-radius: 10px; padding: 16px 18px; }
 
+@media (max-width: 820px) {
+  body {
+    padding: 12px 8px;
+    align-items: flex-start;
+  }
+  .page-container {
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    min-height: auto !important;
+    box-shadow: none !important;
+  }
+  .wm {
+    display: none !important;
+  }
+  div[style*="padding:34px 48px"],
+  div[style*="padding:28px 48px"],
+  div[style*="padding:30px 48px"],
+  div[style*="padding:26px 48px"],
+  div[style*="padding:24px 48px"],
+  div[style*="padding:22px 48px"],
+  div[style*="padding:16px 48px"],
+  div[style*="padding:18px 48px"],
+  div[style*="padding:70px 64px"],
+  div[style*="padding:34px 64px"] {
+    padding-left: clamp(14px, 4vw, 24px) !important;
+    padding-right: clamp(14px, 4vw, 24px) !important;
+  }
+  div[style*="display:flex;gap:28px"],
+  div[style*="display:flex;gap:16px"],
+  div[style*="display:flex;gap:12px"] {
+    flex-wrap: wrap !important;
+  }
+  div[style*="width:320px"],
+  div[style*="width:300px"] {
+    width: 100% !important;
+  }
+  .r {
+    flex-direction: column !important;
+    gap: 4px !important;
+  }
+  .r p:first-child {
+    width: 100% !important;
+  }
+}
+
 @media print {
   body {
     background: #FFFFFF !important;
     padding: 0 !important;
   }
   .page-container {
+    width: 794px !important;
     box-shadow: none !important;
     margin: 0 !important;
     page-break-after: always;
+  }
+  .wm {
+    display: flex !important;
   }
 }
 `;
