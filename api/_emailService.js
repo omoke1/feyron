@@ -185,17 +185,366 @@ export async function sendEmailViaResend(options) {
         error: errMsg2 || 'Resend API failed',
     };
 }
+
+export function resolveIntentConfig(
+  rawInterest,
+  rawSource = '',
+  rawDetails = ''
+) {
+  const normInterest = (rawInterest || '').toLowerCase();
+  const normSource = (rawSource || '').toLowerCase();
+  const normDetails = (rawDetails || '').toLowerCase();
+  const combined = `${normInterest} ${normSource} ${normDetails}`;
+
+  // 1. Products Waitlist
+  if (normSource === 'products-waitlist' || normInterest.includes('waitlist')) {
+    return {
+      category: 'products-waitlist',
+      badgeLabel: 'EARLY ACCESS SUBSCRIBER',
+      badgeColor: '#4ADE80',
+      heroHeadline: "You're on the early-access list.",
+      heroDescription:
+        'Thank you for joining early access for Feyron Products. You are queued to receive private test flight access to our upcoming workflow and software platforms before public release.',
+      bodyIntro:
+        'Thank you for joining the Feyron Products early-access list. We build technology that moves work forward, and our subscribers get direct, priority previews of new tools as they enter pilot phase.',
+      stepsTitle: 'What to expect from early access',
+      steps: [
+        {
+          title: 'Zero noise policy.',
+          desc: 'We only email when a working test build, pilot release, or major feature chapter is ready for hands-on review.',
+          color: '#FEB47B',
+        },
+        {
+          title: 'Private test flights.',
+          desc: 'You will receive private access links to test workflow tools and influence our product roadmap.',
+          color: '#C084FC',
+        },
+        {
+          title: 'Founding member benefits.',
+          desc: 'Priority onboarding, dedicated technical support, and early subscriber tier benefits on all public launches.',
+          color: '#4ADE80',
+        },
+      ],
+      caseStudyNote: {
+        name: 'Explore Live Platforms',
+        desc: 'Review our shipped systems across multi-vendor logistics, enterprise verification, and payments.',
+        url: 'https://feyron.site/work',
+      },
+      ctaText: 'Explore our shipped case studies',
+      ctaUrl: 'https://feyron.site/work',
+      subjectLine: "You're on the early-access list — Feyron Products",
+      plainTextNextSteps:
+        '- Zero noise: We only email when a private test flight or pilot is live.\n- Direct input: Test new tools and help guide what we build.\n- Founding perks: Priority onboarding and subscriber benefits.',
+    };
+  }
+
+  // 2. AI Automation & Custom Agents
+  if (
+    combined.includes('ai') ||
+    combined.includes('agent') ||
+    combined.includes('automat') ||
+    combined.includes('froodi') ||
+    combined.includes('bot') ||
+    combined.includes('llm') ||
+    combined.includes('workflow')
+  ) {
+    return {
+      category: 'ai-automation',
+      badgeLabel: 'AI AUTOMATION & WORKFLOW AGENTS',
+      badgeColor: '#FEB47B',
+      heroHeadline: 'Architecting intelligent workflows that scale.',
+      heroDescription:
+        'Thank you for contacting Feyron. We analyze your operational workflows directly and will reply with a technical assessment and implementation scope within one working day.',
+      bodyIntro:
+        'Thank you for reaching out to Feyron regarding AI Automation and Custom Agents. Our team reviews every enquiry directly to understand your operational touchpoints and will reply within one working day with practical next steps.',
+      stepsTitle: 'What we evaluate for your automation',
+      steps: [
+        {
+          title: 'Workflow & Bottleneck Audit.',
+          desc: 'We analyze your manual handoffs, repetitive operational tasks, and team coordination delays.',
+          color: '#FEB47B',
+        },
+        {
+          title: 'Agent Architecture & Boundaries.',
+          desc: 'Matching the right model APIs and stateful logic to your existing stack with strict data boundaries.',
+          color: '#C084FC',
+        },
+        {
+          title: 'Implementation Roadmap & ROI.',
+          desc: 'A written plan detailing required API connectors, execution timeline, and measurable hours saved.',
+          color: '#4ADE80',
+        },
+      ],
+      caseStudyNote: {
+        name: 'Froodi Logistics & Dispatch',
+        desc: 'Automated dispatch console and rider routing platform that saved 14+ hours/week.',
+        url: 'https://feyron.site/work/froodi',
+      },
+      ctaText: 'Book a 20-min workflow audit',
+      ctaUrl: 'https://feyron.site/contact',
+      subjectLine: 'Next steps: AI Automation & Agent Systems — Feyron',
+      plainTextNextSteps:
+        '- Workflow & Bottleneck Audit: Mapping your repetitive operational handoffs.\n- Agent Architecture & Boundaries: Matching models and state machines with strict data security.\n- Implementation Roadmap & ROI: Clear connectors, delivery timeline, and hours saved.',
+    };
+  }
+
+  // 3. Platforms, Web Apps & Software Engineering
+  if (
+    combined.includes('platform') ||
+    combined.includes('website') ||
+    combined.includes('software') ||
+    combined.includes('portal') ||
+    combined.includes('app') ||
+    combined.includes('workverify') ||
+    combined.includes('propledger') ||
+    combined.includes('phovify')
+  ) {
+    return {
+      category: 'platform-development',
+      badgeLabel: 'PLATFORM & WEB ENGINEERING',
+      badgeColor: '#C084FC',
+      heroHeadline: 'High-performance platforms built to scale.',
+      heroDescription:
+        'Thank you for contacting Feyron. We have received your platform specifications and will reply with architectural recommendations and scope within one working day.',
+      bodyIntro:
+        'Thank you for reaching out to Feyron regarding software and platform development. Our engineering team reviews every specification directly and will reply within one working day with practical next steps.',
+      stepsTitle: 'Our platform delivery approach',
+      steps: [
+        {
+          title: 'Architecture & Stack Selection.',
+          desc: 'Selecting modern, resilient stacks (React, TypeScript, cloud databases, edge APIs) tailored for fast performance and clean maintenance.',
+          color: '#FEB47B',
+        },
+        {
+          title: 'UX Systems & Interface Polish.',
+          desc: 'Designing intuitive, high-conversion user flows with responsive performance across mobile and desktop.',
+          color: '#C084FC',
+        },
+        {
+          title: 'Sprint Milestones & Scope.',
+          desc: 'A phased milestone roadmap with clear sprint deliverables, deployment checkpoints, and fixed transparent pricing.',
+          color: '#4ADE80',
+        },
+      ],
+      caseStudyNote: {
+        name: 'WorkVerify Portal',
+        desc: 'Enterprise credential verification platform with real-time audit logs and multi-tenant security.',
+        url: 'https://feyron.site/work/workverify',
+      },
+      ctaText: 'Schedule a 20-min architecture review',
+      ctaUrl: 'https://feyron.site/contact',
+      subjectLine: 'Next steps: Platform Engineering & Web Architecture — Feyron',
+      plainTextNextSteps:
+        '- Architecture & Stack Selection: Modern React/Node foundations for speed and longevity.\n- UX Systems & Interface Polish: Intuitive user journeys and high conversion flows.\n- Sprint Milestones & Scope: Phased deliverables and transparent pricing.',
+    };
+  }
+
+  // 4. Integrations & Payment Infrastructure
+  if (
+    combined.includes('payment') ||
+    combined.includes('fintech') ||
+    combined.includes('integration') ||
+    combined.includes('api') ||
+    combined.includes('gateway') ||
+    combined.includes('flowpay') ||
+    combined.includes('qreva') ||
+    combined.includes('stripe') ||
+    combined.includes('paystack')
+  ) {
+    return {
+      category: 'integrations-payments',
+      badgeLabel: 'INTEGRATIONS & PAYMENT INFRASTRUCTURE',
+      badgeColor: '#4ADE80',
+      heroHeadline: 'Resilient infrastructure connecting your operations.',
+      heroDescription:
+        'Thank you for contacting Feyron. We will review your API endpoints and payment gateway architecture within one working day.',
+      bodyIntro:
+        'Thank you for reaching out to Feyron regarding payment and system integrations. Our team reviews every technical requirement directly and will reply within one working day with practical next steps.',
+      stepsTitle: 'What we evaluate for your integration',
+      steps: [
+        {
+          title: 'API & Webhook Reliability.',
+          desc: 'Designing idempotent webhook handlers, secure signature checks, and zero-data-loss error retries.',
+          color: '#FEB47B',
+        },
+        {
+          title: 'Payment Gateway & Split Routing.',
+          desc: 'Configuring multi-currency checkout, automated split-payouts, and transparent reconciliation ledgers.',
+          color: '#C084FC',
+        },
+        {
+          title: 'Security & Implementation Plan.',
+          desc: 'Secure credential isolation, audit logging, and automated reconciliation matching your accounting workflow.',
+          color: '#4ADE80',
+        },
+      ],
+      caseStudyNote: {
+        name: 'FlowPay Invoicing & Reconciliation',
+        desc: 'Real-time billing, multi-currency collections, and automated payment matching.',
+        url: 'https://feyron.site/work/flowpay',
+      },
+      ctaText: 'Schedule an integration consultation',
+      ctaUrl: 'https://feyron.site/contact',
+      subjectLine: 'Next steps: Integrations & Payments Architecture — Feyron',
+      plainTextNextSteps:
+        '- API & Webhook Reliability: Idempotent processing and zero-loss error recovery.\n- Gateway & Split Routing: Multi-currency checkout and automated reconciliation.\n- Security & Implementation Plan: Secret isolation and end-to-end integration tests.',
+    };
+  }
+
+  // 5. General Consultation
+  return {
+    category: 'general',
+    badgeLabel: 'CONSULTATION & PROJECT INQUIRY',
+    badgeColor: '#FEB47B',
+    heroHeadline: 'Technology that moves work forward.',
+    heroDescription:
+      'Thank you for contacting Feyron. We have received your note and will reply with practical next steps within one working day.',
+    bodyIntro:
+      'Thank you for reaching out to Feyron. Our team reviews every enquiry directly and will reply within one working day with practical next steps.',
+    stepsTitle: 'What happens next',
+    steps: [
+      {
+        title: 'Enquiry review.',
+        desc: 'We analyze your workflow bottlenecks, project scope, and tools involved.',
+        color: '#FEB47B',
+      },
+      {
+        title: 'Direct follow-up.',
+        desc: 'We respond with clarifying questions or a clear architectural recommendation.',
+        color: '#C084FC',
+      },
+      {
+        title: 'Discovery & Plan.',
+        desc: 'A written plan with clear architecture, timeline, and deliverables.',
+        color: '#4ADE80',
+      },
+    ],
+    ctaText: 'Book a workflow audit',
+    ctaUrl: 'https://feyron.site/contact',
+    subjectLine: 'Thank you for reaching out — Feyron',
+    plainTextNextSteps:
+      '- Enquiry review: We analyze your bottlenecks and project scope.\n- Direct follow-up: We respond with clarifying questions or recommendation.\n- Discovery & Plan: A written plan with clear architecture and timeline.',
+  };
+}
+
+export function resolveBookingTopicAgenda(notes = '') {
+  const norm = (notes || '').toLowerCase();
+  if (norm.includes('ai') || norm.includes('agent') || norm.includes('automat') || norm.includes('froodi')) {
+    return [
+      {
+        title: 'Your workflow bottlenecks.',
+        desc: 'What manual tasks, handoffs, or operational friction are slowing your team down today.',
+        color: '#FEB47B',
+      },
+      {
+        title: 'Tooling & model architecture.',
+        desc: 'Matching the right model APIs, custom agent logic, and security boundaries to your data.',
+        color: '#C084FC',
+      },
+      {
+        title: 'Implementation scope & ROI.',
+        desc: 'Clear recommendations on required connectors, delivery timeline, and measurable hours saved.',
+        color: '#4ADE80',
+      },
+    ];
+  }
+  if (norm.includes('platform') || norm.includes('web') || norm.includes('app') || norm.includes('software')) {
+    return [
+      {
+        title: 'Platform scope & user journeys.',
+        desc: 'Reviewing your core user flows, user onboarding, and technical requirements.',
+        color: '#FEB47B',
+      },
+      {
+        title: 'Architecture & tech stack.',
+        desc: 'Selecting modern React/TypeScript frameworks, cloud databases, and high-performance hosting.',
+        color: '#C084FC',
+      },
+      {
+        title: 'Sprint roadmap & delivery.',
+        desc: 'Breaking down milestones, release velocity, and fixed-scope timeline estimates.',
+        color: '#4ADE80',
+      },
+    ];
+  }
+  if (norm.includes('payment') || norm.includes('fintech') || norm.includes('integration') || norm.includes('api')) {
+    return [
+      {
+        title: 'Systems & gateway mapping.',
+        desc: 'Reviewing your API endpoints, payment providers (Stripe, Paystack, Flutterwave), and sync needs.',
+        color: '#FEB47B',
+      },
+      {
+        title: 'Reliability & error recovery.',
+        desc: 'Designing idempotent webhook handling, state machines, and automated reconciliation.',
+        color: '#C084FC',
+      },
+      {
+        title: 'Integration blueprint.',
+        desc: 'Clear architectural steps to connect your software and operations securely.',
+        color: '#4ADE80',
+      },
+    ];
+  }
+  return [
+    {
+      title: 'Your goals & priorities.',
+      desc: 'What you are looking to build, automate, integrate or improve for your team or customers.',
+      color: '#FEB47B',
+    },
+    {
+      title: 'Current setup & tools.',
+      desc: 'Any existing websites, software platforms, communication channels or workflows your team uses today.',
+      color: '#C084FC',
+    },
+    {
+      title: 'Practical next steps.',
+      desc: 'Clear recommendations on architecture, scope, delivery timeline and how we can move your project forward.',
+      color: '#4ADE80',
+    },
+  ];
+}
+
+
 /**
  * Builds the official Feyron Enquiry Auto-Responder Email HTML.
+ * Dynamically tailored to the visitor's selected category, project specifications, and intent.
  */
 function buildContactAutoResponderHtml(opts) {
-    const firstName = opts.fullName.split(/\s+/)[0] || opts.fullName;
-    const safeFirstName = escapeHtml(firstName);
-    const safeFullName = escapeHtml(opts.fullName);
-    const safeInterest = escapeHtml(opts.interest);
-    const safeCompany = escapeHtml(opts.company || 'Not specified');
-    const safeDetails = escapeHtml(opts.details).replace(/\r?\n/g, '<br/>');
-    return `<!DOCTYPE html>
+  const firstName = opts.fullName.split(/\s+/)[0] || opts.fullName;
+  const safeFirstName = escapeHtml(firstName);
+  const safeFullName = escapeHtml(opts.fullName);
+  const safeInterest = escapeHtml(opts.interest);
+  const safeCompany = escapeHtml(opts.company || 'Not specified');
+  const safeDetails = escapeHtml(opts.details).replace(/\r?\n/g, '<br/>');
+  const intent = opts.intent || resolveIntentConfig(opts.interest, '', opts.details);
+
+  const stepsRows = intent.steps
+    .map(
+      (step) => `<tr>
+        <td valign="top" width="14" style="width:14px;padding-top:6px;">
+          <table role="presentation" width="12" cellpadding="0" cellspacing="0" border="0"><tr><td width="12" height="12" bgcolor="${step.color}" style="width:12px;height:12px;background-color:${step.color};border-radius:3px;font-size:0;line-height:0;">&nbsp;</td></tr></table>
+        </td>
+        <td class="t-dark" style="padding:0 0 16px 14px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:25px;color:#1E1E1E;"><strong>${escapeHtml(step.title)}</strong> ${escapeHtml(step.desc)}</td>
+      </tr>`
+    )
+    .join('');
+
+  const caseStudyBlock = intent.caseStudyNote
+    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 28px 0;">
+        <tr>
+          <td style="background-color:#FAFAFA;border:1.5px solid #E5E5E0;border-radius:12px;padding:18px 22px;">
+            <p style="margin:0 0 4px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:11px;line-height:16px;letter-spacing:1.4px;text-transform:uppercase;font-weight:700;color:#5F5F5F;">Related Proven System</p>
+            <p class="t-dark" style="margin:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:14px;line-height:22px;color:#1E1E1E;">
+              <strong>${escapeHtml(intent.caseStudyNote.name)}</strong>: ${escapeHtml(intent.caseStudyNote.desc)}
+              <a href="${intent.caseStudyNote.url}" style="color:#FEB47B;text-decoration:none;font-weight:700;display:inline-block;margin-left:6px;">View Case Study &rarr;</a>
+            </p>
+          </td>
+        </tr>
+      </table>`
+    : '';
+
+  return `<!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
 <meta charset="utf-8">
@@ -312,9 +661,9 @@ function buildContactAutoResponderHtml(opts) {
     <!-- ============ HERO ============ -->
     <tr>
       <td class="px" bgcolor="#1E1E1E" style="background-color:#1E1E1E;padding:52px 40px 56px 40px;">
-        <p style="margin:0 0 18px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:12px;line-height:16px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:#FEB47B;">${safeInterest}</p>
-        <h1 class="hero-h" style="margin:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:38px;line-height:44px;font-weight:700;letter-spacing:-1px;color:#FFFFFF;">Technology that moves work forward.</h1>
-        <p style="margin:20px 0 0 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:17px;line-height:27px;color:#E7E7E7;">Thank you for contacting Feyron. We have received your note and will reply with practical next steps within one working day.</p>
+        <p style="margin:0 0 18px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:12px;line-height:16px;letter-spacing:2px;text-transform:uppercase;font-weight:700;color:${intent.badgeColor};">${escapeHtml(intent.badgeLabel)}</p>
+        <h1 class="hero-h" style="margin:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:38px;line-height:44px;font-weight:700;letter-spacing:-1px;color:#FFFFFF;">${escapeHtml(intent.heroHeadline)}</h1>
+        <p style="margin:20px 0 0 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:17px;line-height:27px;color:#E7E7E7;">${escapeHtml(intent.heroDescription)}</p>
       </td>
     </tr>
  
@@ -324,59 +673,44 @@ function buildContactAutoResponderHtml(opts) {
  
         <h2 class="t-dark" style="margin:0 0 16px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:22px;line-height:28px;font-weight:700;letter-spacing:-0.3px;color:#1E1E1E;">Hi ${safeFirstName},</h2>
  
-        <p class="t-dark" style="margin:0 0 24px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:26px;color:#1E1E1E;">Thank you for reaching out to Feyron regarding <strong>${safeInterest}</strong>${opts.company ? ` at <strong>${safeCompany}</strong>` : ''}. Our team reviews every enquiry directly and will reply within one working day with practical next steps.</p>
+        <p class="t-dark" style="margin:0 0 24px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:26px;color:#1E1E1E;">${intent.bodyIntro}</p>
  
-        <!-- ---------- BLOCK: WHAT HAPPENS NEXT (three points) ---------- -->
-        <h3 class="t-dark" style="margin:0 0 18px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:13px;line-height:18px;letter-spacing:1.6px;text-transform:uppercase;font-weight:700;color:#1E1E1E;">What happens next</h3>
+        <!-- DYNAMIC STEPS BLOCK -->
+        <h3 class="t-dark" style="margin:0 0 18px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:13px;line-height:18px;letter-spacing:1.6px;text-transform:uppercase;font-weight:700;color:#1E1E1E;">${escapeHtml(intent.stepsTitle)}</h3>
  
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 30px 0;">
-          <tr>
-            <td valign="top" width="14" style="width:14px;padding-top:6px;">
-              <table role="presentation" width="12" cellpadding="0" cellspacing="0" border="0"><tr><td width="12" height="12" bgcolor="#FEB47B" style="width:12px;height:12px;background-color:#FEB47B;border-radius:3px;font-size:0;line-height:0;">&nbsp;</td></tr></table>
-            </td>
-            <td class="t-dark" style="padding:0 0 16px 14px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:25px;color:#1E1E1E;"><strong>Enquiry review.</strong> We analyze your workflow bottlenecks and tools involved.</td>
-          </tr>
-          <tr>
-            <td valign="top" width="14" style="width:14px;padding-top:6px;">
-              <table role="presentation" width="12" cellpadding="0" cellspacing="0" border="0"><tr><td width="12" height="12" bgcolor="#C084FC" style="width:12px;height:12px;background-color:#C084FC;border-radius:3px;font-size:0;line-height:0;">&nbsp;</td></tr></table>
-            </td>
-            <td class="t-dark" style="padding:0 0 16px 14px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:25px;color:#1E1E1E;"><strong>Direct follow-up.</strong> We respond with clarifying questions or a clear idea of what to build.</td>
-          </tr>
-          <tr>
-            <td valign="top" width="14" style="width:14px;padding-top:6px;">
-              <table role="presentation" width="12" cellpadding="0" cellspacing="0" border="0"><tr><td width="12" height="12" bgcolor="#4ADE80" style="width:12px;height:12px;background-color:#4ADE80;border-radius:3px;font-size:0;line-height:0;">&nbsp;</td></tr></table>
-            </td>
-            <td class="t-dark" style="padding:0 0 0 14px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:25px;color:#1E1E1E;"><strong>Discovery &amp; Plan.</strong> A written plan with clear architecture, timeline, and deliverables.</td>
-          </tr>
+          ${stepsRows}
         </table>
  
-        <!-- ---------- BLOCK: CALLOUT ---------- -->
+        <!-- SUMMARY CALLOUT -->
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 24px 0;">
           <tr>
-            <td class="callout" bgcolor="#F3F3F3" style="background-color:#F3F3F3;border-left:4px solid #FEB47B;border-radius:0 10px 10px 0;padding:20px 22px;">
-              <p class="t-muted" style="margin:0 0 6px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:12px;line-height:16px;letter-spacing:1.4px;text-transform:uppercase;font-weight:700;color:#5F5F5F;">Your summary</p>
+            <td class="callout" bgcolor="#F3F3F3" style="background-color:#F3F3F3;border-left:4px solid ${intent.badgeColor};border-radius:0 10px 10px 0;padding:20px 22px;">
+              <p class="t-muted" style="margin:0 0 6px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:12px;line-height:16px;letter-spacing:1.4px;text-transform:uppercase;font-weight:700;color:#5F5F5F;">${intent.category === 'products-waitlist' ? 'Your Details' : 'Your Enquiry Summary'}</p>
               <p class="t-dark" style="margin:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:15px;line-height:24px;color:#1E1E1E;">${safeDetails}</p>
             </td>
           </tr>
         </table>
+
+        ${caseStudyBlock}
  
         <p class="t-dark" style="margin:0 0 32px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:15px;line-height:24px;color:#1E1E1E;">Need to add anything in the meantime? Simply reply to this email or write to <a href="mailto:hello@feyron.site" style="color:#FEB47B;text-decoration:none;font-weight:600;">hello@feyron.site</a>.</p>
  
-        <!-- ---------- BLOCK: BUTTON ---------- -->
+        <!-- CTA BUTTON -->
         <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 38px 0;">
           <tr>
             <td class="btn-td" bgcolor="#FEB47B" style="background-color:#FEB47B;border-radius:10px;">
               <!--[if mso]>
-              <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="https://feyron.site/contact" style="height:50px;v-text-anchor:middle;width:240px;" arcsize="20%" stroke="f" fillcolor="#FEB47B"><w:anchorlock/><center style="color:#1E1E1E;font-family:Arial,sans-serif;font-size:16px;font-weight:bold;">Book a workflow audit</center></v:roundrect>
+              <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" href="${intent.ctaUrl}" style="height:50px;v-text-anchor:middle;width:260px;" arcsize="20%" stroke="f" fillcolor="#FEB47B"><w:anchorlock/><center style="color:#1E1E1E;font-family:Arial,sans-serif;font-size:16px;font-weight:bold;">${escapeHtml(intent.ctaText)}</center></v:roundrect>
               <![endif]-->
               <!--[if !mso]><!-- -->
-              <a class="btn-a" href="https://feyron.site/contact" style="display:inline-block;padding:15px 30px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:20px;font-weight:700;color:#1E1E1E;text-decoration:none;border-radius:10px;">Book a workflow audit</a>
+              <a class="btn-a" href="${intent.ctaUrl}" style="display:inline-block;padding:15px 30px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:20px;font-weight:700;color:#1E1E1E;text-decoration:none;border-radius:10px;">${escapeHtml(intent.ctaText)}</a>
               <!--<![endif]-->
             </td>
           </tr>
         </table>
  
-        <!-- ---------- SIGN-OFF ---------- -->
+        <!-- SIGN-OFF -->
         <p class="t-dark" style="margin:0 0 6px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:26px;color:#1E1E1E;">Best regards,</p>
  
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:18px 0 0 0;">
@@ -428,6 +762,7 @@ function buildContactAutoResponderHtml(opts) {
         <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 22px 0;">
           <tr>
             <td style="padding-right:20px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:14px;line-height:20px;"><a href="https://feyron.site" style="color:#E7E7E7;text-decoration:underline;">Website</a></td>
+            <td style="padding-right:20px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:14px;line-height:20px;"><a href="https://feyron.site/work" style="color:#E7E7E7;text-decoration:underline;">Case Studies</a></td>
             <td style="padding-right:20px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:14px;line-height:20px;"><a href="mailto:hello@feyron.site" style="color:#E7E7E7;text-decoration:underline;">Contact</a></td>
             <td style="font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:14px;line-height:20px;"><a href="https://feyron.site/privacy" style="color:#E7E7E7;text-decoration:underline;">Privacy</a></td>
           </tr>
@@ -456,44 +791,57 @@ function buildContactAutoResponderHtml(opts) {
 </body>
 </html>`.trim();
 }
+
 /**
  * Builds the official Feyron Booking Confirmation Email HTML.
+ * Dynamically tailored with session agenda matched to the guest's topic notes.
  */
 function buildBookingConfirmationHtml(opts) {
-    const firstName = opts.fullName.split(/\s+/)[0] || opts.fullName;
-    const safeFirstName = escapeHtml(firstName);
-    const safeFullName = escapeHtml(opts.fullName);
-    const safeEmail = escapeHtml(opts.email);
-    const safeNotes = opts.notes ? escapeHtml(opts.notes).replace(/\r?\n/g, '<br/>') : '';
-    const safeDate = escapeHtml(opts.formattedDate);
-    const safeStart = escapeHtml(opts.slotStr);
-    const safeEnd = escapeHtml(opts.endSlotStr);
-    const safeMeetingUrl = escapeHtml(opts.meetingUrl);
-    const safeGcalUrl = escapeHtml(opts.gcalUrl);
-    const safeOutlookUrl = opts.outlookUrl ? escapeHtml(opts.outlookUrl) : '';
-    const safeClientTime = opts.clientTimeLabel ? escapeHtml(opts.clientTimeLabel) : '';
-    const safeRescheduleUrl = escapeHtml(opts.rescheduleUrl);
-    const heroBadge = opts.isInternal
-        ? 'New Meeting Booked'
-        : opts.isReminder
-            ? 'Upcoming Call Reminder'
-            : 'Meeting Confirmed';
-    const heroHeadline = opts.isInternal
-        ? `New call booked with ${opts.fullName}.`
-        : opts.isReminder
-            ? 'Your call with Feyron starts soon.'
-            : 'Your call with Feyron is confirmed.';
-    const emailTitle = opts.isInternal
-        ? `New call booked with ${safeFullName} | Feyron`
-        : opts.isReminder
-            ? 'Reminder: Your call with Feyron | Feyron'
-            : 'Your call with Feyron is confirmed | Feyron';
-    const heroIntro = opts.isInternal
-        ? `${safeFullName} (<a href="mailto:${safeEmail}" style="color:#FEB47B;text-decoration:underline;">${safeEmail}</a>) scheduled a 20-minute call for ${safeDate} at ${safeStart} WAT. The direct video meeting link and session details are below.`
-        : opts.isReminder
-            ? `Hi ${safeFirstName}, this is a quick reminder for your upcoming 20-minute call with Feyron. Your direct video meeting link is below.`
-            : `Hi ${safeFirstName}, thank you for scheduling a 20-minute call with Feyron. Your session details and direct video meeting link are below.`;
-    return `<!DOCTYPE html>
+  const firstName = opts.fullName.split(/\s+/)[0] || opts.fullName;
+  const safeFirstName = escapeHtml(firstName);
+  const safeFullName = escapeHtml(opts.fullName);
+  const safeEmail = escapeHtml(opts.email);
+  const safeNotes = opts.notes ? escapeHtml(opts.notes).replace(/\r?\n/g, '<br/>') : '';
+  const safeDate = escapeHtml(opts.formattedDate);
+  const safeStart = escapeHtml(opts.slotStr);
+  const safeEnd = escapeHtml(opts.endSlotStr);
+  const safeMeetingUrl = escapeHtml(opts.meetingUrl);
+  const safeGcalUrl = escapeHtml(opts.gcalUrl);
+  const safeOutlookUrl = opts.outlookUrl ? escapeHtml(opts.outlookUrl) : '';
+  const safeClientTime = opts.clientTimeLabel ? escapeHtml(opts.clientTimeLabel) : '';
+  const safeRescheduleUrl = escapeHtml(opts.rescheduleUrl);
+  const heroBadge = opts.isInternal
+    ? 'New Meeting Booked'
+    : opts.isReminder
+      ? 'Upcoming Call Reminder'
+      : 'Session Confirmed';
+  const heroHeadline = opts.isInternal
+    ? `New call booked with ${opts.fullName}.`
+    : opts.isReminder
+      ? 'Your call with Feyron starts soon.'
+      : 'Your call with Feyron is confirmed.';
+  const emailTitle = opts.isInternal
+    ? `New call booked with ${safeFullName} | Feyron`
+    : opts.isReminder
+      ? 'Reminder: Your call with Feyron | Feyron'
+      : 'Your call with Feyron is confirmed | Feyron';
+  const heroIntro = opts.isInternal
+    ? `${safeFullName} (<a href="mailto:${safeEmail}" style="color:#FEB47B;text-decoration:underline;">${safeEmail}</a>) scheduled a 20-minute call for ${safeDate} at ${safeStart} WAT. The direct video meeting link and session details are below.`
+    : opts.isReminder
+      ? `Hi ${safeFirstName}, this is a quick reminder for your upcoming 20-minute strategy call with Feyron. Your calendar invitation is attached and video room link is below.`
+      : `Hi ${safeFirstName}, thank you for scheduling a 20-minute strategy session with Feyron. Your session details and video room link are below. A calendar invite (.ics) has been attached.`;
+
+  const agenda = resolveBookingTopicAgenda(opts.notes || '');
+  const agendaRows = agenda
+    .map(
+      (item) => `<tr>
+        <td valign="top" width="14" style="width:14px;padding-top:6px;"><table role="presentation" width="12" cellpadding="0" cellspacing="0" border="0"><tr><td width="12" height="12" bgcolor="${item.color}" style="width:12px;height:12px;background-color:${item.color};border-radius:3px;font-size:0;line-height:0;">&nbsp;</td></tr></table></td>
+        <td class="t-dark" style="padding:0 0 16px 14px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:25px;color:#1E1E1E;"><strong>${escapeHtml(item.title)}</strong> ${escapeHtml(item.desc)}</td>
+      </tr>`
+    )
+    .join('');
+
+  return `<!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
 <meta charset="utf-8">
@@ -541,7 +889,7 @@ function buildBookingConfirmationHtml(opts) {
  
 <!-- PREHEADER -->
 <div style="display:none;font-size:1px;line-height:1px;max-height:0;max-width:0;opacity:0;overflow:hidden;mso-hide:all;">
-  ${safeDate} at ${safeStart} with Feyron. Here is what to expect and what to prepare.&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
+  ${safeDate} at ${safeStart} with Feyron. Direct video link and session agenda.&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;&nbsp;&zwnj;
 </div>
  
 <table role="presentation" class="body-bg" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#E7E7E7;">
@@ -608,12 +956,14 @@ function buildBookingConfirmationHtml(opts) {
         <tr>
           <td class="callout" bgcolor="#F3F3F3" style="background-color:#F3F3F3;border-left:4px solid #FEB47B;border-radius:0 10px 10px 0;padding:22px 24px;">
             <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-              ${opts.isInternal
-        ? `<tr>
+              ${
+                opts.isInternal
+                  ? `<tr>
                 <td class="lbl t-muted" width="110" valign="top" style="width:110px;padding:0 0 12px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:14px;line-height:22px;color:#5F5F5F;">Guest</td>
                 <td class="val t-dark" valign="top" style="padding:0 0 12px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:22px;font-weight:700;color:#1E1E1E;">${safeFullName} (${safeEmail})</td>
               </tr>`
-        : ''}
+                  : ''
+              }
               <tr>
                 <td class="lbl t-muted" width="110" valign="top" style="width:110px;padding:0 0 12px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:14px;line-height:22px;color:#5F5F5F;">Date</td>
                 <td class="val t-dark" valign="top" style="padding:0 0 12px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:22px;font-weight:700;color:#1E1E1E;">${safeDate}</td>
@@ -630,12 +980,14 @@ function buildBookingConfirmationHtml(opts) {
                 <td class="lbl t-muted" width="110" valign="top" style="width:110px;padding:${safeNotes ? '0 0 12px 0' : '0'};font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:14px;line-height:22px;color:#5F5F5F;">With</td>
                 <td class="val t-dark" valign="top" style="padding:${safeNotes ? '0 0 12px 0' : '0'};font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:22px;font-weight:700;color:#1E1E1E;">Fredy, Feyron Team</td>
               </tr>
-              ${safeNotes
-        ? `<tr>
+              ${
+                safeNotes
+                  ? `<tr>
                 <td class="lbl t-muted" width="110" valign="top" style="width:110px;padding:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:14px;line-height:22px;color:#5F5F5F;">Topic / Notes</td>
                 <td class="val t-dark" valign="top" style="padding:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:15px;line-height:22px;font-weight:500;color:#1E1E1E;">${safeNotes}</td>
               </tr>`
-        : ''}
+                  : ''
+              }
             </table>
           </td>
         </tr>
@@ -659,27 +1011,16 @@ function buildBookingConfirmationHtml(opts) {
         <a href="${safeRescheduleUrl}" style="color:#1E1E1E;text-decoration:underline;" class="t-dark">Reschedule</a>
       </p>
  
-      <!-- PREPARE -->
+      <!-- AGENDA (DYNAMIC TO TOPIC) -->
       <h3 class="t-dark" style="margin:0 0 18px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:13px;line-height:18px;letter-spacing:1.6px;text-transform:uppercase;font-weight:700;color:#1E1E1E;">What we will cover</h3>
  
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 32px 0;">
-        <tr>
-          <td valign="top" width="14" style="width:14px;padding-top:6px;"><table role="presentation" width="12" cellpadding="0" cellspacing="0" border="0"><tr><td width="12" height="12" bgcolor="#FEB47B" style="width:12px;height:12px;background-color:#FEB47B;border-radius:3px;font-size:0;line-height:0;">&nbsp;</td></tr></table></td>
-          <td class="t-dark" style="padding:0 0 16px 14px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:25px;color:#1E1E1E;"><strong>Your goals &amp; priorities.</strong> What you are looking to build, automate, integrate or improve for your team or customers.</td>
-        </tr>
-        <tr>
-          <td valign="top" width="14" style="width:14px;padding-top:6px;"><table role="presentation" width="12" cellpadding="0" cellspacing="0" border="0"><tr><td width="12" height="12" bgcolor="#C084FC" style="width:12px;height:12px;background-color:#C084FC;border-radius:3px;font-size:0;line-height:0;">&nbsp;</td></tr></table></td>
-          <td class="t-dark" style="padding:0 0 16px 14px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:25px;color:#1E1E1E;"><strong>Current setup &amp; tools.</strong> Any existing websites, software platforms, communication channels or workflows your team uses today.</td>
-        </tr>
-        <tr>
-          <td valign="top" width="14" style="width:14px;padding-top:6px;"><table role="presentation" width="12" cellpadding="0" cellspacing="0" border="0"><tr><td width="12" height="12" bgcolor="#4ADE80" style="width:12px;height:12px;background-color:#4ADE80;border-radius:3px;font-size:0;line-height:0;">&nbsp;</td></tr></table></td>
-          <td class="t-dark" style="padding:0 0 0 14px;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:25px;color:#1E1E1E;"><strong>Practical next steps.</strong> Clear recommendations on architecture, scope, delivery timeline and how we can move your project forward.</td>
-        </tr>
+        ${agendaRows}
       </table>
  
       <!-- WHAT HAPPENS AFTER -->
       <h3 class="t-dark" style="margin:0 0 12px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:13px;line-height:18px;letter-spacing:1.6px;text-transform:uppercase;font-weight:700;color:#1E1E1E;">After the call</h3>
-      <p class="t-dark" style="margin:0 0 20px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:26px;color:#1E1E1E;">Following our conversation, we will send you a clear written summary outlining what we recommend building, how it connects to your operations, the delivery timeline and transparent pricing.</p>
+      <p class="t-dark" style="margin:0 0 20px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:26px;color:#1E1E1E;">Following our session, we will send you a clear written summary outlining what we recommend building, how it connects to your operations, the delivery timeline and transparent pricing.</p>
       <p class="t-dark" style="margin:0 0 30px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:26px;color:#1E1E1E;">Need to share anything ahead of time or adjust your slot? Reply directly to this email or use the reschedule link above.</p>
  
       <p class="t-dark" style="margin:0 0 6px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:16px;line-height:26px;color:#1E1E1E;">Best regards,</p>
@@ -724,6 +1065,7 @@ function buildBookingConfirmationHtml(opts) {
 </body>
 </html>`.trim();
 }
+
 export async function handleContactSubmission(body) {
     if (body.website && String(body.website).trim().length > 0) {
         return { status: 200, body: { ok: true, message: 'Received' } };
@@ -835,17 +1177,19 @@ export async function handleContactSubmission(body) {
         replyTo: rawEmail,
         isInternal: true,
     });
+    const intent = resolveIntentConfig(rawInterestKey, source, rawMessage);
     const visitorHtml = buildContactAutoResponderHtml({
         fullName: rawName,
         interest: interestLabel,
         company: rawCompany,
         details: rawMessage,
+        intent,
     });
     const visitorPromise = sendEmailViaResend({
         to: [rawEmail],
-        subject: `Thank you for reaching out — Feyron`,
+        subject: intent.subjectLine,
         html: visitorHtml,
-        text: `Hi ${rawName},\n\nThank you for reaching out to Feyron regarding ${interestLabel}. Our team reviews every enquiry directly and will reply within one working day with practical next steps.\n\nYour summary\n${rawMessage}\n\nNeed to add anything in the meantime? Simply reply to this email or write to hello@feyron.site.\n\n— Fredy\nFeyron Team\nhttps://feyron.site | hello@feyron.site`,
+        text: `Hi ${rawName},\n\n${intent.bodyIntro}\n\nYour summary:\n${rawMessage}\n\n${intent.stepsTitle}:\n${intent.plainTextNextSteps}\n\nNeed to add anything in the meantime? Simply reply to this email or write to hello@feyron.site.\n\n— Fredy\nFeyron Team\nhttps://feyron.site | hello@feyron.site`,
         replyTo: getToEmail(),
         isInternal: false,
     });
