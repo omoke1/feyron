@@ -639,7 +639,7 @@ export function ClientMaterialsStudio({
               gap: '6px',
             }}
           >
-            <span>📥</span> Download PDF
+            Download PDF
           </button>
 
           <button
@@ -661,7 +661,7 @@ export function ClientMaterialsStudio({
               gap: '6px',
             }}
           >
-            <span>🖨️</span> Print / Save PDF
+            Print / Save PDF
           </button>
 
           <button
@@ -679,7 +679,7 @@ export function ClientMaterialsStudio({
               fontWeight: 700,
             }}
           >
-            💾 Download HTML
+            Download HTML
           </button>
 
           <button
@@ -697,7 +697,7 @@ export function ClientMaterialsStudio({
               fontWeight: 700,
             }}
           >
-            📋 Copy HTML
+            Copy HTML
           </button>
 
           <button
@@ -721,7 +721,7 @@ export function ClientMaterialsStudio({
               gap: '6px',
             }}
           >
-            {isSending ? 'Sending via Resend…' : '✉️ Send to Client Now'}
+            {isSending ? 'Sending via Resend…' : 'Send to Client Now'}
           </button>
         </div>
       </div>
@@ -760,7 +760,7 @@ export function ClientMaterialsStudio({
             transition: 'all 0.15s ease',
           }}
         >
-          ✏️ Edit Document
+          Edit Document
         </button>
         <button
           type="button"
@@ -781,7 +781,7 @@ export function ClientMaterialsStudio({
             transition: 'all 0.15s ease',
           }}
         >
-          👁️ Live Preview
+          Live Preview
         </button>
       </div>
 
@@ -815,7 +815,7 @@ export function ClientMaterialsStudio({
           }}
         >
           {[
-            { id: 'agreement', label: '🤝 Client Services Agreement' },
+            { id: 'agreement', label: 'Client Services Agreement' },
             { id: 'milestones', label: 'Milestones & Deliverables Roadmap' },
             { id: 'invoice', label: 'Commercial Invoice' },
             { id: 'receipt', label: 'Payment Receipt' },
@@ -939,7 +939,7 @@ export function ClientMaterialsStudio({
               fontFamily: "'Geist Mono', monospace",
             }}
           >
-            ⚡ AI Agents
+            AI Agents
           </button>
           <button
             type="button"
@@ -955,7 +955,7 @@ export function ClientMaterialsStudio({
               fontFamily: "'Geist Mono', monospace",
             }}
           >
-            🌐 Platform &amp; Web
+            Platform &amp; Web
           </button>
           <button
             type="button"
@@ -971,7 +971,7 @@ export function ClientMaterialsStudio({
               fontFamily: "'Geist Mono', monospace",
             }}
           >
-            💳 Payments
+            Payments
           </button>
         </div>
       </div>

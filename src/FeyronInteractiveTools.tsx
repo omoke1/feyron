@@ -2611,7 +2611,7 @@ export function TeamDashboardSection() {
               { id: 'bookings', label: `Bookings (${bookings.length})` },
               { id: 'enquiries', label: `Enquiries (${enquiries.length})` },
               { id: 'waitlist', label: `Waitlist (${waitlistCount})` },
-              { id: 'materials', label: '📄 Client Materials & Docs' },
+              { id: 'materials', label: 'Client Materials & Docs' },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -3065,7 +3065,7 @@ export function TeamDashboardSection() {
                           textTransform: 'uppercase',
                         }}
                       >
-                        📄 Milestones &amp; Docs →
+                        Milestones &amp; Docs →
                       </button>
                       <button
                         type="button"
@@ -3415,7 +3415,7 @@ export function TeamDashboardSection() {
                     textTransform: 'uppercase',
                   }}
                 >
-                  {broadcastOpen ? 'Close Composer' : `✉ Send Update to Waitlist (${waitlistCount})`}
+                  {broadcastOpen ? 'Close Composer' : `Send Update to Waitlist (${waitlistCount})`}
                 </button>
                 <button
                   type="button"
@@ -3900,7 +3900,7 @@ export function TeamDashboardSection() {
                           textTransform: 'uppercase',
                         }}
                       >
-                        📄 Milestones &amp; Docs →
+                        Milestones &amp; Docs →
                       </button>
                       <button
                         type="button"
