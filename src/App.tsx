@@ -54,16 +54,25 @@ function FeyronLogo({ size = 26, fontSize = 22 }: { size?: number; fontSize?: nu
 
 function resolveFeyronPage(pathname: string): FeyronPageData | null {
   const clean = pathname.replace(/^\/+|\/+$/g, '').toLowerCase();
+  if (clean === 'admin' || clean === 'dashboard') {
+    return FEYRON_PAGES.admin || FEYRON_PAGES.dashboard;
+  }
   if (clean && FEYRON_PAGES[clean]) {
     return FEYRON_PAGES[clean];
   }
   try {
     const params = new URLSearchParams(window.location.search);
     const pageParam = (params.get('page') || '').trim().toLowerCase();
+    if (pageParam === 'admin' || pageParam === 'dashboard') {
+      return FEYRON_PAGES.admin || FEYRON_PAGES.dashboard;
+    }
     if (pageParam && FEYRON_PAGES[pageParam]) {
       return FEYRON_PAGES[pageParam];
     }
     const hashClean = (window.location.hash || '').replace(/^#+|\/+$/g, '').toLowerCase();
+    if (hashClean === 'admin' || hashClean === 'dashboard') {
+      return FEYRON_PAGES.admin || FEYRON_PAGES.dashboard;
+    }
     if (hashClean && FEYRON_PAGES[hashClean]) {
       return FEYRON_PAGES[hashClean];
     }
@@ -528,6 +537,16 @@ export default function App() {
               >
                 Terms of service
               </button>
+              <button
+                type="button"
+                className="cs-mobile-sublink"
+                onClick={() => {
+                  setMobileNavOpen(false);
+                  navigateToPath('/admin');
+                }}
+              >
+                Admin
+              </button>
             </div>
           </div>
         </div>
@@ -917,6 +936,7 @@ export default function App() {
                   { slug: 'responsible-ai', label: 'Responsible AI' },
                   { slug: 'privacy', label: 'Privacy Policy' },
                   { slug: 'terms', label: 'Terms of Service' },
+                { slug: 'admin', label: 'Admin' },
                 ].map((l) => (
                   <button
                     key={l.slug}
@@ -1225,7 +1245,7 @@ export default function App() {
               </p>
             )}
 
-            {feyronPage.primaryCta && !feyronPage.isContactPage && (
+            {feyronPage.primaryCta && !feyronPage.isContactPage && !feyronPage.isDashboardPage && (
               <div style={{ display: 'flex', gap: '14px', flexWrap: 'wrap', marginTop: '32px' }}>
                 <button
                   type="button"
@@ -1278,6 +1298,105 @@ export default function App() {
           gap: 'clamp(36px, 4.5vw, 56px)',
         }}
       >
+        {/* Dedicated Products Early-Access Waitlist Section on /products */}
+        {feyronPage.isProductsPage && (
+          <section
+            style={{
+              background: '#fff',
+              border: '2.5px solid var(--ink, #1E1E1E)',
+              borderRadius: '24px',
+              padding: 'clamp(28px, 4vw, 44px)',
+              boxShadow: '8px 8px 0 rgba(30,30,30,0.9)',
+            }}
+          >
+            <div
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '8px',
+                fontFamily: "'Geist Mono', monospace",
+                fontSize: '11.5px',
+                letterSpacing: '.14em',
+                textTransform: 'uppercase',
+                color: '#15803d',
+                marginBottom: '10px',
+                background: '#dcfce7',
+                border: '1.5px solid #86efac',
+                padding: '4px 12px',
+                borderRadius: '100px',
+              }}
+            >
+              <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#16a34a' }} />
+              Early Access Waitlist · Feyron Products
+            </div>
+            <h2 style={{ margin: '0 0 10px', fontSize: 'clamp(1.6rem, 3vw, 2.3rem)', fontWeight: 800 }}>
+              Join the Products Early-Access Waitlist
+            </h2>
+            <p style={{ margin: '0 0 22px', fontSize: '15.5px', lineHeight: 1.6, maxWidth: '640px', color: '#2c301c', fontWeight: 500 }}>
+              We build technology that moves work forward. Join our early-access list to receive private test flight invites, previews of our upcoming workflow platforms, and direct founder updates before public release.
+            </p>
+            {productJoined ? (
+              <div
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '10px',
+                  padding: '14px 22px',
+                  borderRadius: '14px',
+                  background: 'var(--bg, #D4F534)',
+                  border: '2px solid var(--ink, #1E1E1E)',
+                  fontWeight: 700,
+                  fontSize: '15px',
+                }}
+              >
+                ✓ You are on the early-access list. We have sent a confirmation to your email.
+              </div>
+            ) : (
+              <form
+                onSubmit={handleProductJoin}
+                style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', maxWidth: '580px' }}
+              >
+                <input
+                  type="email"
+                  required
+                  value={productEmail}
+                  onChange={(e) => setProductEmail(e.target.value)}
+                  placeholder="Enter your email (e.g. you@company.com)"
+                  style={{
+                    flex: '1 1 280px',
+                    padding: '14px 18px',
+                    borderRadius: '100px',
+                    border: '2px solid var(--ink, #1E1E1E)',
+                    background: 'var(--paper, #E7E7E7)',
+                    fontFamily: 'inherit',
+                    fontSize: '15px',
+                    color: 'var(--ink, #1E1E1E)',
+                  }}
+                />
+                <button
+                  type="submit"
+                  style={{
+                    cursor: 'pointer',
+                    background: 'var(--ink, #1E1E1E)',
+                    color: 'var(--accent, #D4F534)',
+                    border: 'none',
+                    borderRadius: '100px',
+                    padding: '14px 28px',
+                    fontFamily: 'inherit',
+                    fontWeight: 700,
+                    fontSize: '15px',
+                  }}
+                >
+                  Join Waitlist →
+                </button>
+              </form>
+            )}
+            <div style={{ marginTop: '14px', fontFamily: "'Geist Mono', monospace", fontSize: '11.5px', color: '#666' }}>
+              Zero noise policy · No spam · Unsubscribe anytime · Direct founder updates
+            </div>
+          </section>
+        )}
+
         {/* Dedicated Contact Form on /contact */}
         {feyronPage.isContactPage && (
           <section
@@ -1801,7 +1920,7 @@ export default function App() {
             )}
 
             {/* Early access email form on /products exploration section */}
-            {feyronPage.isProductsPage && sec.kicker === "What we're exploring" && (
+            {feyronPage.isProductsPage && (sec.kicker === "Areas we are exploring" || sec.kicker === "What we're exploring") && (
               <div style={{ marginTop: '22px' }}>
                 {productJoined ? (
                   <div
@@ -2044,7 +2163,7 @@ export default function App() {
         )}
 
         {/* Closing Banner */}
-        {(feyronPage.closingLine || (!feyronPage.isContactPage && !feyronPage.isProductsPage)) && (
+        {(feyronPage.closingLine || (!feyronPage.isContactPage && !feyronPage.isProductsPage && !feyronPage.isDashboardPage)) && (
           <section
             style={{
               background: 'var(--bg, #D4F534)',

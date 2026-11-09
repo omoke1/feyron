@@ -2062,7 +2062,86 @@ export async function handleDashboardAction(body) {
                 savePersistentStore();
             }
         }
-        return { ok: true, message: `Branded email sent to ${recipientEmail}.` };
+            return { ok: true, message: `Branded email sent to ${recipientEmail}.` };
+    }
+
+    // 2b. Send broadcast update to waitlist or multiple subscribers
+    if (action === 'send_broadcast') {
+        const rawRecipients = Array.isArray(body?.recipients)
+            ? body.recipients
+            : String(body?.recipients || '')
+                .split(/[\s,;]+/)
+                .filter(Boolean);
+        const subject = String(body?.subject || '').trim();
+        const eyebrow = String(body?.eyebrow || 'Feyron Products · Early Access').trim();
+        const headline = String(body?.headline || 'Technology that moves work forward.').trim();
+        const messageBody = String(body?.message || '').trim();
+        const calloutTitle = String(body?.calloutTitle || '').trim();
+        const calloutBody = String(body?.calloutBody || '').trim();
+        const ctaLabel = String(body?.ctaLabel || '').trim();
+        const ctaUrl = String(body?.ctaUrl || '').trim();
+
+        const validEmails = Array.from(new Set(rawRecipients.map((e) => String(e || '').trim()).filter(isEmailAddress)));
+        if (validEmails.length === 0 || !subject || !messageBody) {
+            return {
+                ok: false,
+                error: 'At least one valid recipient email, subject, and message body are required.',
+            };
+        }
+
+        let successCount = 0;
+        const failures = [];
+
+        for (const toEmail of validEmails) {
+            const recipientName = toEmail.split('@')[0];
+            const html = buildCustomDashboardEmailHtml({
+                recipientName,
+                eyebrow,
+                headline,
+                messageBody,
+                calloutTitle,
+                calloutBody,
+                ctaLabel,
+                ctaUrl,
+            });
+
+            const res = await sendEmailViaResend({
+                to: [toEmail],
+                subject,
+                html,
+                text: [
+                    `Hi ${recipientName},`,
+                    '',
+                    messageBody,
+                    calloutBody ? `\n${calloutTitle || 'Summary'}:\n${calloutBody}` : '',
+                    ctaUrl && ctaLabel ? `\n${ctaLabel}: ${ctaUrl}` : '',
+                    '',
+                    '— Fredy',
+                    'Feyron Team',
+                    'https://feyron.site | hello@feyron.site',
+                ].filter(Boolean).join('\n'),
+                replyTo: getToEmail(),
+            });
+
+            if (res.success) {
+                successCount++;
+                const eq = memoryStore.enquiries.find((e) => e.email.toLowerCase() === toEmail.toLowerCase());
+                if (eq) {
+                    const stamp = new Date().toISOString().slice(0, 16).replace('T', ' ');
+                    const logLine = `[Broadcast sent ${stamp}: "${subject}"]`;
+                    eq.internalNotes = eq.internalNotes ? `${eq.internalNotes}\n${logLine}` : logLine;
+                }
+            } else {
+                failures.push(`${toEmail}: ${res.error || 'Failed'}`);
+            }
+        }
+
+        savePersistentStore();
+
+        return {
+            ok: successCount > 0,
+            message: `Broadcast sent to ${successCount} of ${validEmails.length} recipient(s).${failures.length ? ` (${failures.length} failed)` : ''}`,
+        };
     }
     // 3. Reschedule a booking (frees old slot, claims new slot, updates links, optionally notifies guest)
     if (action === 'reschedule') {

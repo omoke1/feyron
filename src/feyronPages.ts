@@ -909,14 +909,27 @@ export const FEYRON_PAGES: Record<string, FeyronPageData> = {
     slug: 'dashboard',
     title: 'Team Dashboard',
     metaTitle: 'Team Dashboard | Feyron',
-    metaDescription: 'Internal Feyron dashboard for managing booked calls and client enquiries.',
+    metaDescription: 'Internal Feyron operations dashboard for managing booked calls, waitlist subscribers, and client enquiries.',
     kicker: 'Internal Operations · Feyron Team',
-    headline: 'Lead & booking operations',
+    headline: 'Admin & Operations Dashboard',
     subheading:
-      'Review booked calls, manage incoming client enquiries, update status stages, and dispatch session reminders.',
+      'Review booked calls, manage waitlist subscribers, send product updates, and manage calendar availability.',
     sections: [],
-    primaryCta: { label: 'Book a 20-min call', action: 'audit' },
+    primaryCta: { label: 'Talk to our team', action: 'contact' },
+    isDashboardPage: true,
+  },
+
+  admin: {
+    slug: 'admin',
+    title: 'Admin Dashboard',
+    metaTitle: 'Admin Dashboard | Feyron',
+    metaDescription: 'Internal Feyron admin dashboard for managing booked calls, waitlist subscribers, and client enquiries.',
+    kicker: 'Admin & Operations · Feyron Team',
+    headline: 'Admin & Operations Dashboard',
+    subheading:
+      'Review booked calls, manage waitlist subscribers, send product updates, and manage calendar availability.',
+    sections: [],
+    primaryCta: { label: 'Talk to our team', action: 'contact' },
     isDashboardPage: true,
   },
 };
-
