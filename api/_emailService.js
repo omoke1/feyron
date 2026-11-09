@@ -1998,13 +1998,14 @@ export async function handleDashboardAction(body) {
         const calloutBody = String(body?.calloutBody || '').trim();
         const ctaLabel = String(body?.ctaLabel || 'Book or manage call').trim();
         const ctaUrl = String(body?.ctaUrl || 'https://feyron.site/contact').trim();
-        if (!isEmailAddress(recipientEmail) || !subject || !messageBody) {
+        const customHtml = body?.customHtml ? String(body.customHtml) : '';
+        if (!isEmailAddress(recipientEmail) || !subject || (!messageBody && !customHtml)) {
             return {
                 ok: false,
-                error: 'Recipient email, subject, and message body are required.',
+                error: 'Recipient email, subject, and message or document content are required.',
             };
         }
-        const html = body?.customHtml ? String(body.customHtml) : buildCustomDashboardEmailHtml({
+        const html = customHtml || buildCustomDashboardEmailHtml({
             recipientName,
             eyebrow,
             headline,
@@ -2014,6 +2015,7 @@ export async function handleDashboardAction(body) {
             ctaLabel,
             ctaUrl,
         });
+        const plainText = messageBody || `Please find your official Feyron document (${subject}) rendered above.`;
         const sendRes = await sendEmailViaResend({
             to: [recipientEmail],
             subject,
@@ -2021,7 +2023,7 @@ export async function handleDashboardAction(body) {
             text: [
                 `Hi ${recipientName.split(/\s+/)[0] || recipientName},`,
                 ``,
-                messageBody,
+                plainText,
                 calloutBody ? `\n${calloutTitle || 'Summary'}:\n${calloutBody}` : '',
                 ``,
                 `— Fredy`,

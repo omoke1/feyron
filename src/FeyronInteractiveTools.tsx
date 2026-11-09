@@ -2683,10 +2683,14 @@ export function TeamDashboardSection() {
               to: payload.to,
               recipientName: payload.recipientName,
               subject: payload.subject,
+              message: `Please find attached your official Feyron document: ${payload.subject}`,
               customHtml: payload.customHtml,
               recordId: payload.recordId,
             });
-            return res;
+            return {
+              ok: Boolean(res.ok),
+              error: res.data?.error || (res.ok ? undefined : 'Failed to dispatch email via Resend.'),
+            };
           }}
         />
       )}
