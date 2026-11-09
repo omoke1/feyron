@@ -2,6 +2,7 @@
 // Extracted 1:1 directly from Feyron Business Documents.html
 
 export type ExactDocType =
+  | 'agreement'
   | 'milestones'
   | 'proposal'
   | 'service_order'
@@ -572,7 +573,82 @@ export function generateExactDocument(type: ExactDocType, data: ExactDocData): s
     `;
   }
 
-  // 9. MILESTONES & DELIVERABLES ROADMAP (Constructed using the EXACT Feyron design system & markup)
+  // 9. CLIENT SERVICES AGREEMENT (Master Agreement)
+  else if (type === 'agreement') {
+    bodyContent = `
+      <div class="page-container" style="width:794px;min-height:1123px;box-sizing:border-box;display:flex;flex-direction:column;background:#fff;position:relative;isolation:isolate;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,0.08)">
+        ${watermarks}
+        <div style="background:#1E1E1E;padding:34px 48px;color:#fff">
+          ${headerLogo}
+          <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-top:26px">
+            <div>
+              <p class="lb" style="color:#FEB47B;margin:0 0 8px">Master Engagement &amp; Technology Agreement</p>
+              <h1 class="h" style="margin:0;font-size:34px;line-height:1.1">Client Services Agreement</h1>
+            </div>
+            <p style="color:#E7E7E7;text-align:right">Agreement no. ${data.agreementNo || data.docNo}<br>Date: ${data.dateIssued}</p>
+          </div>
+        </div>
+        ${stripe}
+        <div style="padding:24px 48px 0;display:flex;flex-direction:column;gap:18px;flex:1">
+          <div style="display:flex;gap:28px">
+            <div style="flex:1">
+              <p class="lb">Service Provider</p>
+              <p><b>${companyName}</b><br>CAC ${companyCac} &bull; TIN ${companyTin}<br>${companyAddress}<br>${companyEmail} &bull; ${companyPhone}</p>
+            </div>
+            <div style="flex:1">
+              <p class="lb">Client</p>
+              <p><b>${data.clientLegalName || data.clientName}</b><br>${data.clientRole || 'Authorized Representative'}<br>${data.clientAddress || 'Client Registered Address'}<br>${data.clientEmail}</p>
+            </div>
+          </div>
+
+          <div>
+            <p class="lb">1. Purpose &amp; Engagement Scope</p>
+            <p>This Client Services Agreement governs the technical architecture, custom software development, AI agent deployment, and ongoing systems integration for <b>${data.projectName}</b> as detailed in the attached Milestones &amp; Deliverables schedule.</p>
+          </div>
+
+          <div>
+            <p class="lb">2. Commercial Terms &amp; Settlement Gates</p>
+            <div style="background:#F3F3F3;border-radius:10px;padding:14px 18px;display:flex;flex-direction:column;gap:6px">
+              <div style="display:flex;justify-content:space-between"><p>Total Contract Consideration:</p><p class="h" style="font-size:18px;font-weight:700">${data.currency}${data.amount}</p></div>
+              <div style="display:flex;justify-content:space-between"><p>Payment Structure:</p><p><b>Phased Milestone Gates (40% Kickoff, 30% Build, 20% Pre-launch, 10% Final)</b></p></div>
+              <div style="display:flex;justify-content:space-between"><p>Settlement Terms:</p><p>Invoices payable within 7 business days via bank transfer or verified card gateway.</p></div>
+            </div>
+          </div>
+
+          <div>
+            <p class="lb">3. Intellectual Property Rights</p>
+            <p>Upon receipt of full payment for each respective milestone, all custom code, system architectures, workflows, and proprietary assets authored specifically for <b>${data.clientLegalName || data.clientName}</b> shall be the exclusive property of the Client. Feyron retains rights to general, pre-existing core libraries and tooling.</p>
+          </div>
+
+          <div>
+            <p class="lb">4. Mutual Confidentiality &amp; Data Security</p>
+            <p>Both parties agree to protect all confidential proprietary information, customer datasets, API credentials, and internal operational workflows. Neither party shall disclose proprietary data without written consent.</p>
+          </div>
+
+          <div>
+            <p class="lb">5. Warranties &amp; 30-Day Defect SLA</p>
+            <p>Feyron warrants that all delivered deliverables will operate in material compliance with specifications. Feyron provides a <b>30-calendar-day warranty</b> following final production launch to resolve any code defects at zero additional charge.</p>
+          </div>
+
+          <div style="display:flex;gap:28px;margin-top:auto;padding-bottom:18px">
+            <div style="flex:1">
+              <p class="lb">For Client</p>
+              <div style="height:32px;border-bottom:1px solid #1E1E1E"></div>
+              <p style="font-size:12px;color:#5F5F5F;padding-top:6px">Authorized Signatory: ${data.clientName}<br>${data.clientRole || 'Client Representative'}, ${data.clientLegalName || data.clientName}</p>
+            </div>
+            <div style="flex:1">
+              <p class="lb">For Feyron Technologies</p>
+              <div style="height:32px;border-bottom:1px solid #1E1E1E"></div>
+              <p style="font-size:12px;color:#5F5F5F;padding-top:6px">Authorized Signatory: ${data.feyronSignerName || 'Delivery Engineering Lead'}<br>${data.feyronSignerRole || 'Principal Architect'}, Feyron</p>
+            </div>
+          </div>
+        </div>
+        ${footer}
+      </div>
+    `;
+  }
+
+  // 10. MILESTONES & DELIVERABLES ROADMAP (Constructed using the EXACT Feyron design system & markup)
   else {
     bodyContent = `
       <div class="page-container" style="width:794px;min-height:1123px;box-sizing:border-box;display:flex;flex-direction:column;background:#fff;position:relative;isolation:isolate;overflow:hidden;box-shadow:0 4px 14px rgba(0,0,0,0.08)">

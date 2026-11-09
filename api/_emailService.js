@@ -1,3 +1,4 @@
+import { buildDocumentDispatchEmailHtml } from './_documentEmailTemplate.js';
 import fs from 'fs';
 import path from 'path';
 try {
@@ -1999,13 +2000,16 @@ export async function handleDashboardAction(body) {
         const ctaLabel = String(body?.ctaLabel || 'Book or manage call').trim();
         const ctaUrl = String(body?.ctaUrl || 'https://feyron.site/contact').trim();
         const customHtml = body?.customHtml ? String(body.customHtml) : '';
-        if (!isEmailAddress(recipientEmail) || !subject || (!messageBody && !customHtml)) {
+        const documentData = body?.documentData;
+        if (!isEmailAddress(recipientEmail) || !subject || (!messageBody && !customHtml && !documentData)) {
             return {
                 ok: false,
                 error: 'Recipient email, subject, and message or document content are required.',
             };
         }
-        const html = customHtml || buildCustomDashboardEmailHtml({
+        const html = documentData
+          ? buildDocumentDispatchEmailHtml({ recipientName, ...documentData })
+          : customHtml || buildCustomDashboardEmailHtml({
             recipientName,
             eyebrow,
             headline,
@@ -2016,6 +2020,7 @@ export async function handleDashboardAction(body) {
             ctaUrl,
         });
         const plainText = messageBody || `Please find your official Feyron document (${subject}) rendered above.`;
+        const attachments = Array.isArray(body?.attachments) ? body.attachments : [];
         const sendRes = await sendEmailViaResend({
             to: [recipientEmail],
             subject,
@@ -2033,6 +2038,7 @@ export async function handleDashboardAction(body) {
                 .filter(Boolean)
                 .join('\n'),
             replyTo: getToEmail(),
+            ...(attachments.length > 0 ? { attachments } : {}),
         });
         if (!sendRes.success) {
             return { ok: false, error: sendRes.error || 'Failed to dispatch email via Resend.' };

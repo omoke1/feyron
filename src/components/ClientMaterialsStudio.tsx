@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { generateExactDocument, ExactDocType } from '../templates/feyronExactDocuments';
+import { downloadPdfFile, generatePdfBase64 } from '../utils/feyronPdfGenerator';
 
 export interface ClientMaterialsStudioProps {
   enquiries: Array<{
@@ -22,13 +23,17 @@ export interface ClientMaterialsStudioProps {
     to: string;
     recipientName: string;
     subject: string;
-    customHtml: string;
+    customHtml?: string;
+    message?: string;
+    documentData?: any;
+    attachments?: Array<{ filename: string; content: string; contentType?: string }>;
     recordId?: string;
   }) => Promise<{ ok: boolean; error?: string }>;
   showToast: (msg: string, duration?: number) => void;
 }
 
 export type DocType =
+  | 'agreement'
   | 'milestones'
   | 'proposal'
   | 'service_order'
@@ -287,6 +292,7 @@ export function ClientMaterialsStudio({
   const handleDocTypeChange = (newType: DocType) => {
     setDocType(newType);
     const prefixMap: Record<DocType, string> = {
+      agreement: 'AG',
       milestones: 'MS',
       proposal: 'PROP',
       service_order: 'SOF',
@@ -345,6 +351,20 @@ export function ClientMaterialsStudio({
     signatoryTitle,
   ]);
 
+  const docTitles: Record<DocType, string> = {
+    agreement: 'Client Services Agreement',
+    milestones: 'Milestones & Deliverables Roadmap',
+    proposal: 'Client Engagement Proposal',
+    service_order: 'Official Service Order Form',
+    invoice: 'Commercial Milestone Invoice',
+    receipt: 'Payment & Settlement Receipt',
+    acceptance: 'Milestone Acceptance Sign-Off',
+    change_request: 'Scope Change Request',
+    care_report: 'Monthly Care Report',
+    brochure: 'Services & Platform Brochure',
+    letterhead: 'Executive Letterhead Document',
+  };
+
   // Actions
   const handleOpenPrintPreview = () => {
     const printWindow = window.open('', '_blank');
@@ -355,6 +375,35 @@ export function ClientMaterialsStudio({
     printWindow.document.open();
     printWindow.document.write(generatedHtml);
     printWindow.document.close();
+  };
+
+  const handleDownloadPdf = () => {
+    try {
+      downloadPdfFile({
+        docType,
+        docTitle: docTitles[docType] || 'Official Document',
+        docRef,
+        clientName,
+        clientEmail,
+        clientCompany,
+        clientRole,
+        projectName,
+        dateIssued,
+        targetDate,
+        currency,
+        totalAmount,
+        scopeSummary,
+        milestones: docType === 'milestones' ? milestones : undefined,
+        lineItems: (docType === 'invoice' || docType === 'receipt') ? lineItems : undefined,
+        slaTurnaround,
+        warrantyPeriod,
+        signatoryName,
+        signatoryTitle,
+      });
+      showToast(`Downloaded ${docRef}_${docType}.pdf`);
+    } catch (err: any) {
+      showToast(`Failed to generate PDF: ${err.message || String(err)}`);
+    }
   };
 
   const handleDownloadHtml = () => {
@@ -384,6 +433,7 @@ export function ClientMaterialsStudio({
     }
 
     const docTitles: Record<DocType, string> = {
+      agreement: 'Client Services Agreement',
       milestones: 'Milestones & Deliverables Roadmap',
       proposal: 'Client Engagement Proposal',
       service_order: 'Official Service Order Form',
@@ -405,11 +455,77 @@ export function ClientMaterialsStudio({
 
     setIsSending(true);
     try {
+      let pdfBase64 = '';
+      try {
+        pdfBase64 = generatePdfBase64({
+          docType,
+          docTitle: docTitles[docType] || 'Official Document',
+          docRef,
+          clientName,
+          clientEmail,
+          clientCompany,
+          clientRole,
+          projectName,
+          dateIssued,
+          targetDate,
+          currency,
+          totalAmount,
+          scopeSummary,
+          milestones: docType === 'milestones' ? milestones : undefined,
+          lineItems: (docType === 'invoice' || docType === 'receipt') ? lineItems : undefined,
+          slaTurnaround,
+          warrantyPeriod,
+          signatoryName,
+          signatoryTitle,
+        });
+      } catch (pdfErr) {
+        console.warn('PDF generation notice:', pdfErr);
+      }
+
+      // Standalone HTML attachment in base64
+      let htmlBase64 = '';
+      try {
+        htmlBase64 = btoa(unescape(encodeURIComponent(generatedHtml)));
+      } catch {
+        // ignore
+      }
+
+      const safePrefix = `${(clientCompany || clientName || 'Client').replace(/[^a-zA-Z0-9_-]/g, '_')}_${docType}_${docRef}`;
+
+      const attachments: Array<{ filename: string; content: string; contentType?: string }> = [];
+      if (pdfBase64) {
+        attachments.push({
+          filename: `${safePrefix}.pdf`,
+          content: pdfBase64,
+          contentType: 'application/pdf',
+        });
+      }
+      if (htmlBase64) {
+        attachments.push({
+          filename: `${safePrefix}.html`,
+          content: htmlBase64,
+          contentType: 'text/html',
+        });
+      }
+
       const res = await onSendEmail({
         to: clientEmail,
         recipientName: clientName,
         subject,
-        customHtml: generatedHtml,
+        documentData: {
+          docType,
+          docTitle: docTitles[docType] || 'Official Document',
+          docRef,
+          clientName,
+          clientCompany,
+          projectName,
+          dateIssued,
+          targetDate,
+          currency,
+          totalAmount,
+          scopeSummary,
+        },
+        attachments,
         recordId: selectedLeadId || undefined,
       });
 
@@ -498,6 +614,27 @@ export function ClientMaterialsStudio({
 
         {/* Quick Action Buttons */}
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <button
+            type="button"
+            onClick={handleDownloadPdf}
+            style={{
+              cursor: 'pointer',
+              background: '#FAF9F5',
+              color: '#1E1E1E',
+              border: '2px solid #1E1E1E',
+              borderRadius: '100px',
+              padding: '9px 16px',
+              fontFamily: "'Geist Mono', monospace",
+              fontSize: '11.5px',
+              fontWeight: 700,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+            }}
+          >
+            <span>📥</span> Download PDF
+          </button>
+
           <button
             type="button"
             onClick={handleOpenPrintPreview}
@@ -657,6 +794,7 @@ export function ClientMaterialsStudio({
         </div>
         <div className="feyron-mobile-scroll" style={{ display: 'flex', gap: '8px', overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: '6px' }}>
           {[
+            { id: 'agreement', label: '🤝 Client Services Agreement' },
             { id: 'milestones', label: 'Milestones & Deliverables Roadmap' },
             { id: 'invoice', label: 'Commercial Invoice' },
             { id: 'receipt', label: 'Payment Receipt' },
