@@ -572,9 +572,14 @@ export function ClientMaterialsStudio({
         background: '#FFFFFF',
         border: '2px solid var(--ink, #1E1E1E)',
         borderRadius: '16px',
-        padding: '24px',
+        padding: 'clamp(18px, 2.5vw, 28px)',
         marginBottom: '28px',
         boxShadow: '4px 4px 0 rgba(30, 30, 30, 0.9)',
+        maxWidth: '100%',
+        width: '100%',
+        minWidth: 0,
+        boxSizing: 'border-box',
+        overflow: 'hidden',
       }}
     >
       {/* Studio Header */}
@@ -583,14 +588,16 @@ export function ClientMaterialsStudio({
           display: 'flex',
           flexWrap: 'wrap',
           gap: '16px',
-          alignItems: 'center',
+          alignItems: 'flex-start',
           justifyContent: 'space-between',
           borderBottom: '2px solid #E5E5E0',
           paddingBottom: '16px',
           marginBottom: '20px',
+          maxWidth: '100%',
+          minWidth: 0,
         }}
       >
-        <div>
+        <div style={{ flex: '1 1 300px', minWidth: 0 }}>
           <div
             style={{
               fontFamily: "'Geist Mono', monospace",
@@ -604,16 +611,16 @@ export function ClientMaterialsStudio({
           >
             Feyron Official Materials Studio &bull; Manual Mode
           </div>
-          <h2 style={{ margin: 0, fontSize: '24px', fontWeight: 800 }}>
+          <h2 style={{ margin: 0, fontSize: 'clamp(1.25rem, 2.2vw, 1.6rem)', fontWeight: 800 }}>
             Client Materials &amp; Document Generator
           </h2>
-          <p style={{ margin: '4px 0 0', fontSize: '13.5px', color: '#555' }}>
+          <p style={{ margin: '4px 0 0', fontSize: '13.5px', color: '#555', maxWidth: '65ch' }}>
             Generate, customize, preview, and send official branded Feyron materials (Milestones, Proposals, Invoices, Receipts) to clients.
           </p>
         </div>
 
         {/* Quick Action Buttons */}
-        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center', maxWidth: '100%' }}>
           <button
             type="button"
             onClick={handleDownloadPdf}
@@ -719,9 +726,9 @@ export function ClientMaterialsStudio({
         </div>
       </div>
 
-      {/* Mobile Segmented Toggle (Edit vs Live Preview on phones) */}
+      {/* Mobile/Tablet Segmented Toggle (Edit vs Live Preview on smaller screens) */}
       <div
-        className="feyron-mobile-only"
+        className="feyron-studio-toggle-bar"
         style={{
           display: 'none',
           width: '100%',
@@ -731,6 +738,7 @@ export function ClientMaterialsStudio({
           border: '2px solid var(--ink, #1E1E1E)',
           marginBottom: '16px',
           gap: '4px',
+          boxSizing: 'border-box',
         }}
       >
         <button
@@ -792,7 +800,20 @@ export function ClientMaterialsStudio({
         >
           Select Document Template:
         </div>
-        <div className="feyron-mobile-scroll" style={{ display: 'flex', gap: '8px', overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: '6px' }}>
+        <div
+          className="feyron-mobile-scroll"
+          style={{
+            display: 'flex',
+            gap: '8px',
+            overflowX: 'auto',
+            WebkitOverflowScrolling: 'touch',
+            paddingBottom: '8px',
+            maxWidth: '100%',
+            width: '100%',
+            minWidth: 0,
+            boxSizing: 'border-box',
+          }}
+        >
           {[
             { id: 'agreement', label: '🤝 Client Services Agreement' },
             { id: 'milestones', label: 'Milestones & Deliverables Roadmap' },
@@ -834,16 +855,19 @@ export function ClientMaterialsStudio({
           background: '#FAF9F5',
           border: '1.5px solid #1E1E1E',
           borderRadius: '12px',
-          padding: '14px 18px',
+          padding: '12px 16px',
           marginBottom: '20px',
           display: 'flex',
           flexWrap: 'wrap',
-          gap: '16px',
+          gap: '14px',
           alignItems: 'center',
           justifyContent: 'space-between',
+          maxWidth: '100%',
+          minWidth: 0,
+          boxSizing: 'border-box',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', maxWidth: '100%' }}>
           <span
             style={{
               fontFamily: "'Geist Mono', monospace",
@@ -866,7 +890,9 @@ export function ClientMaterialsStudio({
               fontSize: '12px',
               background: '#FFFFFF',
               fontWeight: 600,
-              minWidth: '240px',
+              minWidth: '220px',
+              maxWidth: '100%',
+              boxSizing: 'border-box',
             }}
           >
             <option value="">-- Choose Existing Lead / Booking --</option>
@@ -952,15 +978,22 @@ export function ClientMaterialsStudio({
 
       {/* Main Split Layout: Form Controls on Left, Live Preview on Right */}
       <div
-        className="feyron-mobile-grid-1"
+        className="feyron-studio-grid"
         style={{
           display: 'grid',
-          gridTemplateColumns: previewMode === 'split' ? '1fr 1fr' : '1fr',
+          gridTemplateColumns: previewMode === 'split' ? 'minmax(0, 1.05fr) minmax(0, 0.95fr)' : 'minmax(0, 1fr)',
           gap: '24px',
+          maxWidth: '100%',
+          width: '100%',
+          minWidth: 0,
+          boxSizing: 'border-box',
         }}
       >
         {/* LEFT COLUMN: Customizable Form Fields */}
-        <div className={`feyron-studio-form-col ${mobileTab === 'preview' ? 'feyron-desktop-only' : ''}`} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div
+          className={`feyron-studio-form-col ${mobileTab === 'preview' ? 'feyron-hide-on-compact' : ''}`}
+          style={{ display: 'flex', flexDirection: 'column', gap: '16px', minWidth: 0, maxWidth: '100%' }}
+        >
           <div
             style={{
               fontFamily: "'Geist Mono', monospace",
@@ -1399,7 +1432,10 @@ export function ClientMaterialsStudio({
         </div>
 
         {/* RIGHT COLUMN: Live In-Browser Document Preview */}
-        <div className={`feyron-studio-preview-col ${mobileTab === 'form' ? 'feyron-desktop-only' : ''}`} style={{ display: 'flex', flexDirection: 'column' }}>
+        <div
+          className={`feyron-studio-preview-col ${mobileTab === 'form' ? 'feyron-hide-on-compact' : ''}`}
+          style={{ display: 'flex', flexDirection: 'column', minWidth: 0, maxWidth: '100%' }}
+        >
           <div
             style={{
               display: 'flex',

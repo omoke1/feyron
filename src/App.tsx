@@ -265,6 +265,33 @@ export default function App() {
     };
   }, [feyronPage, activeCaseStudy]);
 
+  // Suppress intrusive animated mascot & canvas overlays on Admin Dashboard
+  useEffect(() => {
+    if (feyronPage?.isDashboardPage) {
+      document.body.classList.add('feyron-admin-mode');
+      const hideMascot = () => {
+        const mascot = document.querySelector('.cs-ai-mascot') as HTMLElement | null;
+        if (mascot) {
+          mascot.style.display = 'none';
+          mascot.style.opacity = '0';
+          mascot.style.pointerEvents = 'none';
+        }
+      };
+      hideMascot();
+      const iv = setInterval(hideMascot, 250);
+      return () => {
+        clearInterval(iv);
+        document.body.classList.remove('feyron-admin-mode');
+        const mascot = document.querySelector('.cs-ai-mascot') as HTMLElement | null;
+        if (mascot) {
+          mascot.style.display = '';
+          mascot.style.opacity = '';
+          mascot.style.pointerEvents = '';
+        }
+      };
+    }
+  }, [feyronPage?.isDashboardPage]);
+
   const handleCtaAction = (action?: string) => {
     if (!action) return;
     if (action === 'contact' || action === 'audit' || action === '#contact') {
@@ -994,6 +1021,8 @@ export default function App() {
   return (
     <div
       data-lenis-prevent=""
+      data-feyron-dashboard={feyronPage.isDashboardPage ? 'true' : undefined}
+      className={feyronPage.isDashboardPage ? 'feyron-admin-page' : ''}
       style={{
         position: 'fixed',
         inset: 0,
@@ -1290,12 +1319,17 @@ export default function App() {
       {/* Main Content Sections */}
       <main
         style={{
-          maxWidth: '1160px',
+          maxWidth: feyronPage.isDashboardPage ? '1440px' : '1160px',
+          width: '100%',
+          boxSizing: 'border-box',
+          minWidth: 0,
           margin: '0 auto',
-          padding: 'clamp(44px, 6vw, 90px) clamp(18px, 4vw, 44px)',
+          padding: feyronPage.isDashboardPage
+            ? 'clamp(20px, 3.5vw, 44px) clamp(14px, 2.8vw, 36px)'
+            : 'clamp(44px, 6vw, 90px) clamp(18px, 4vw, 44px)',
           display: 'flex',
           flexDirection: 'column',
-          gap: 'clamp(36px, 4.5vw, 56px)',
+          gap: feyronPage.isDashboardPage ? '28px' : 'clamp(36px, 4.5vw, 56px)',
         }}
       >
         {/* Dedicated Products Early-Access Waitlist Section on /products */}

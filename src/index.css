@@ -317,11 +317,76 @@ html, body {
   display: flex !important;
   overflow-x: auto !important;
   -webkit-overflow-scrolling: touch !important;
-  scrollbar-width: none !important;
+  scrollbar-width: thin !important;
+  scrollbar-color: rgba(30, 30, 30, 0.25) transparent !important;
   white-space: nowrap !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
 }
 .feyron-mobile-scroll::-webkit-scrollbar {
+  height: 5px;
+}
+.feyron-mobile-scroll::-webkit-scrollbar-thumb {
+  background: rgba(30, 30, 30, 0.25);
+  border-radius: 100px;
+}
+
+/* Studio & Dashboard Responsive Layouts */
+.feyron-studio-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
+  gap: 24px;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+@media (max-width: 1080px) {
+  .feyron-studio-grid {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+  .feyron-studio-toggle-bar {
+    display: flex !important;
+  }
+  .feyron-hide-on-compact {
+    display: none !important;
+  }
+}
+
+@media (min-width: 1081px) {
+  .feyron-studio-toggle-bar {
+    display: none !important;
+  }
+  .feyron-studio-form-col,
+  .feyron-studio-preview-col {
+    display: flex !important;
+  }
+}
+
+/* Suppress living mascot creature and particle effects on Admin / Dashboard */
+body.feyron-admin-mode .cs-ai-mascot,
+body.feyron-admin-mode .cs-mascot-trail,
+body.feyron-admin-mode .cs-mascot-tether,
+body.feyron-admin-mode .cs-ai-mascot__bubble,
+body.feyron-admin-mode #cs-physics-box,
+body.feyron-admin-mode canvas#cs-stage-canvas,
+body:has([data-feyron-dashboard="true"]) .cs-ai-mascot,
+body:has([data-feyron-dashboard="true"]) .cs-mascot-trail,
+body:has([data-feyron-dashboard="true"]) .cs-mascot-tether,
+body:has([data-feyron-dashboard="true"]) .cs-ai-mascot__bubble,
+body:has([data-feyron-dashboard="true"]) #cs-physics-box,
+body:has([data-feyron-dashboard="true"]) canvas#cs-stage-canvas,
+.feyron-admin-page .cs-ai-mascot,
+.feyron-admin-page .cs-mascot-trail,
+.feyron-admin-page .cs-mascot-tether,
+.feyron-admin-page .cs-ai-mascot__bubble {
   display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
 
 @media (max-width: 860px) {

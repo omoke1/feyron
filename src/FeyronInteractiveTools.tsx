@@ -1882,28 +1882,35 @@ export function TeamDashboardSection() {
     Object.values(blockedSlots).reduce((acc, arr) => acc + (Array.isArray(arr) ? arr.length : 0), 0);
 
   return (
-    <div style={{ display: 'grid', gap: '28px' }}>
+    <div style={{ display: 'grid', gap: '28px', maxWidth: '100%', width: '100%', minWidth: 0 }}>
       {/* Metrics Overview Card */}
       <section
         style={{
           background: '#fff',
           border: '2.5px solid var(--ink, #1E1E1E)',
           borderRadius: '24px',
-          padding: 'clamp(22px, 3vw, 34px)',
+          padding: 'clamp(18px, 2.5vw, 32px)',
           boxShadow: '6px 6px 0 rgba(30,30,30,0.88)',
+          maxWidth: '100%',
+          width: '100%',
+          minWidth: 0,
+          boxSizing: 'border-box',
+          overflow: 'hidden',
         }}
       >
         <div
           style={{
             display: 'flex',
             justifyContent: 'space-between',
-            alignItems: 'center',
+            alignItems: 'flex-start',
             flexWrap: 'wrap',
             gap: '14px',
             marginBottom: '20px',
+            maxWidth: '100%',
+            minWidth: 0,
           }}
         >
-          <div>
+          <div style={{ flex: '1 1 240px', minWidth: 0 }}>
             <div
               style={{
                 fontFamily: "'Geist Mono', monospace",
@@ -1920,7 +1927,7 @@ export function TeamDashboardSection() {
             </h2>
           </div>
 
-          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center', maxWidth: '100%' }}>
             <button
               type="button"
               onClick={() => setActivePanel(activePanel === 'create' ? 'none' : 'create')}
@@ -2506,9 +2513,11 @@ export function TeamDashboardSection() {
         <div
           style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))',
-            gap: '14px',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))',
+            gap: '12px',
             marginBottom: '22px',
+            maxWidth: '100%',
+            minWidth: 0,
           }}
         >
           <div
@@ -2579,9 +2588,24 @@ export function TeamDashboardSection() {
             gap: '12px',
             alignItems: 'center',
             justifyContent: 'space-between',
+            maxWidth: '100%',
+            minWidth: 0,
           }}
         >
-          <div className="feyron-mobile-scroll" style={{ display: 'flex', gap: '8px', overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: '4px', maxWidth: '100%' }}>
+          <div
+            className="feyron-mobile-scroll"
+            style={{
+              display: 'flex',
+              gap: '8px',
+              overflowX: 'auto',
+              WebkitOverflowScrolling: 'touch',
+              paddingBottom: '4px',
+              maxWidth: '100%',
+              width: '100%',
+              minWidth: 0,
+              boxSizing: 'border-box',
+            }}
+          >
             {[
               { id: 'all', label: 'All Records' },
               { id: 'bookings', label: `Bookings (${bookings.length})` },
