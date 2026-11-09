@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8">
+<title>Proposal</title>
+<script src="27d00314-10df-487b-8ac4-b0cdae05d106"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<style>/* cyrillic-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("eaff57bb-7b93-44ca-b3f7-e70327b8d11a") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("780be11a-a806-4310-9dee-8106a2d635fd") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("4c0d37af-5227-4953-b8d8-3531b5b6dc14") format('woff2');
+  unicode-range: U+1F00-1FFF;
+}
+/* greek */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("71b50972-17bb-4b87-a026-cc6416391efd") format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("787824c3-ae50-46c3-85f5-f8479b95bf2e") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("ffc43b39-e244-4d62-9292-ac0615b0a0db") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("96da2107-2b2a-4a92-a439-1f1fe69c6d87") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("eaff57bb-7b93-44ca-b3f7-e70327b8d11a") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("780be11a-a806-4310-9dee-8106a2d635fd") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("4c0d37af-5227-4953-b8d8-3531b5b6dc14") format('woff2');
+  unicode-range: U+1F00-1FFF;
+}
+/* greek */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("71b50972-17bb-4b87-a026-cc6416391efd") format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("787824c3-ae50-46c3-85f5-f8479b95bf2e") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("ffc43b39-e244-4d62-9292-ac0615b0a0db") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("96da2107-2b2a-4a92-a439-1f1fe69c6d87") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("eaff57bb-7b93-44ca-b3f7-e70327b8d11a") format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("780be11a-a806-4310-9dee-8106a2d635fd") format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* greek-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("4c0d37af-5227-4953-b8d8-3531b5b6dc14") format('woff2');
+  unicode-range: U+1F00-1FFF;
+}
+/* greek */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("71b50972-17bb-4b87-a026-cc6416391efd") format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("787824c3-ae50-46c3-85f5-f8479b95bf2e") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("ffc43b39-e244-4d62-9292-ac0615b0a0db") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("96da2107-2b2a-4a92-a439-1f1fe69c6d87") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("f7eb4d84-a865-46a8-84fa-9225d0c7556c") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("0f6aba6a-62ea-4d7b-bcae-6ae0218bc453") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url("37d55896-ae34-48fd-851f-9faf6515a2bf") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* vietnamese */
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("f7eb4d84-a865-46a8-84fa-9225d0c7556c") format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+0128-0129, U+0168-0169, U+01A0-01A1, U+01AF-01B0, U+0300-0301, U+0303-0304, U+0308-0309, U+0323, U+0329, U+1EA0-1EF9, U+20AB;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("0f6aba6a-62ea-4d7b-bcae-6ae0218bc453") format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'Space Grotesk';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url("37d55896-ae34-48fd-851f-9faf6515a2bf") format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+</style>
+<style>
+body{margin:0;font-family:Inter,Arial,sans-serif;color:#1E1E1E}
+.h{font-family:'Space Grotesk',Arial,sans-serif}
+.lb{font-size:11px;letter-spacing:1.6px;text-transform:uppercase;font-weight:700;color:#5F5F5F;margin:0 0 8px}
+.mk{width:44px;height:44px;border-radius:10px;background:#FEB47B;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ey{display:flex;gap:8px}.ey i{width:9px;height:18px;border-radius:4px;background:#1E1E1E}
+.mo{width:8px;height:3px;border-radius:2px;background:#1E1E1E;margin-top:5px}
+p{margin:0;font-size:13px;line-height:1.55}
+</style>
+</helmet>
+<div style="width:794px;height:1123px;box-sizing:border-box;display:flex;flex-direction:column;background:#fff;position:relative;isolation:isolate;overflow:hidden">
+<div aria-hidden="true" style="position:absolute;z-index:-1;left:70px;top:330px;width:150px;height:150px;border-radius:34px;background:#FEB47B;opacity:0.14;transform:rotate(-8deg);display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none"><div style="display:flex;gap:27px"><div style="width:31px;height:61px;border-radius:14px;background:#1E1E1E"></div><div style="width:31px;height:61px;border-radius:14px;background:#1E1E1E"></div></div><div style="width:27px;height:10px;border-radius:7px;background:#1E1E1E;margin-top:17px"></div></div>
+<div aria-hidden="true" style="position:absolute;z-index:-1;left:560px;top:600px;width:150px;height:150px;border-radius:34px;background:#FEB47B;opacity:0.14;transform:rotate(7deg);display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none"><div style="display:flex;gap:27px"><div style="width:31px;height:61px;border-radius:14px;background:#1E1E1E"></div><div style="width:31px;height:61px;border-radius:14px;background:#1E1E1E"></div></div><div style="width:27px;height:10px;border-radius:7px;background:#1E1E1E;margin-top:17px"></div></div>
+<div aria-hidden="true" style="position:absolute;z-index:-1;left:150px;top:860px;width:150px;height:150px;border-radius:34px;background:#FEB47B;opacity:0.14;transform:rotate(-5deg);display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none"><div style="display:flex;gap:27px"><div style="width:31px;height:61px;border-radius:14px;background:#1E1E1E"></div><div style="width:31px;height:61px;border-radius:14px;background:#1E1E1E"></div></div><div style="width:27px;height:10px;border-radius:7px;background:#1E1E1E;margin-top:17px"></div></div>
+<div style="background:#1E1E1E;padding:34px 48px 36px;color:#fff">
+<div style="display:flex;align-items:center;gap:14px"><div class="mk"><div class="ey"><i></i><i></i></div><div class="mo"></div></div><span class="h" style="font-size:24px;font-weight:700">Feyron</span><span style="margin-left:auto;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:#A9A9A9">AI Productivity &amp; Technology</span></div>
+<p class="lb" style="color:#FEB47B;margin:30px 0 10px">Proposal</p>
+<h1 class="h" style="margin:0;font-size:38px;line-height:1.1">[Project name]</h1>
+<p style="margin-top:12px;color:#E7E7E7">Prepared for [Client name] · [Date] · Valid for [30] days</p>
+</div>
+<div style="display:flex;height:6px"><div style="flex:34;background:#FEB47B"></div><div style="flex:33;background:#C084FC"></div><div style="flex:33;background:#4ADE80"></div></div>
+<div style="padding:30px 48px 0;display:flex;flex-direction:column;gap:20px;flex:1">
+<div><p class="lb">The situation</p><p>[Describe how the work happens today, who does it, which tools are involved, and what it costs in time, errors or missed follow-ups. Include the baseline.]</p></div>
+<div><p class="lb">What we will build</p><p>[One short paragraph: the agent, website, platform or integration, and what changes for the client.]</p></div>
+<div style="display:flex;gap:28px">
+<div style="flex:1"><p class="lb">In scope</p><p>[Deliverable one]<br>[Deliverable two]<br>[Integrations]<br>[Training and handover]</p></div>
+<div style="flex:1"><p class="lb">Not included</p><p>[Exclusion one]<br>[Exclusion two]<br>Changes outside this scope are quoted before they are built.</p></div>
+</div>
+<div><p class="lb">Timeline</p>
+<div style="display:flex;gap:12px">
+<div style="flex:1;border-top:4px solid #FEB47B;padding-top:8px"><p><b>Understand</b><br>[Dates]</p></div>
+<div style="flex:1;border-top:4px solid #C084FC;padding-top:8px"><p><b>Build and review</b><br>[Dates]</p></div>
+<div style="flex:1;border-top:4px solid #4ADE80;padding-top:8px"><p><b>Launch and handover</b><br>[Date]</p></div>
+</div></div>
+<div><p class="lb">Investment</p>
+<div style="background:#F3F3F3;border-radius:10px;padding:16px 20px;display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;justify-content:space-between"><p>[Package name]</p><p><b>₦[Amount]</b></p></div>
+<div style="display:flex;justify-content:space-between"><p>Payment schedule: 50% at signing, 30% at the build milestone, 20% before launch</p><p>₦[x] / ₦[y] / ₦[z]</p></div>
+<div style="display:flex;justify-content:space-between"><p>Third-party costs (model usage, messaging, hosting) are billed separately at cost</p><p>[Estimate]</p></div>
+<div style="display:flex;justify-content:space-between"><p>Optional care plan: [Essential / Growth / Managed], per month</p><p>₦[Amount]</p></div>
+</div></div>
+<div><p class="lb">Next steps</p><p>1. Sign the service order form and pay the first instalment. 2. We schedule the kickoff within [number] working days. 3. We start building and keep you updated at each milestone.</p></div>
+<div style="display:flex;gap:28px;margin-top:6px">
+<div style="flex:1;border-top:1px solid #1E1E1E;padding-top:6px"><p style="font-size:12px;color:#5F5F5F">Accepted for [Client name]: name, signature, date</p></div>
+<div style="flex:1;border-top:1px solid #1E1E1E;padding-top:6px"><p style="font-size:12px;color:#5F5F5F">For Feyron: name, signature, date</p></div>
+</div>
+</div>
+<div style="background:#1E1E1E;padding:18px 48px;display:flex;justify-content:space-between;align-items:center">
+<p style="color:#FEB47B;font-size:12px">Technology that moves work forward.</p>
+<p style="color:#A9A9A9;font-size:11px">[Registered company name] · CAC [number] · [Email] · [Website]</p>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script="" data-props="{&quot;$preview&quot;:{&quot;width&quot;:794,&quot;height&quot;:1123}}">
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+
+
+</body></html>

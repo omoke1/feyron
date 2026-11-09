@@ -2004,7 +2004,7 @@ export async function handleDashboardAction(body) {
                 error: 'Recipient email, subject, and message body are required.',
             };
         }
-        const html = buildCustomDashboardEmailHtml({
+        const html = body?.customHtml ? String(body.customHtml) : buildCustomDashboardEmailHtml({
             recipientName,
             eyebrow,
             headline,

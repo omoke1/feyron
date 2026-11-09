@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Milestones &amp; Deliverables Roadmap — Feyron</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700;800&family=Geist+Mono:wght@400;600;700&display=swap');
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  margin: 0;
+  padding: 32px 16px;
+  background: #FAF9F5;
+  color: #1E1E1E;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  display: flex;
+  justify-content: center;
+}
+.page {
+  width: 100%;
+  max-width: 860px;
+  background: #FFFFFF;
+  border: 2px solid #1E1E1E;
+  border-radius: 18px;
+  box-shadow: 8px 8px 0 rgba(30, 30, 30, 0.9);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.header {
+  background: #1E1E1E;
+  color: #FFFFFF;
+  padding: 34px 44px 30px;
+}
+.brand-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.logo-mark {
+  width: 40px;
+  height: 40px;
+  background: #4ADE80;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.logo-mark svg {
+  width: 24px;
+  height: 24px;
+}
+.brand-name {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+}
+.brand-sub {
+  margin-left: auto;
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  color: #A9A9A9;
+}
+.badge-strip {
+  display: flex;
+  height: 6px;
+}
+.bar-gold { flex: 34; background: #FEB47B; }
+.bar-purple { flex: 33; background: #C084FC; }
+.bar-emerald { flex: 33; background: #4ADE80; }
+
+.kicker {
+  font-family: 'Geist Mono', monospace;
+  font-size: 11.5px;
+  letter-spacing: 1.6px;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #4ADE80;
+  margin: 26px 0 10px;
+}
+.title {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 34px;
+  line-height: 1.15;
+  font-weight: 800;
+  margin: 0 0 10px;
+  letter-spacing: -0.02em;
+}
+.meta-line {
+  font-size: 14.5px;
+  color: #E7E7E7;
+  font-family: 'Geist Mono', monospace;
+}
+
+.content {
+  padding: 34px 44px 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 26px;
+  flex: 1;
+}
+
+.sec-label {
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  font-weight: 700;
+  color: #5F5F5F;
+  margin-bottom: 8px;
+}
+.sec-p {
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: #2C301C;
+}
+
+/* Table styles */
+.milestone-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  border: 1.5px solid #1E1E1E;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-top: 10px;
+  font-size: 13.5px;
+}
+.milestone-table th {
+  background: #1E1E1E;
+  color: #FFFFFF;
+  font-family: 'Geist Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 12px 14px;
+  text-align: left;
+  border-bottom: 1.5px solid #1E1E1E;
+}
+.milestone-table td {
+  padding: 14px 14px;
+  border-bottom: 1px solid #E5E5E0;
+  vertical-align: top;
+  line-height: 1.5;
+}
+.milestone-table tr:last-child td {
+  border-bottom: none;
+}
+.milestone-table tr:nth-child(even) td {
+  background: #FAFAFA;
+}
+
+.phase-tag {
+  display: inline-block;
+  padding: 3px 9px;
+  border-radius: 100px;
+  font-family: 'Geist Mono', monospace;
+  font-size: 10.5px;
+  font-weight: 700;
+  border: 1px solid #1E1E1E;
+}
+.tag-gold { background: #FEB47B; color: #1E1E1E; }
+.tag-purple { background: #C084FC; color: #1E1E1E; }
+.tag-emerald { background: #4ADE80; color: #1E1E1E; }
+
+.callout-box {
+  background: #F3F3F3;
+  border-left: 4px solid #4ADE80;
+  border-radius: 0 10px 10px 0;
+  padding: 16px 20px;
+  display: grid;
+  gap: 6px;
+}
+.callout-title {
+  font-family: 'Geist Mono', monospace;
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #1E1E1E;
+}
+
+.deliverables-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 16px;
+  margin-top: 10px;
+}
+.deliv-card {
+  background: #FAFAFA;
+  border: 1.5px solid #E5E5E0;
+  border-radius: 12px;
+  padding: 16px 18px;
+}
+.deliv-title {
+  font-weight: 700;
+  font-size: 14.5px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.sign-row {
+  display: flex;
+  gap: 30px;
+  margin-top: 14px;
+}
+.sign-box {
+  flex: 1;
+  border-top: 1.5px solid #1E1E1E;
+  padding-top: 8px;
+  font-family: 'Geist Mono', monospace;
+  font-size: 11.5px;
+  color: #5F5F5F;
+}
+
+.footer {
+  background: #1E1E1E;
+  padding: 18px 44px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #FFFFFF;
+}
+.footer-tag {
+  color: #4ADE80;
+  font-size: 12px;
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 700;
+}
+.footer-meta {
+  color: #A9A9A9;
+  font-size: 11px;
+  font-family: 'Geist Mono', monospace;
+}
+
+@media print {
+  body { background: #FFFFFF; padding: 0; }
+  .page { border: none; box-shadow: none; max-width: 100%; border-radius: 0; }
+  .no-print { display: none !important; }
+}
+</style>
+</head>
+<body>
+
+<div class="page" id="feyron-document">
+  <!-- Top Bar -->
+  <header class="header">
+    <div class="brand-row">
+      <div class="logo-mark">
+        <svg viewBox="0 0 100 100" fill="#1E1E1E">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M14.5,0.0H85.5A14.5,14.5 0 0 1 100.0,14.5V85.5A14.5,14.5 0 0 1 85.5,100.0H14.5A14.5,14.5 0 0 1 0.0,85.5V14.5A14.5,14.5 0 0 1 14.5,0.0Z M21.2,16.2H33.1A8.2,8.2 0 0 1 41.3,24.4V59.4A8.2,8.2 0 0 1 33.1,67.6H21.2A8.2,8.2 0 0 1 13.0,59.4V24.4A8.2,8.2 0 0 1 21.2,16.2Z M66.9,16.2H78.8A8.2,8.2 0 0 1 87.0,24.4V59.4A8.2,8.2 0 0 1 78.8,67.6H66.9A8.2,8.2 0 0 1 58.7,59.4V24.4A8.2,8.2 0 0 1 66.9,16.2Z M45.1,76.0H54.9A4.9,4.9 0 0 1 59.8,80.9V80.9A4.9,4.9 0 0 1 54.9,85.8H45.1A4.9,4.9 0 0 1 40.2,80.9V80.9A4.9,4.9 0 0 1 45.1,76.0Z"/>
+        </svg>
+      </div>
+      <span class="brand-name">Feyron</span>
+      <span class="brand-sub">AI Productivity &amp; Technology</span>
+    </div>
+    <div class="kicker">Milestones &amp; Deliverables Roadmap</div>
+    <h1 class="title" id="doc-title">[Project Name] — Scope &amp; Milestones</h1>
+    <div class="meta-line" id="doc-meta">Client: [Client Name] · Ref: [FEY-0000] · Launch Target: [Target Date]</div>
+  </header>
+
+  <!-- 3-Color Brand Strip -->
+  <div class="badge-strip">
+    <div class="bar-gold"></div>
+    <div class="bar-purple"></div>
+    <div class="bar-emerald"></div>
+  </div>
+
+  <!-- Body Content -->
+  <main class="content">
+    <div>
+      <div class="sec-label">Project Objectives &amp; Scope Summary</div>
+      <p class="sec-p" id="doc-summary">
+        This document defines the formal engineering sprint stages, milestone deliverables, dependency requirements, and acceptance criteria agreed between Feyron and the Client.
+      </p>
+    </div>
+
+    <!-- Milestones Roadmap Table -->
+    <div>
+      <div class="sec-label">Sprint Timeline &amp; Milestone Deliverables</div>
+      <table class="milestone-table" id="milestones-table">
+        <thead>
+          <tr>
+            <th style="width: 18%;">Milestone</th>
+            <th style="width: 36%;">Core Deliverables &amp; Outputs</th>
+            <th style="width: 26%;">Client Inputs &amp; Dependencies</th>
+            <th style="width: 20%;">Target &amp; Sign-Off</th>
+          </tr>
+        </thead>
+        <tbody id="milestones-tbody">
+          <tr>
+            <td>
+              <span class="phase-tag tag-gold">Sprint 1</span><br>
+              <strong>Architecture &amp; Audit</strong>
+            </td>
+            <td>
+              • Process audit &amp; bottleneck mapping<br>
+              • Database schema &amp; API connector spec<br>
+              • Data boundary &amp; credential isolation setup
+            </td>
+            <td>API keys, workflow sample documents, and technical stakeholder point of contact.</td>
+            <td><strong>Week 1</strong><br><span style="font-size:11.5px;color:#555;">Deposit Instalment</span></td>
+          </tr>
+          <tr>
+            <td>
+              <span class="phase-tag tag-purple">Sprint 2</span><br>
+              <strong>Core Build &amp; Engine</strong>
+            </td>
+            <td>
+              • State machine agent &amp; routing logic<br>
+              • Webhook listeners with idempotent retries<br>
+              • Core backend services &amp; database integration
+            </td>
+            <td>Staging sandbox credentials, payment gateway keys (Paystack/Stripe).</td>
+            <td><strong>Weeks 2–3</strong><br><span style="font-size:11.5px;color:#555;">Staging Walkthrough</span></td>
+          </tr>
+          <tr>
+            <td>
+              <span class="phase-tag tag-purple">Sprint 3</span><br>
+              <strong>Interface &amp; Portals</strong>
+            </td>
+            <td>
+              • Responsive client dashboard &amp; review console<br>
+              • Real-time logging &amp; audit trail view<br>
+              • Role-based authentication &amp; security policies
+            </td>
+            <td>Brand assets, logo SVG, copywriting sign-offs, and custom domain access.</td>
+            <td><strong>Week 4</strong><br><span style="font-size:11.5px;color:#555;">Milestone 2 (30%)</span></td>
+          </tr>
+          <tr>
+            <td>
+              <span class="phase-tag tag-emerald">Sprint 4</span><br>
+              <strong>Hardening &amp; Testing</strong>
+            </td>
+            <td>
+              • End-to-end user acceptance testing (UAT)<br>
+              • Stress testing, edge case handling &amp; recovery<br>
+              • Spending limit caps &amp; emergency off-switch test
+            </td>
+            <td>Client acceptance testing review &amp; verification of pass/fail criteria.</td>
+            <td><strong>Week 5</strong><br><span style="font-size:11.5px;color:#555;">UAT Sign-Off</span></td>
+          </tr>
+          <tr>
+            <td>
+              <span class="phase-tag tag-emerald">Sprint 5</span><br>
+              <strong>Production Go-Live</strong>
+            </td>
+            <td>
+              • Production DNS cutover &amp; live deployment<br>
+              • Team training session &amp; handover documentation<br>
+              • 30-day post-launch warranty period activation
+            </td>
+            <td>Production domain DNS access and final acceptance sign-off.</td>
+            <td><strong>Week 6</strong><br><span style="font-size:11.5px;color:#555;">Final Balance (20%)</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Deliverables Breakdown Grid -->
+    <div>
+      <div class="sec-label">Tangible Deliverables Ledger</div>
+      <div class="deliverables-grid">
+        <div class="deliv-card">
+          <div class="deliv-title"><span style="color:#15803d;">✓</span> Code Repository &amp; Software</div>
+          <p style="font-size:13px;line-height:1.5;color:#444;">Clean, maintainable TypeScript / React code with full repository ownership transferred to the client upon final payment.</p>
+        </div>
+        <div class="deliv-card">
+          <div class="deliv-title"><span style="color:#15803d;">✓</span> Production Cloud Infrastructure</div>
+          <p style="font-size:13px;line-height:1.5;color:#444;">Configured cloud environment with automated edge deployments, SSL certificates, and high-availability database connections.</p>
+        </div>
+        <div class="deliv-card">
+          <div class="deliv-title"><span style="color:#15803d;">✓</span> Admin Console &amp; Audit Log</div>
+          <p style="font-size:13px;line-height:1.5;color:#444;">Dedicated management panel allowing your internal team to monitor active processes, inspect runs, and take manual control anytime.</p>
+        </div>
+        <div class="deliv-card">
+          <div class="deliv-title"><span style="color:#15803d;">✓</span> Documentation &amp; 30-Day Warranty</div>
+          <p style="font-size:13px;line-height:1.5;color:#444;">Step-by-step handover video, API reference, and 30 calendar days of direct bug fix and technical support included post-launch.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Client Dependency SLA Callout -->
+    <div class="callout-box">
+      <div class="callout-title">Client Dependency &amp; Feedback SLA</div>
+      <p style="font-size:13.5px;line-height:1.5;margin:0;color:#2c301c;">
+        To maintain delivery timelines, requested inputs (credentials, review feedback, approval of milestone checkpoints) must be provided within two (2) working days. Any delays in client dependencies automatically extend the go-live milestone accordingly.
+      </p>
+    </div>
+
+    <!-- Sign-off Block -->
+    <div>
+      <div class="sec-label">Agreement &amp; Milestone Approval</div>
+      <div class="sign-row">
+        <div class="sign-box">
+          <strong>Accepted for [Client Name]</strong><br>
+          Authorized Signature · Name · Date
+        </div>
+        <div class="sign-box">
+          <strong>For Feyron Team</strong><br>
+          Fredy O. · Engineering Lead · Date
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="footer-tag">Technology that moves work forward.</div>
+    <div class="footer-meta">Feyron AI Productivity &amp; Technology · feyron.site · hello@feyron.site · Lagos, Nigeria</div>
+  </footer>
+</div>
+
+</body>
+</html>

@@ -2372,7 +2372,7 @@ export async function handleDashboardAction(body: any): Promise<{
       };
     }
 
-    const html = buildCustomDashboardEmailHtml({
+    const html = body?.customHtml ? String(body.customHtml) : buildCustomDashboardEmailHtml({
       recipientName,
       eyebrow,
       headline,

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { ClientMaterialsStudio } from './components/ClientMaterialsStudio';
 
 interface WorkflowScenario {
   id: string;
@@ -1129,7 +1130,7 @@ export function TeamDashboardSection() {
   const [bookings, setBookings] = useState<DashboardBooking[]>([]);
   const [blockedDates, setBlockedDates] = useState<string[]>([]);
   const [blockedSlots, setBlockedSlots] = useState<Record<string, string[]>>({});
-  const [activeTab, setActiveTab] = useState<'all' | 'bookings' | 'enquiries' | 'waitlist'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'bookings' | 'enquiries' | 'waitlist' | 'materials'>('all');
   const [statusFilter, setStatusFilter] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [feedbackMsg, setFeedbackMsg] = useState('');
@@ -2586,6 +2587,7 @@ export function TeamDashboardSection() {
               { id: 'bookings', label: `Bookings (${bookings.length})` },
               { id: 'enquiries', label: `Enquiries (${enquiries.length})` },
               { id: 'waitlist', label: `Waitlist (${waitlistCount})` },
+              { id: 'materials', label: '📄 Client Materials & Docs' },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -2668,6 +2670,26 @@ export function TeamDashboardSection() {
           </div>
         )}
       </section>
+
+      {/* Client Materials Studio (Milestones Roadmap, Proposals, Invoices, Receipts) */}
+      {activeTab === 'materials' && (
+        <ClientMaterialsStudio
+          enquiries={enquiries}
+          bookings={bookings}
+          showToast={showToast}
+          onSendEmail={async (payload) => {
+            const res = await postDashboardAction({
+              action: 'send_email',
+              to: payload.to,
+              recipientName: payload.recipientName,
+              subject: payload.subject,
+              customHtml: payload.customHtml,
+              recordId: payload.recordId,
+            });
+            return res;
+          }}
+        />
+      )}
 
       {/* Booked Calls List */}
       {(activeTab === 'all' || activeTab === 'bookings') && (
@@ -2991,6 +3013,26 @@ export function TeamDashboardSection() {
                       >
                         + Google Calendar
                       </a>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveTab('materials');
+                        }}
+                        style={{
+                          cursor: 'pointer',
+                          background: '#FAF9F5',
+                          color: '#1E1E1E',
+                          border: '1.5px solid var(--ink, #1E1E1E)',
+                          borderRadius: '100px',
+                          padding: '7px 14px',
+                          fontFamily: "'Geist Mono', monospace",
+                          fontSize: '11.5px',
+                          fontWeight: 700,
+                          textTransform: 'uppercase',
+                        }}
+                      >
+                        📄 Milestones &amp; Docs →
+                      </button>
                       <button
                         type="button"
                         onClick={() => handleDeleteRecord('booking', b.id, b.email)}
@@ -3805,6 +3847,26 @@ export function TeamDashboardSection() {
                       >
                         Open Mail App
                       </a>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveTab('materials');
+                        }}
+                        style={{
+                          cursor: 'pointer',
+                          background: '#FAF9F5',
+                          color: '#1E1E1E',
+                          border: '1.5px solid var(--ink, #1E1E1E)',
+                          borderRadius: '100px',
+                          padding: '7px 14px',
+                          fontFamily: "'Geist Mono', monospace",
+                          fontSize: '11.5px',
+                          fontWeight: 700,
+                          textTransform: 'uppercase',
+                        }}
+                      >
+                        📄 Milestones &amp; Docs →
+                      </button>
                       <button
                         type="button"
                         onClick={() => handleDeleteRecord('enquiry', e.id, e.email)}
