@@ -225,11 +225,6 @@ export function resolveIntentConfig(
           color: '#4ADE80',
         },
       ],
-      caseStudyNote: {
-        name: 'Explore Live Platforms',
-        desc: 'Review our shipped systems across multi-vendor logistics, enterprise verification, and payments.',
-        url: 'https://feyron.site/work',
-      },
       ctaText: 'Explore our shipped case studies',
       ctaUrl: 'https://feyron.site/work',
       subjectLine: "You're on the early-access list — Feyron Products",
@@ -275,11 +270,6 @@ export function resolveIntentConfig(
           color: '#4ADE80',
         },
       ],
-      caseStudyNote: {
-        name: 'Froodi Logistics & Dispatch',
-        desc: 'Automated dispatch console and rider routing platform that saved 14+ hours/week.',
-        url: 'https://feyron.site/work/froodi',
-      },
       ctaText: 'Book a 20-min workflow audit',
       ctaUrl: 'https://feyron.site/contact',
       subjectLine: 'Next steps: AI Automation & Agent Systems — Feyron',
@@ -326,11 +316,6 @@ export function resolveIntentConfig(
           color: '#4ADE80',
         },
       ],
-      caseStudyNote: {
-        name: 'WorkVerify Portal',
-        desc: 'Enterprise credential verification platform with real-time audit logs and multi-tenant security.',
-        url: 'https://feyron.site/work/workverify',
-      },
       ctaText: 'Schedule a 20-min architecture review',
       ctaUrl: 'https://feyron.site/contact',
       subjectLine: 'Next steps: Platform Engineering & Web Architecture — Feyron',
@@ -378,11 +363,6 @@ export function resolveIntentConfig(
           color: '#4ADE80',
         },
       ],
-      caseStudyNote: {
-        name: 'FlowPay Invoicing & Reconciliation',
-        desc: 'Real-time billing, multi-currency collections, and automated payment matching.',
-        url: 'https://feyron.site/work/flowpay',
-      },
       ctaText: 'Schedule an integration consultation',
       ctaUrl: 'https://feyron.site/contact',
       subjectLine: 'Next steps: Integrations & Payments Architecture — Feyron',
@@ -529,20 +509,6 @@ function buildContactAutoResponderHtml(opts) {
       </tr>`
     )
     .join('');
-
-  const caseStudyBlock = intent.caseStudyNote
-    ? `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 28px 0;">
-        <tr>
-          <td style="background-color:#FAFAFA;border:1.5px solid #E5E5E0;border-radius:12px;padding:18px 22px;">
-            <p style="margin:0 0 4px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:11px;line-height:16px;letter-spacing:1.4px;text-transform:uppercase;font-weight:700;color:#5F5F5F;">Related Proven System</p>
-            <p class="t-dark" style="margin:0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:14px;line-height:22px;color:#1E1E1E;">
-              <strong>${escapeHtml(intent.caseStudyNote.name)}</strong>: ${escapeHtml(intent.caseStudyNote.desc)}
-              <a href="${intent.caseStudyNote.url}" style="color:#FEB47B;text-decoration:none;font-weight:700;display:inline-block;margin-left:6px;">View Case Study &rarr;</a>
-            </p>
-          </td>
-        </tr>
-      </table>`
-    : '';
 
   return `<!DOCTYPE html>
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
@@ -691,8 +657,6 @@ function buildContactAutoResponderHtml(opts) {
             </td>
           </tr>
         </table>
-
-        ${caseStudyBlock}
  
         <p class="t-dark" style="margin:0 0 32px 0;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;font-size:15px;line-height:24px;color:#1E1E1E;">Need to add anything in the meantime? Simply reply to this email or write to <a href="mailto:hello@feyron.site" style="color:#FEB47B;text-decoration:none;font-weight:600;">hello@feyron.site</a>.</p>
  
