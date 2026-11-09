@@ -16,7 +16,7 @@ catch {
     // Ignore .env read errors in serverless runtime
 }
 function getResendApiKey() {
-    return (process.env.RESEND_API_KEY || '').trim();
+    return (process.env.RESEND_API_KEY || process.env.ESEND_API_KEY || '').trim();
 }
 function getFromEmail() {
     return (process.env.RESEND_FROM_EMAIL || 'Feyron <hello@feyron.site>').trim();
@@ -160,11 +160,12 @@ export async function sendEmailViaResend(options) {
         return { success: true, id: attempt2.data?.id };
     }
     const errMsg2 = String(attempt2.data?.message || attempt2.data?.error || errMsg1);
-    // Attempt 3: If Resend sandbox restricts recipient to the account owner's email address,
-    // extract that email or fall back to fredrickomoke@gmail.com
+    // Attempt 3: If Resend sandbox restricts recipient (only for internal alerts)
+  if (options.isInternal) {
     const matchOwnerEmail = errMsg2.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
     const fallbackRecipient = matchOwnerEmail ? matchOwnerEmail[1] : getOwnerFallbackEmail();
     if (fallbackRecipient && !options.to.includes(fallbackRecipient)) {
+      
         const sandboxPayload = {
             ...onboardingPayload,
             to: [fallbackRecipient],
@@ -174,10 +175,11 @@ export async function sendEmailViaResend(options) {
             return { success: true, id: attempt3.data?.id };
         }
         return {
-            success: false,
-            error: String(attempt3.data?.message || errMsg2 || 'Resend API failed'),
-        };
+      success: false,
+      error: String(attempt3.data?.message || errMsg2 || 'Resend API failed'),
+    };
     }
+  }
     return {
         success: false,
         error: errMsg2 || 'Resend API failed',
@@ -825,12 +827,27 @@ export async function handleContactSubmission(body) {
         `Details:`,
         rawMessage,
     ].join('\n');
-    const internalResult = await sendEmailViaResend({
+    const internalPromise = sendEmailViaResend({
         to: [getToEmail()],
         subject: `[Feyron] New ${interestLabel} enquiry from ${rawName}`,
         html: internalHtml,
         text: internalText,
         replyTo: rawEmail,
+        isInternal: true,
+    });
+    const visitorHtml = buildContactAutoResponderHtml({
+        fullName: rawName,
+        interest: interestLabel,
+        company: rawCompany,
+        details: rawMessage,
+    });
+    const visitorPromise = sendEmailViaResend({
+        to: [rawEmail],
+        subject: `Thank you for reaching out — Feyron`,
+        html: visitorHtml,
+        text: `Hi ${rawName},\n\nThank you for reaching out to Feyron regarding ${interestLabel}. Our team reviews every enquiry directly and will reply within one working day with practical next steps.\n\nYour summary\n${rawMessage}\n\nNeed to add anything in the meantime? Simply reply to this email or write to hello@feyron.site.\n\n— Fredy\nFeyron Team\nhttps://feyron.site | hello@feyron.site`,
+        replyTo: getToEmail(),
+        isInternal: false,
     });
     // Persist enquiry record for the Team Dashboard
     const enquiryId = `enq-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
@@ -862,25 +879,19 @@ export async function handleContactSubmission(body) {
             { text: 'Visit feyron.site', url: 'https://feyron.site' },
         ],
     ]);
-    if (!internalResult.success) {
-        console.warn('Contact email delivery notice:', internalResult.error);
+    const [internalOutcome, visitorOutcome] = await Promise.allSettled([
+        internalPromise,
+        visitorPromise,
+    ]);
+    if (internalOutcome.status === 'rejected' || (internalOutcome.status === 'fulfilled' && !internalOutcome.value.success)) {
+        const err = internalOutcome.status === 'rejected' ? internalOutcome.reason : internalOutcome.value.error;
+        console.warn('Contact internal email delivery notice:', err);
     }
-    else {
-        // Send the official Feyron branded auto-responder template to visitor
-        const visitorHtml = buildContactAutoResponderHtml({
-            fullName: rawName,
-            interest: interestLabel,
-            company: rawCompany,
-            details: rawMessage,
-        });
-        await sendEmailViaResend({
-            to: [rawEmail],
-            subject: `Thank you for reaching out — Feyron`,
-            html: visitorHtml,
-            text: `Hi ${rawName},\n\nThank you for reaching out to Feyron regarding ${interestLabel}. Our team reviews every enquiry directly and will reply within one working day with practical next steps.\n\nYour summary\n${rawMessage}\n\nNeed to add anything in the meantime? Simply reply to this email or write to hello@feyron.site.\n\n— Fredy\nFeyron Team\nhttps://feyron.site | hello@feyron.site`,
-            replyTo: getToEmail(),
-        }).catch(() => { });
+    if (visitorOutcome.status === 'rejected' || (visitorOutcome.status === 'fulfilled' && !visitorOutcome.value.success)) {
+        const err = visitorOutcome.status === 'rejected' ? visitorOutcome.reason : visitorOutcome.value.error;
+        console.warn('Contact visitor email delivery notice:', err);
     }
+    const internalResult = internalOutcome.status === 'fulfilled' ? internalOutcome.value : { success: false, error: 'Failed' };
     return {
         status: 200,
         body: {
@@ -1306,7 +1317,7 @@ export async function handleBookingSubmission(body) {
         },
     ];
     // Send confirmation to internal inbox
-    const res = await sendEmailViaResend({
+    const internalPromise = sendEmailViaResend({
         to: [getToEmail()],
         subject: `[Feyron] New call booked with ${name} — ${formattedDate} (${slotPart} WAT)`,
         html: internalBookingHtml,
@@ -1322,6 +1333,33 @@ export async function handleBookingSubmission(body) {
         ].join('\n'),
         replyTo: email,
         attachments,
+        isInternal: true,
+    });
+    const guestPromise = sendEmailViaResend({
+        to: [email],
+        subject: `Your call with Feyron is confirmed — ${formattedDate} (${slotPart} WAT)`,
+        html: guestBookingHtml,
+        text: [
+            `Hi ${name},`,
+            ``,
+            `Your 20-minute call with Feyron is confirmed.`,
+            `Date: ${formattedDate}`,
+            `Time: ${slotPart} to ${endSlotPart} (West Africa Time)${clientTimeLabel ? ` / Local time: ${clientTimeLabel}` : ''}`,
+            notes ? `Topic / Notes: ${notes}` : '',
+            `Join Video Meeting: ${meetingUrl}`,
+            `Add to Google Calendar: ${gcalUrl}`,
+            `Add to Outlook: ${outlookUrl}`,
+            `Reschedule: ${rescheduleUrl}`,
+            ``,
+            `— Fredy`,
+            `Feyron Team`,
+            `https://feyron.site | hello@feyron.site`,
+        ]
+            .filter(Boolean)
+            .join('\n'),
+        replyTo: getToEmail(),
+        attachments,
+        isInternal: false,
     });
     recordBooking(bookingRecord);
     scheduleTwoHourReminderIfUpcoming(bookingRecord);
@@ -1340,37 +1378,19 @@ export async function handleBookingSubmission(body) {
         ],
         [{ text: 'Open Team Dashboard', url: 'https://feyron.site/dashboard' }],
     ]);
-    if (!res.success) {
-        console.warn('Booking email delivery notice:', res.error);
+    const [internalBookingOutcome, guestBookingOutcome] = await Promise.allSettled([
+        internalPromise,
+        guestPromise,
+    ]);
+    if (internalBookingOutcome.status === 'rejected' || (internalBookingOutcome.status === 'fulfilled' && !internalBookingOutcome.value.success)) {
+        const err = internalBookingOutcome.status === 'rejected' ? internalBookingOutcome.reason : internalBookingOutcome.value.error;
+        console.warn('Booking internal email delivery notice:', err);
     }
-    else {
-        // Send the official Feyron Booking confirmation email to the guest
-        await sendEmailViaResend({
-            to: [email],
-            subject: `Your call with Feyron is confirmed — ${formattedDate} (${slotPart} WAT)`,
-            html: guestBookingHtml,
-            text: [
-                `Hi ${name},`,
-                ``,
-                `Your 20-minute call with Feyron is confirmed.`,
-                `Date: ${formattedDate}`,
-                `Time: ${slotPart} to ${endSlotPart} (West Africa Time)${clientTimeLabel ? ` / Local time: ${clientTimeLabel}` : ''}`,
-                notes ? `Topic / Notes: ${notes}` : '',
-                `Join Video Meeting: ${meetingUrl}`,
-                `Add to Google Calendar: ${gcalUrl}`,
-                `Add to Outlook: ${outlookUrl}`,
-                `Reschedule: ${rescheduleUrl}`,
-                ``,
-                `— Fredy`,
-                `Feyron Team`,
-                `https://feyron.site | hello@feyron.site`,
-            ]
-                .filter(Boolean)
-                .join('\n'),
-            replyTo: getToEmail(),
-            attachments,
-        }).catch(() => { });
+    if (guestBookingOutcome.status === 'rejected' || (guestBookingOutcome.status === 'fulfilled' && !guestBookingOutcome.value.success)) {
+        const err = guestBookingOutcome.status === 'rejected' ? guestBookingOutcome.reason : guestBookingOutcome.value.error;
+        console.warn('Booking guest email delivery notice:', err);
     }
+    const res = internalBookingOutcome.status === 'fulfilled' ? internalBookingOutcome.value : { success: false, error: 'Failed' };
     return {
         status: 200,
         body: {

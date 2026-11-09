@@ -14,3 +14,4 @@ bun.lockb
 firebase-applet-config.json
 data/
 
+.vercel
