@@ -1,4 +1,8 @@
-import { verifyDashboardAuth, sendNotificationEmail } from './_emailService.js';
+import {
+  verifyDashboardAuth,
+  sendEmailViaResend,
+  sendTelegramNotification,
+} from './_emailService.js';
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -37,7 +41,7 @@ export default async function handler(req, res) {
     const watHour = wat.getHours();
     const watMin = wat.getMinutes();
     const day = wat.getDay();
-    const inWindow = day >= 1 && day <= 5 && (watHour * 60 + watMin >= 510) && (watHour * 60 + watMin <= 1050);
+    const inWindow = day >= 1 && day <= 5 && watHour * 60 + watMin >= 510 && watHour * 60 + watMin <= 1050;
 
     return res.status(200).json({
       ok: true,
@@ -58,14 +62,24 @@ export default async function handler(req, res) {
         return res.status(400).json({ ok: false, error: 'Missing destination or message body.' });
       }
 
-      // If live email credentials are set, send notification/email
+      // If live email credentials are set, send email and telegram notification
       try {
-        await sendNotificationEmail(
-          `[Agent Outbound Dispatched] ${subject}`,
-          `Prospect ID: ${prospectId || 'N/A'}\nQueue ID: ${queueId || 'N/A'}\nTo: ${to}\nSubject: ${subject}\n\n---\n${bodyText}`
+        await sendEmailViaResend({
+          to,
+          subject: subject || 'Feyron Automation Systems',
+          text: bodyText,
+          html: `<div style="font-family:sans-serif;line-height:1.6;color:#1E1E1E;white-space:pre-wrap;">${bodyText}</div>`,
+        });
+      } catch (err) {
+        console.warn('Agent email dispatch deferred:', err.message);
+      }
+
+      try {
+        await sendTelegramNotification(
+          `<b>[Agent Outbound Dispatched]</b>\nTo: ${to}\nSubject: ${subject}\nProspect: ${prospectId || 'N/A'}\nQueue ID: ${queueId || 'N/A'}`
         );
       } catch (err) {
-        console.warn('Agent email notification deferred:', err.message);
+        // ignore
       }
 
       return res.status(200).json({
