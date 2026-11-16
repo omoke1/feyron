@@ -265,28 +265,54 @@ export default function App() {
     };
   }, [feyronPage, activeCaseStudy]);
 
-  // Suppress intrusive animated mascot & canvas overlays on Admin Dashboard
+  // Suppress intrusive animated mascot, canvas overlays, and restore native mouse cursor on Admin Dashboard
   useEffect(() => {
     if (feyronPage?.isDashboardPage) {
+      document.documentElement.classList.add('feyron-admin-mode');
       document.body.classList.add('feyron-admin-mode');
-      const hideMascot = () => {
+      document.documentElement.style.cursor = 'default';
+      document.body.style.cursor = 'default';
+
+      const enforceAdminUi = () => {
         const mascot = document.querySelector('.cs-ai-mascot') as HTMLElement | null;
         if (mascot) {
           mascot.style.display = 'none';
           mascot.style.opacity = '0';
           mascot.style.pointerEvents = 'none';
         }
+        const customCursor = document.getElementById('cs-cursor');
+        if (customCursor) {
+          customCursor.style.display = 'none';
+          customCursor.style.opacity = '0';
+          customCursor.style.pointerEvents = 'none';
+        }
+        const customSpot = document.getElementById('cs-spot');
+        if (customSpot) {
+          customSpot.style.display = 'none';
+        }
+        document.documentElement.style.cursor = 'default';
+        document.body.style.cursor = 'default';
       };
-      hideMascot();
-      const iv = setInterval(hideMascot, 250);
+
+      enforceAdminUi();
+      const iv = setInterval(enforceAdminUi, 250);
       return () => {
         clearInterval(iv);
+        document.documentElement.classList.remove('feyron-admin-mode');
         document.body.classList.remove('feyron-admin-mode');
+        document.documentElement.style.cursor = '';
+        document.body.style.cursor = '';
         const mascot = document.querySelector('.cs-ai-mascot') as HTMLElement | null;
         if (mascot) {
           mascot.style.display = '';
           mascot.style.opacity = '';
           mascot.style.pointerEvents = '';
+        }
+        const customCursor = document.getElementById('cs-cursor');
+        if (customCursor) {
+          customCursor.style.display = '';
+          customCursor.style.opacity = '';
+          customCursor.style.pointerEvents = '';
         }
       };
     }

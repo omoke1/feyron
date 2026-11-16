@@ -45,6 +45,10 @@
           if (location.pathname.replace(/\/+$/, '') === '/play') {
             window.__csGameOnly = true;
           }
+          var p = location.pathname.toLowerCase();
+          if (p.startsWith('/admin') || p.startsWith('/dashboard')) {
+            document.documentElement.classList.add('feyron-admin-mode');
+          }
         } catch (e) {}
         window.__feyronIntroActive = false;
         try {
