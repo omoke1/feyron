@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { ClientMaterialsStudio } from './components/ClientMaterialsStudio';
+import { AgentWorkflowStudio } from './components/AgentWorkflowStudio';
 
 interface WorkflowScenario {
   id: string;
@@ -1130,7 +1131,7 @@ export function TeamDashboardSection() {
   const [bookings, setBookings] = useState<DashboardBooking[]>([]);
   const [blockedDates, setBlockedDates] = useState<string[]>([]);
   const [blockedSlots, setBlockedSlots] = useState<Record<string, string[]>>({});
-  const [activeTab, setActiveTab] = useState<'all' | 'bookings' | 'enquiries' | 'waitlist' | 'materials'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'bookings' | 'enquiries' | 'waitlist' | 'materials' | 'agent_pipeline'>('all');
   const [statusFilter, setStatusFilter] = useState<string>('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [feedbackMsg, setFeedbackMsg] = useState('');
@@ -2596,6 +2597,7 @@ export function TeamDashboardSection() {
               { id: 'enquiries', label: `Enquiries (${enquiries.length})` },
               { id: 'waitlist', label: `Waitlist (${waitlistCount})` },
               { id: 'materials', label: 'Client Materials & Docs' },
+              { id: 'agent_pipeline', label: 'Sales Agents & Approvals' },
             ].map((tab) => (
               <button
                 key={tab.id}
@@ -2705,6 +2707,14 @@ export function TeamDashboardSection() {
               error: res.data?.error || (res.ok ? undefined : 'Failed to dispatch email via Resend.'),
             };
           }}
+        />
+      )}
+
+      {/* Autonomous Sales Workflow Agents & Approvals Queue */}
+      {activeTab === 'agent_pipeline' && (
+        <AgentWorkflowStudio
+          passcode={passcode}
+          showToast={showToast}
         />
       )}
 
