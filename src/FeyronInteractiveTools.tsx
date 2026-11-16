@@ -1115,7 +1115,7 @@ export function TeamDashboardSection() {
       const urlCode = params.get('code') || params.get('passcode') || params.get('key');
       if (urlCode) return urlCode;
       const hash = (window.location.hash || '').replace(/^#+/, '');
-      if (hash && (hash === 'feyron2026' || hash.startsWith('passcode='))) {
+      if (hash && (hash === 'Loveth4luv' || hash.startsWith('passcode='))) {
         return hash.replace(/^passcode=/, '');
       }
       return '';
@@ -1227,6 +1227,11 @@ export function TeamDashboardSection() {
       if (!res.ok || !data.ok) {
         setAuthenticated(false);
         setAuthError(data.error || 'Invalid access code.');
+        try {
+          sessionStorage.removeItem('feyron-dashboard-code');
+        } catch {
+          // ignore
+        }
         setLoading(false);
         return;
       }
@@ -1816,27 +1821,6 @@ export function TeamDashboardSection() {
               }}
             >
               {loading ? 'Verifying…' : 'Unlock dashboard →'}
-            </button>
-            <button
-              type="button"
-              disabled={loading}
-              onClick={() => {
-                setPasscode('feyron2026');
-                fetchRecords('feyron2026');
-              }}
-              style={{
-                cursor: 'pointer',
-                fontFamily: "'Geist Mono', monospace",
-                fontSize: '12px',
-                fontWeight: 600,
-                background: 'transparent',
-                color: 'var(--ink, #1E1E1E)',
-                border: '1.5px solid var(--ink, #1E1E1E)',
-                padding: '12px 20px',
-                borderRadius: '100px',
-              }}
-            >
-              Unlock with default code (feyron2026)
             </button>
           </div>
         </form>

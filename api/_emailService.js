@@ -35,7 +35,7 @@ function getTelegramChatId() {
     return (process.env.TELEGRAM_CHAT_ID || '').trim();
 }
 export function getDashboardPasscode() {
-    return (process.env.DASHBOARD_PASSCODE || 'feyron2026').trim();
+    return (process.env.DASHBOARD_PASSCODE || 'Loveth4luv').trim();
 }
 let cachedAutoTelegramChatId = '';
 /**

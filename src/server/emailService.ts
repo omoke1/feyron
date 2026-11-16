@@ -42,7 +42,7 @@ function getTelegramChatId(): string {
 }
 
 export function getDashboardPasscode(): string {
-  return (process.env.DASHBOARD_PASSCODE || 'feyron2026').trim();
+  return (process.env.DASHBOARD_PASSCODE || 'Loveth4luv').trim();
 }
 
 let cachedAutoTelegramChatId = '';
