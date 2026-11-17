@@ -26,13 +26,24 @@ interface AgentWorkflowStudioProps {
 export function AgentWorkflowStudio({ passcode, showToast }: AgentWorkflowStudioProps) {
   const [state, setState] = useState<PipelineState>(() => pipelineEngine.getState());
   const [selectedProspect, setSelectedProspect] = useState<ProspectRecord | null>(null);
-  const [activeSubTab, setActiveSubTab] = useState<'queue' | 'board' | 'scenarios' | 'history' | 'settings'>('queue');
+  const [activeSubTab, setActiveSubTab] = useState<'queue' | 'scout' | 'board' | 'scenarios' | 'history' | 'settings'>('scout');
   const [watInfo, setWatInfo] = useState(() => isWithinWatSendWindow());
   const [runningScenario, setRunningScenario] = useState<string | null>(null);
   const [lastScenarioResult, setLastScenarioResult] = useState<any | null>(null);
   const [editingDraftId, setEditingDraftId] = useState<string | null>(null);
   const [editedDraftText, setEditedDraftText] = useState<string>('');
   const [actionBusy, setActionBusy] = useState<string | null>(null);
+
+  // Active Lead Scout & Hunter States
+  const [scoutSector, setScoutSector] = useState('Third-party Logistics & Haulage');
+  const [scoutLocation, setScoutLocation] = useState('Lagos, Nigeria');
+  const [scoutKeywords, setScoutKeywords] = useState('');
+  const [scoutCustomCompanies, setScoutCustomCompanies] = useState('');
+  const [scoutCount, setScoutCount] = useState<number>(3);
+  const [isScouting, setIsScouting] = useState(false);
+  const [scoutResults, setScoutResults] = useState<any[]>([]);
+  const [csvInput, setCsvInput] = useState('');
+  const [showCsvBox, setShowCsvBox] = useState(false);
 
   // Update WAT clock every 10 seconds
   useEffect(() => {
@@ -111,6 +122,75 @@ export function AgentWorkflowStudio({ passcode, showToast }: AgentWorkflowStudio
     const next = current === 'APPROVE' ? 'AUTO' : 'APPROVE';
     pipelineEngine.updateAutonomySetting(actionKey, next);
     showToast(`Autonomy for ${actionKey} set to ${next}`);
+  };
+
+  const handleRunScout = async () => {
+    if (state.autonomy.paused) {
+      showToast('System paused. Release Emergency Kill Switch to scout.');
+      return;
+    }
+    setIsScouting(true);
+    try {
+      const res = await fetch('/api/agent', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-feyron-passcode': passcode,
+        },
+        body: JSON.stringify({
+          action: 'scout_and_qualify',
+          payload: {
+            sector: scoutSector,
+            location: scoutLocation,
+            keywords: scoutKeywords,
+            customCompanies: scoutCustomCompanies,
+            count: scoutCount,
+          },
+        }),
+      });
+      const data = await res.json();
+      if (data.ok && Array.isArray(data.leads) && data.leads.length > 0) {
+        setScoutResults(data.leads);
+        pipelineEngine.batchIngestProspects(data.leads);
+        showToast(`Scout Agent identified and queued ${data.leads.length} high-priority leads!`);
+      } else {
+        showToast(data.error || 'No leads returned from scout.');
+      }
+    } catch (e: any) {
+      showToast(`Scout error: ${e.message}`);
+    } finally {
+      setIsScouting(false);
+    }
+  };
+
+  const handleImportCsv = () => {
+    if (!csvInput.trim()) {
+      showToast('Please paste company names or CSV lines.');
+      return;
+    }
+    const lines = csvInput.trim().split(/\r?\n/);
+    const parsedLeads: any[] = [];
+    for (const line of lines) {
+      const parts = line.split(',').map((p) => p.trim());
+      if (parts[0]) {
+        parsedLeads.push({
+          company_name: parts[0],
+          industry: parts[1] || scoutSector,
+          location: parts[2] || scoutLocation,
+          contact_name: parts[3] || 'Decision Maker',
+          verified_channel: parts[4] || 'operations@feyron.site',
+          icp_score: 85,
+          draft_subject: `Automating operational workflows at ${parts[0]}`,
+          draft_body: `Dear Decision Maker,\n\nI reviewed ${parts[0]}'s public client channels and noticed opportunities to eliminate manual processing delays.\n\nAt Feyron, we engineer automated enterprise workflows that route requests instantly without phone calls or paper trails.\n\nWould you be open to a 20-minute discussion this Thursday at 14:00 WAT to review the architecture?\n\nKind regards,\nFredrick Omoke\nFeyron AI Productivity & Technology`,
+        });
+      }
+    }
+    if (parsedLeads.length > 0) {
+      pipelineEngine.batchIngestProspects(parsedLeads);
+      showToast(`Imported and queued ${parsedLeads.length} leads.`);
+      setCsvInput('');
+      setShowCsvBox(false);
+    }
   };
 
   return (
@@ -327,6 +407,7 @@ export function AgentWorkflowStudio({ passcode, showToast }: AgentWorkflowStudio
         }}
       >
         {[
+          { id: 'scout', label: 'Lead Scout & Hunter (Google AI)' },
           { id: 'queue', label: `Approval Queue (${pendingQueue.length})` },
           { id: 'board', label: `Pipeline Board (${state.prospects.length})` },
           { id: 'scenarios', label: '20 Test Scenarios (Section 15)' },
@@ -632,6 +713,428 @@ export function AgentWorkflowStudio({ passcode, showToast }: AgentWorkflowStudio
                   </div>
                 );
               })}
+            </div>
+          )}
+        </section>
+      )}
+
+      {/* ------------------------------------------------------------------- */}
+      {/* 1.5. ACTIVE LEAD SCOUT & HUNTER TAB (GOOGLE AI)                    */}
+      {/* ------------------------------------------------------------------- */}
+      {activeSubTab === 'scout' && (
+        <section
+          style={{
+            background: '#fff',
+            border: '2.5px solid var(--ink, #1E1E1E)',
+            borderRadius: '20px',
+            padding: '24px',
+            boxShadow: '4px 4px 0 rgba(30,30,30,0.9)',
+            display: 'grid',
+            gap: '20px',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px' }}>
+            <div>
+              <div style={{ fontFamily: "'Geist Mono', monospace", fontSize: '11px', textTransform: 'uppercase', color: '#666' }}>
+                Autonomous Lead Acquisition · Scout Agent
+              </div>
+              <h3 style={{ margin: '4px 0 0 0', fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: '22px', fontWeight: 800 }}>
+                Google AI Lead Hunter &amp; Market Scout
+              </h3>
+              <p style={{ margin: '4px 0 0 0', fontFamily: "'Geist Mono', monospace", fontSize: '12px', color: '#666' }}>
+                Scouts target companies, identifies operational friction points, scores ICP (0-100), and auto-drafts compliant Touch 1 emails.
+              </p>
+            </div>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <button
+                type="button"
+                onClick={() => setShowCsvBox(!showCsvBox)}
+                style={{
+                  cursor: 'pointer',
+                  border: '1.5px solid var(--ink, #1E1E1E)',
+                  borderRadius: '100px',
+                  padding: '6px 14px',
+                  fontFamily: "'Geist Mono', monospace",
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  background: showCsvBox ? 'var(--ink, #1E1E1E)' : 'var(--paper, #E7E7E7)',
+                  color: showCsvBox ? '#fff' : 'var(--ink, #1E1E1E)',
+                }}
+              >
+                {showCsvBox ? 'Close CSV Importer' : '+ Bulk Paste CSV Leads'}
+              </button>
+            </div>
+          </div>
+
+          {showCsvBox && (
+            <div
+              style={{
+                border: '2px dashed var(--ink, #1E1E1E)',
+                borderRadius: '14px',
+                padding: '16px',
+                background: '#FAF9F5',
+                display: 'grid',
+                gap: '10px',
+              }}
+            >
+              <div style={{ fontFamily: "'Geist Mono', monospace", fontSize: '11px', fontWeight: 700 }}>
+                Paste CSV or line-separated leads (Format: Company, Sector, Location, Contact Name, Email):
+              </div>
+              <textarea
+                value={csvInput}
+                onChange={(e) => setCsvInput(e.target.value)}
+                rows={4}
+                placeholder="Metro Swift, Logistics, Lagos, Emeka Nnamdi, operations@metroswift.ng&#10;Crestview Real Estate, Property, Abuja, Amina Bello, amina@crestview.ng"
+                style={{
+                  width: '100%',
+                  boxSizing: 'border-box',
+                  border: '1.5px solid var(--ink, #1E1E1E)',
+                  borderRadius: '8px',
+                  padding: '10px',
+                  fontFamily: "'Geist Mono', monospace",
+                  fontSize: '12px',
+                  background: '#fff',
+                }}
+              />
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button
+                  type="button"
+                  onClick={handleImportCsv}
+                  style={{
+                    cursor: 'pointer',
+                    background: 'var(--ink, #1E1E1E)',
+                    color: 'var(--accent, #D4F534)',
+                    border: '1.5px solid var(--ink, #1E1E1E)',
+                    borderRadius: '8px',
+                    padding: '8px 16px',
+                    fontFamily: "'Geist Mono', monospace",
+                    fontSize: '11px',
+                    fontWeight: 800,
+                  }}
+                >
+                  Import and Queue Leads
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Scout Parameters Form */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+              gap: '14px',
+              background: '#FAF9F5',
+              padding: '16px',
+              borderRadius: '16px',
+              border: '1.5px solid var(--ink, #1E1E1E)',
+            }}
+          >
+            <div>
+              <label style={{ display: 'block', fontFamily: "'Geist Mono', monospace", fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', marginBottom: '6px' }}>
+                Target Sector / Industry
+              </label>
+              <select
+                value={scoutSector}
+                onChange={(e) => setScoutSector(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '8px 10px',
+                  borderRadius: '8px',
+                  border: '1.5px solid var(--ink, #1E1E1E)',
+                  fontFamily: "'Geist Mono', monospace",
+                  fontSize: '12px',
+                  background: '#fff',
+                }}
+              >
+                <option value="Third-party Logistics & Haulage">Third-party Logistics &amp; Haulage</option>
+                <option value="Commercial Real Estate & Facilities">Commercial Real Estate &amp; Facilities</option>
+                <option value="Fintech, Lending & Payments">Fintech, Lending &amp; Payments</option>
+                <option value="Healthcare, Clinics & Diagnostic Labs">Healthcare, Clinics &amp; Diagnostic Labs</option>
+                <option value="E-commerce, Brands & D2C Fulfillment">E-commerce &amp; D2C Fulfillment</option>
+                <option value="Legal, Tax & Accounting Practices">Legal, Tax &amp; Accounting Practices</option>
+                <option value="Hospitality & Chain Operations">Hospitality &amp; Chain Operations</option>
+              </select>
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontFamily: "'Geist Mono', monospace", fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', marginBottom: '6px' }}>
+                Target Location / Market
+              </label>
+              <select
+                value={scoutLocation}
+                onChange={(e) => setScoutLocation(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '8px 10px',
+                  borderRadius: '8px',
+                  border: '1.5px solid var(--ink, #1E1E1E)',
+                  fontFamily: "'Geist Mono', monospace",
+                  fontSize: '12px',
+                  background: '#fff',
+                }}
+              >
+                <option value="Lagos, Nigeria">Lagos, Nigeria</option>
+                <option value="Abuja, FCT, Nigeria">Abuja, FCT, Nigeria</option>
+                <option value="Port Harcourt, Rivers, Nigeria">Port Harcourt, Nigeria</option>
+                <option value="Accra, Ghana">Accra, Ghana</option>
+                <option value="Nairobi, Kenya">Nairobi, Kenya</option>
+                <option value="London, United Kingdom">London, United Kingdom</option>
+                <option value="Global / Remote">Global / Remote</option>
+              </select>
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontFamily: "'Geist Mono', monospace", fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', marginBottom: '6px' }}>
+                Operational Friction Keywords
+              </label>
+              <input
+                type="text"
+                value={scoutKeywords}
+                onChange={(e) => setScoutKeywords(e.target.value)}
+                placeholder="e.g. manual dispatch, broken form, paper waybill"
+                style={{
+                  width: '100%',
+                  boxSizing: 'border-box',
+                  padding: '8px 10px',
+                  borderRadius: '8px',
+                  border: '1.5px solid var(--ink, #1E1E1E)',
+                  fontFamily: "'Geist Mono', monospace",
+                  fontSize: '12px',
+                  background: '#fff',
+                }}
+              />
+            </div>
+
+            <div>
+              <label style={{ display: 'block', fontFamily: "'Geist Mono', monospace", fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', marginBottom: '6px' }}>
+                Target Companies or Domains (Optional)
+              </label>
+              <input
+                type="text"
+                value={scoutCustomCompanies}
+                onChange={(e) => setScoutCustomCompanies(e.target.value)}
+                placeholder="e.g. apexhaulage.ng, speedaf.com"
+                style={{
+                  width: '100%',
+                  boxSizing: 'border-box',
+                  padding: '8px 10px',
+                  borderRadius: '8px',
+                  border: '1.5px solid var(--ink, #1E1E1E)',
+                  fontFamily: "'Geist Mono', monospace",
+                  fontSize: '12px',
+                  background: '#fff',
+                }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'flex-end', gap: '8px' }}>
+              <div style={{ flex: '0 0 80px' }}>
+                <label style={{ display: 'block', fontFamily: "'Geist Mono', monospace", fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', marginBottom: '6px' }}>
+                  Count
+                </label>
+                <select
+                  value={scoutCount}
+                  onChange={(e) => setScoutCount(Number(e.target.value))}
+                  style={{
+                    width: '100%',
+                    padding: '8px 6px',
+                    borderRadius: '8px',
+                    border: '1.5px solid var(--ink, #1E1E1E)',
+                    fontFamily: "'Geist Mono', monospace",
+                    fontSize: '12px',
+                    background: '#fff',
+                  }}
+                >
+                  <option value={1}>1 lead</option>
+                  <option value={3}>3 leads</option>
+                  <option value={5}>5 leads</option>
+                </select>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleRunScout}
+                disabled={isScouting}
+                style={{
+                  flex: 1,
+                  cursor: isScouting ? 'wait' : 'pointer',
+                  border: '2px solid var(--ink, #1E1E1E)',
+                  borderRadius: '8px',
+                  padding: '9px 16px',
+                  fontFamily: "'Geist Mono', monospace",
+                  fontSize: '12px',
+                  fontWeight: 800,
+                  textTransform: 'uppercase',
+                  background: isScouting ? '#bbb' : 'var(--accent, #D4F534)',
+                  color: 'var(--ink, #1E1E1E)',
+                  boxShadow: '2px 2px 0 var(--ink, #1E1E1E)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
+                  minHeight: '38px',
+                }}
+              >
+                {isScouting ? 'Scouting Google AI...' : 'Launch Scout Agent'}
+              </button>
+            </div>
+          </div>
+
+          {/* Quick-Preset Recommendations */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <span style={{ fontFamily: "'Geist Mono', monospace", fontSize: '11px', color: '#666', fontWeight: 700 }}>
+              Quick Presets:
+            </span>
+            {[
+              { label: 'Lagos Logistics (Apex / Freight)', sector: 'Third-party Logistics & Haulage', location: 'Lagos, Nigeria' },
+              { label: 'Abuja Real Estate & Facility Mgt', sector: 'Commercial Real Estate & Facilities', location: 'Abuja, FCT, Nigeria' },
+              { label: 'Fintech & Lending (Tier 2)', sector: 'Fintech, Lending & Payments', location: 'Lagos, Nigeria' },
+              { label: 'Diagnostic Labs & Health', sector: 'Healthcare, Clinics & Diagnostic Labs', location: 'Lagos, Nigeria' },
+            ].map((p, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => {
+                  setScoutSector(p.sector);
+                  setScoutLocation(p.location);
+                }}
+                style={{
+                  cursor: 'pointer',
+                  background: '#FAF9F5',
+                  border: '1px solid var(--ink, #1E1E1E)',
+                  borderRadius: '6px',
+                  padding: '4px 10px',
+                  fontFamily: "'Geist Mono', monospace",
+                  fontSize: '10.5px',
+                  color: '#333',
+                }}
+              >
+                {p.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Live Scouted Results Display */}
+          {scoutResults.length > 0 && (
+            <div style={{ display: 'grid', gap: '16px', marginTop: '10px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <h4 style={{ margin: 0, fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: '18px', fontWeight: 800 }}>
+                  Recently Scouted Leads ({scoutResults.length})
+                </h4>
+                <button
+                  type="button"
+                  onClick={() => setActiveSubTab('queue')}
+                  style={{
+                    cursor: 'pointer',
+                    background: 'none',
+                    border: 'none',
+                    fontFamily: "'Geist Mono', monospace",
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    textDecoration: 'underline',
+                    color: 'var(--ink, #1E1E1E)',
+                  }}
+                >
+                  Go to Approval Queue ({pendingQueue.length}) →
+                </button>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
+                {scoutResults.map((lead, idx) => (
+                  <div
+                    key={idx}
+                    style={{
+                      border: '2px solid var(--ink, #1E1E1E)',
+                      borderRadius: '16px',
+                      background: '#FAF9F5',
+                      padding: '18px',
+                      boxShadow: '3px 3px 0 rgba(30,30,30,0.85)',
+                      display: 'grid',
+                      gap: '12px',
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '8px' }}>
+                      <div>
+                        <div style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: '17px', fontWeight: 800 }}>
+                          {lead.company_name}
+                        </div>
+                        <div style={{ fontFamily: "'Geist Mono', monospace", fontSize: '11px', color: '#666' }}>
+                          {lead.industry} · {lead.location}
+                        </div>
+                      </div>
+                      <span
+                        style={{
+                          fontFamily: "'Geist Mono', monospace",
+                          fontSize: '11px',
+                          fontWeight: 800,
+                          background: lead.icp_score >= 80 ? 'var(--accent, #D4F534)' : '#FFE082',
+                          color: 'var(--ink, #1E1E1E)',
+                          border: '1.5px solid var(--ink, #1E1E1E)',
+                          borderRadius: '100px',
+                          padding: '3px 10px',
+                        }}
+                      >
+                        ICP {lead.icp_score}/100
+                      </span>
+                    </div>
+
+                    <div style={{ fontFamily: "'Geist Mono', monospace", fontSize: '11.5px', background: '#fff', padding: '10px', borderRadius: '8px', border: '1px solid #ddd' }}>
+                      <div style={{ fontWeight: 700, marginBottom: '2px' }}>
+                        Contact: {lead.contact_name} ({lead.contact_title})
+                      </div>
+                      <div style={{ color: '#555' }}>Channel: {lead.verified_channel}</div>
+                    </div>
+
+                    {lead.signals_observed && lead.signals_observed.length > 0 && (
+                      <div>
+                        <div style={{ fontFamily: "'Geist Mono', monospace", fontSize: '10px', textTransform: 'uppercase', fontWeight: 700, color: '#666' }}>
+                          Observed Operational Friction:
+                        </div>
+                        <ul style={{ margin: '4px 0 0 0', paddingLeft: '16px', fontFamily: "'Geist Mono', monospace", fontSize: '11px', color: '#333' }}>
+                          {lead.signals_observed.map((s: string, sIdx: number) => (
+                            <li key={sIdx}>{s}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    {lead.draft_body && (
+                      <div style={{ background: '#fff', border: '1px solid var(--ink, #1E1E1E)', borderRadius: '8px', padding: '12px' }}>
+                        <div style={{ fontFamily: "'Geist Mono', monospace", fontSize: '10px', textTransform: 'uppercase', fontWeight: 700, color: '#666', marginBottom: '4px' }}>
+                          Generated Touch 1 Draft (Strict Section 7 Rules):
+                        </div>
+                        <div style={{ fontFamily: "'Geist Mono', monospace", fontSize: '11px', fontWeight: 700, marginBottom: '6px' }}>
+                          Subj: {lead.draft_subject}
+                        </div>
+                        <div style={{ fontFamily: "'Geist Mono', monospace", fontSize: '11px', whiteSpace: 'pre-wrap', color: '#222', maxHeight: '140px', overflowY: 'auto' }}>
+                          {lead.draft_body}
+                        </div>
+                      </div>
+                    )}
+
+                    <div style={{ display: 'flex', gap: '8px', justifyContent: 'flex-end', paddingTop: '4px' }}>
+                      <button
+                        type="button"
+                        onClick={() => setActiveSubTab('queue')}
+                        style={{
+                          cursor: 'pointer',
+                          background: 'var(--ink, #1E1E1E)',
+                          color: 'var(--accent, #D4F534)',
+                          border: '1.5px solid var(--ink, #1E1E1E)',
+                          borderRadius: '8px',
+                          padding: '7px 14px',
+                          fontFamily: "'Geist Mono', monospace",
+                          fontSize: '11px',
+                          fontWeight: 700,
+                        }}
+                      >
+                        Inspect in Queue →
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
           )}
         </section>

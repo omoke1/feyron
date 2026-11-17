@@ -31,5 +31,11 @@
       "source": "/((?!api/|site/|assets/|mascot\\.js|mascot\\.css|game\\.js|favicon\\.ico).*)",
       "destination": "/index.html"
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/agent?cron=1",
+      "schedule": "30 7 * * 1-5"
+    }
   ]
 }

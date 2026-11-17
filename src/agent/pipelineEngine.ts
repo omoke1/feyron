@@ -1060,6 +1060,94 @@ export class FeyronPipelineEngine {
         };
     }
   }
+
+  // ---------------------------------------------------------------------------
+  // ACTIVE LEAD INGESTION & AUTO-DISCOVERY
+  // ---------------------------------------------------------------------------
+  public ingestScoutedProspect(lead: {
+    company_name: string;
+    industry: string;
+    location: string;
+    website_or_source?: string;
+    contact_name: string;
+    contact_title: string;
+    verified_channel: string;
+    icp_score?: number;
+    notes?: string;
+    signals_observed?: string[];
+    hypotheses?: string[];
+    recommended_package?: string;
+    draft_subject?: string;
+    draft_body?: string;
+  }): { prospect: ProspectRecord; queueItem?: ApprovalQueueItem } {
+    const id = `PR-${Date.now().toString().slice(-4)}-${Math.random().toString(36).substring(2, 5).toUpperCase()}`;
+    const newProspect: ProspectRecord = {
+      prospect_id: id,
+      company_name: lead.company_name,
+      industry: lead.industry || 'Technology & Operations',
+      location: lead.location || 'Lagos, Nigeria',
+      website_or_source: lead.website_or_source || 'https://' + lead.company_name.toLowerCase().replace(/[^a-z0-9]/g, '') + '.com.ng',
+      verified_channel: lead.verified_channel,
+      contact_name: lead.contact_name,
+      contact_title: lead.contact_title || 'Managing Director',
+      stage: 'SCOUTED',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+      touch_count: 0,
+      max_touches: 3,
+      notes: lead.notes || `ICP Score: ${lead.icp_score ?? 85}/100. Discovered via autonomous lead search.`,
+    };
+
+    this.state.prospects.unshift(newProspect);
+    this.state.limits.scouted_today += 1;
+
+    // Save Issue Map if provided
+    if (lead.signals_observed || lead.hypotheses) {
+      this.state.issueMaps[id] = {
+        prospect_id: id,
+        signals_observed: lead.signals_observed || ['Manual customer requests on public web channels.'],
+        hypotheses: lead.hypotheses || ['Operational delay in enquiry handling.'],
+        recommended_package: lead.recommended_package || 'CORE_SYSTEM',
+        custom_observations: lead.notes || 'Identified by Feyron Scout Agent.',
+        generated_at: new Date().toISOString(),
+      };
+      newProspect.stage = 'ANALYSED';
+    }
+
+    let queueItem: ApprovalQueueItem | undefined;
+    if (lead.draft_body) {
+      queueItem = {
+        id: `AQ-${Date.now().toString().slice(-4)}-${Math.random().toString(36).substring(2, 5).toUpperCase()}`,
+        agent: 'Outreach Writer',
+        prospect_id: id,
+        action_type: 'send_first_message',
+        status: 'pending',
+        created_at: new Date().toISOString(),
+        observed_facts: lead.signals_observed ? lead.signals_observed.join('; ') : 'Identified operational bottleneck.',
+        confidence_score: lead.icp_score || 90,
+        draft_subject: lead.draft_subject || `Automating operational workflows at ${lead.company_name}`,
+        draft_body: lead.draft_body,
+        proposed_destination: lead.verified_channel,
+        notes: `ICP Score: ${lead.icp_score ?? 85}/100. Discovered via Google AI lead scouting.`,
+      };
+      this.state.approvalQueue.unshift(queueItem);
+      this.addHistoryLog('Outreach Writer', 'TOUCH1_QUEUED', id, `Touch 1 queued for approval: ${lead.company_name}`, 'queued');
+    } else {
+      this.addHistoryLog('Scout', 'PROSPECT_SCOUTED', id, `Lead scouted: ${lead.company_name}`, 'success');
+    }
+
+    this.saveState();
+    return { prospect: newProspect, queueItem };
+  }
+
+  public batchIngestProspects(leads: Array<Parameters<FeyronPipelineEngine['ingestScoutedProspect']>[0]>): number {
+    let count = 0;
+    for (const lead of leads) {
+      this.ingestScoutedProspect(lead);
+      count++;
+    }
+    return count;
+  }
 }
 
 // Export singleton instance
