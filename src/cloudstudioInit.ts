@@ -863,6 +863,24 @@ function setupMainMobileMenu() {
 }
 
 export async function bootCloudstudio() {
+  // Do NOT boot heavy marketing canvas, physics engine, Three.js, or mascot on Admin Dashboard
+  if (typeof window !== 'undefined') {
+    const loc = window.location;
+    const path = (loc.pathname || '').toLowerCase();
+    const hash = (loc.hash || '').toLowerCase();
+    const search = (loc.search || '').toLowerCase();
+    if (
+      path.includes('admin') ||
+      path.includes('dashboard') ||
+      hash.includes('admin') ||
+      hash.includes('dashboard') ||
+      search.includes('admin') ||
+      search.includes('dashboard')
+    ) {
+      return;
+    }
+  }
+
   if (window.__CS_BOOTED) return;
   window.__CS_BOOTED = true;
 

@@ -366,86 +366,45 @@ html, body {
   }
 }
 
-/* Suppress living mascot creature, particle effects, and custom dot cursor on Admin / Dashboard */
-body.feyron-admin-mode .cs-ai-mascot,
-body.feyron-admin-mode .cs-mascot-trail,
-body.feyron-admin-mode .cs-mascot-tether,
-body.feyron-admin-mode .cs-ai-mascot__bubble,
-body.feyron-admin-mode #cs-physics-box,
-body.feyron-admin-mode canvas#cs-stage-canvas,
-body.feyron-admin-mode #cs-cursor,
-body.feyron-admin-mode #cs-cursor-label,
-body.feyron-admin-mode #cs-spot,
-body:has([data-feyron-dashboard="true"]) .cs-ai-mascot,
-body:has([data-feyron-dashboard="true"]) .cs-mascot-trail,
-body:has([data-feyron-dashboard="true"]) .cs-mascot-tether,
-body:has([data-feyron-dashboard="true"]) .cs-ai-mascot__bubble,
-body:has([data-feyron-dashboard="true"]) #cs-physics-box,
-body:has([data-feyron-dashboard="true"]) canvas#cs-stage-canvas,
-body:has([data-feyron-dashboard="true"]) #cs-cursor,
-body:has([data-feyron-dashboard="true"]) #cs-cursor-label,
-body:has([data-feyron-dashboard="true"]) #cs-spot,
-.feyron-admin-page .cs-ai-mascot,
-.feyron-admin-page .cs-mascot-trail,
-.feyron-admin-page .cs-mascot-tether,
-.feyron-admin-page .cs-ai-mascot__bubble,
-.feyron-admin-page #cs-cursor,
-.feyron-admin-page #cs-cursor-label,
-.feyron-admin-page #cs-spot {
+/* Clean, lightweight styles for Admin Dashboard */
+.feyron-admin-mode,
+.feyron-admin-page {
+  cursor: default !important;
+}
+
+.feyron-admin-page button,
+.feyron-admin-page a,
+.feyron-admin-page select,
+.feyron-admin-page summary,
+.feyron-admin-page [role="button"],
+.feyron-admin-mode button,
+.feyron-admin-mode a,
+.feyron-admin-mode select,
+.feyron-admin-mode [role="button"] {
+  cursor: pointer !important;
+}
+
+.feyron-admin-page input,
+.feyron-admin-page textarea,
+.feyron-admin-mode input,
+.feyron-admin-mode textarea {
+  cursor: text !important;
+}
+
+/* Hide marketing mascot and canvas if still present in DOM */
+.feyron-admin-mode .cs-ai-mascot,
+.feyron-admin-mode .cs-mascot-trail,
+.feyron-admin-mode .cs-mascot-tether,
+.feyron-admin-mode .cs-ai-mascot__bubble,
+.feyron-admin-mode #cs-physics-box,
+.feyron-admin-mode canvas#cs-stage-canvas,
+.feyron-admin-mode #cs-cursor,
+.feyron-admin-mode #cs-cursor-label,
+.feyron-admin-mode #cs-spot {
   display: none !important;
   visibility: hidden !important;
   opacity: 0 !important;
   pointer-events: none !important;
-}
-
-/* Force standard, visible operating system mouse cursor on Admin / Dashboard */
-html.feyron-admin-mode,
-html.feyron-admin-mode *,
-body.feyron-admin-mode,
-body.feyron-admin-mode *,
-body:has([data-feyron-dashboard="true"]),
-body:has([data-feyron-dashboard="true"]) *,
-.feyron-admin-page,
-.feyron-admin-page *,
-[data-feyron-dashboard="true"],
-[data-feyron-dashboard="true"] * {
-  cursor: default !important;
-}
-
-body.feyron-admin-mode button,
-body.feyron-admin-mode [role="button"],
-body.feyron-admin-mode a,
-body.feyron-admin-mode select,
-body.feyron-admin-mode summary,
-body.feyron-admin-mode [data-bouncy],
-body:has([data-feyron-dashboard="true"]) button,
-body:has([data-feyron-dashboard="true"]) [role="button"],
-body:has([data-feyron-dashboard="true"]) a,
-body:has([data-feyron-dashboard="true"]) select,
-body:has([data-feyron-dashboard="true"]) summary,
-body:has([data-feyron-dashboard="true"]) [data-bouncy],
-.feyron-admin-page button,
-.feyron-admin-page [role="button"],
-.feyron-admin-page a,
-.feyron-admin-page select,
-.feyron-admin-page summary,
-[data-feyron-dashboard="true"] button,
-[data-feyron-dashboard="true"] [role="button"],
-[data-feyron-dashboard="true"] a,
-[data-feyron-dashboard="true"] select,
-[data-feyron-dashboard="true"] summary {
-  cursor: pointer !important;
-}
-
-body.feyron-admin-mode input,
-body.feyron-admin-mode textarea,
-body:has([data-feyron-dashboard="true"]) input,
-body:has([data-feyron-dashboard="true"]) textarea,
-.feyron-admin-page input,
-.feyron-admin-page textarea,
-[data-feyron-dashboard="true"] input,
-[data-feyron-dashboard="true"] textarea {
-  cursor: text !important;
 }
 
 @media (max-width: 860px) {
