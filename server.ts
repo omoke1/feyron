@@ -11,7 +11,8 @@ import {
   triggerBookingReminder,
   updateDashboardRecord,
   verifyDashboardAuth,
-} from './src/server/emailService';
+} from './api/_emailService.js';
+import agentHandler from './api/agent.js';
 
 dotenv.config();
 
@@ -105,6 +106,16 @@ async function startServer() {
     }
     const result = await triggerBookingReminder(String(req.body?.id || ''));
     res.status(result.ok ? 200 : 400).json(result);
+  });
+
+  // Sales Workflow Agent Endpoint
+  app.all('/api/agent', async (req, res) => {
+    try {
+      await agentHandler(req, res);
+    } catch (err: any) {
+      console.error('API /api/agent error:', err);
+      res.status(500).json({ ok: false, error: err.message });
+    }
   });
 
   if (process.env.NODE_ENV !== 'production') {
