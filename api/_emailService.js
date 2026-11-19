@@ -1,6 +1,7 @@
 import { buildDocumentDispatchEmailHtml } from './_documentEmailTemplate.js';
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
 try {
     const envPath = path.join(process.cwd(), '.env');
     if (fs.existsSync(envPath)) {
@@ -90,20 +91,78 @@ export async function sendTelegramNotification(htmlMessage, inlineButtons) {
     }
 }
 /**
- * Sends a real-time notification to any external Bot / Webhook (OpenBot, Make, Zapier, Discord, etc.)
+ * Sends a real-time signed notification to OpenBot / Webhooks (OpenBot, Make, Zapier, WhatsApp bridges)
  */
 export async function sendOpenBotNotification(event, payload) {
     const webhookUrl = (process.env.OPENBOT_WEBHOOK_URL || process.env.BOT_WEBHOOK_URL || '').trim();
     if (!webhookUrl) return;
+
+    let summary = '';
+    let whatsappText = '';
+
+    if (event === 'new_enquiry') {
+        const leadName = payload.name || 'Anonymous';
+        const leadCompany = payload.company || 'Not specified';
+        const leadEmail = payload.email || 'None';
+        const leadInterest = payload.interest || 'AI Automation';
+        const leadMsg = payload.details || '';
+        summary = `New enquiry from ${leadName} (${leadCompany}): "${leadMsg.slice(0, 120)}"`;
+        whatsappText = [
+            `*Feyron Inbound Enquiry*`,
+            `Name: ${leadName}`,
+            `Company: ${leadCompany}`,
+            `Email: ${leadEmail}`,
+            `Interest: ${leadInterest}`,
+            `Details: ${leadMsg || 'None'}`,
+            `Source: ${payload.source || 'website'}`,
+            `Dashboard: https://feyron.site/admin`,
+        ].join('\n');
+    } else if (event === 'new_booking') {
+        const guestName = payload.name || 'Guest';
+        const guestEmail = payload.email || 'None';
+        const meetDate = payload.date || 'Scheduled Date';
+        const meetTime = payload.time || 'Scheduled Time';
+        const meetUrl = payload.meetingUrl || 'https://feyron.site';
+        const notes = payload.notes || 'None';
+        summary = `New 20-min call booked by ${guestName} on ${meetDate} at ${meetTime} WAT`;
+        whatsappText = [
+            `*Feyron Meeting Confirmed*`,
+            `Guest: ${guestName} (${guestEmail})`,
+            `When: ${meetDate} at ${meetTime} (WAT)`,
+            `Meeting: ${meetUrl}`,
+            `Notes: ${notes}`,
+            `Dashboard: https://feyron.site/admin`,
+        ].join('\n');
+    }
+
+    const bodyObj = {
+        event,
+        timestamp: new Date().toISOString(),
+        summary,
+        whatsapp_message: whatsappText,
+        text: whatsappText,
+        payload,
+    };
+
+    const bodyJson = JSON.stringify(bodyObj);
+    const headers = {
+        'Content-Type': 'application/json',
+    };
+
+    // HMAC-SHA256 Webhook Signing
+    const secret = (process.env.OPENBOT_WEBHOOK_SECRET || process.env.WEBHOOK_SECRET || '').trim();
+    if (secret) {
+        const signature = crypto.createHmac('sha256', secret).update(bodyJson).digest('hex');
+        headers['X-OpenBot-Signature'] = `sha256=${signature}`;
+        headers['X-Signature-SHA256'] = signature;
+        headers['X-Hub-Signature-256'] = `sha256=${signature}`;
+    }
+
     try {
         await fetch(webhookUrl, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                event,
-                timestamp: new Date().toISOString(),
-                payload,
-            }),
+            headers,
+            body: bodyJson,
         });
     } catch (err) {
         console.warn('OpenBot notification warning (non-blocking):', err.message);
@@ -1458,6 +1517,53 @@ function buildIcsCalendarInvite(datePart, slotPart, endSlotPart, guestName, gues
         'END:VEVENT',
         'END:VCALENDAR',
     ].join('\r\n');
+}
+/**
+ * Generates an RFC 5545 iCalendar (.ics) subscription feed of all booked meetings
+ * for Google Calendar, Apple Calendar, and Outlook sync.
+ */
+export function generateIcsCalendarFeed() {
+    const data = getDashboardData();
+    const bookings = (data.bookings || []).filter((b) => b.status !== 'Archived' && b.status !== 'Cancelled');
+    const nowUtc = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+Z$/, 'Z');
+    const lines = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//Feyron//Calendar Feed//EN',
+        'CALSCALE:GREGORIAN',
+        'X-WR-CALNAME:Feyron Bookings',
+        'X-WR-TIMEZONE:Africa/Lagos',
+        'METHOD:PUBLISH',
+    ];
+    for (const b of bookings) {
+        if (!b.date || !b.time) continue;
+        const compactDate = b.date.replace(/-/g, '');
+        const slotClean = b.time.replace(':', '');
+        const [hh, mm] = b.time.split(':').map(Number);
+        const endTotalMin = hh * 60 + mm + 20;
+        const endHH = String(Math.floor(endTotalMin / 60)).padStart(2, '0');
+        const endMM = String(endTotalMin % 60).padStart(2, '0');
+        const endSlotClean = `${endHH}${endMM}`;
+        const uid = `feyron-${b.id || `${compactDate}-${slotClean}`}@feyron.site`;
+        const summary = `Call — ${b.name || 'Client'} × Feyron`;
+        const cleanNotes = (b.notes || '20-minute workflow audit').replace(/\r?\n/g, '\\n');
+        const meetingUrl = b.meetingUrl || 'https://feyron.site';
+        lines.push(
+            'BEGIN:VEVENT',
+            `UID:${uid}`,
+            `DTSTAMP:${nowUtc}`,
+            `DTSTART;TZID=Africa/Lagos:${compactDate}T${slotClean}00`,
+            `DTEND;TZID=Africa/Lagos:${compactDate}T${endSlotClean}00`,
+            `SUMMARY:${summary}`,
+            `LOCATION:${meetingUrl}`,
+            `URL:${meetingUrl}`,
+            `DESCRIPTION:Guest: ${b.name} (${b.email})\\nNotes: ${cleanNotes}\\nMeeting: ${meetingUrl}`,
+            `STATUS:CONFIRMED`,
+            'END:VEVENT'
+        );
+    }
+    lines.push('END:VCALENDAR');
+    return lines.join('\r\n');
 }
 export async function sendBookingReminderEmail(booking) {
     const rescheduleUrl = 'https://feyron.site/contact';

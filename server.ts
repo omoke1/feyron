@@ -3,6 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
 import {
+  generateIcsCalendarFeed,
   getBookedSlotsForDate,
   getDashboardData,
   handleBookingSubmission,
@@ -126,6 +127,19 @@ async function startServer() {
     } catch (err: any) {
       console.error('API /api/bot error:', err);
       res.status(500).json({ ok: false, error: err.message });
+    }
+  });
+
+  // Dynamic iCalendar subscription feed for Google Calendar / Apple Calendar / Outlook
+  app.get(['/api/calendar.ics', '/api/bookings/feed.ics'], (_req, res) => {
+    try {
+      const ics = generateIcsCalendarFeed();
+      res.setHeader('Content-Type', 'text/calendar; charset=utf-8');
+      res.setHeader('Content-Disposition', 'inline; filename="feyron-calendar.ics"');
+      res.status(200).send(ics);
+    } catch (err: any) {
+      console.error('Calendar feed error:', err);
+      res.status(500).send('Error generating calendar feed');
     }
   });
 
