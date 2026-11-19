@@ -12,6 +12,6 @@ public/assets/aistudio/
 bun.lock
 bun.lockb
 firebase-applet-config.json
-data/
+# data/
 
 .vercel

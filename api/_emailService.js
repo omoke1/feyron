@@ -89,6 +89,26 @@ export async function sendTelegramNotification(htmlMessage, inlineButtons) {
         console.error('Telegram notification error (non-blocking):', err);
     }
 }
+/**
+ * Sends a real-time notification to any external Bot / Webhook (OpenBot, Make, Zapier, Discord, etc.)
+ */
+export async function sendOpenBotNotification(event, payload) {
+    const webhookUrl = (process.env.OPENBOT_WEBHOOK_URL || process.env.BOT_WEBHOOK_URL || '').trim();
+    if (!webhookUrl) return;
+    try {
+        await fetch(webhookUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                event,
+                timestamp: new Date().toISOString(),
+                payload,
+            }),
+        });
+    } catch (err) {
+        console.warn('OpenBot notification warning (non-blocking):', err.message);
+    }
+}
 function escapeHtml(input) {
     return String(input || '')
         .replace(/&/g, '&amp;')
@@ -1184,10 +1204,22 @@ export async function handleContactSubmission(body) {
         escapeHtml(rawMessage),
     ].join('\n'), [
         [
-            { text: 'Open Team Dashboard', url: 'https://feyron.site/dashboard' },
+            { text: 'Open Team Dashboard', url: 'https://feyron.site/admin' },
             { text: 'Visit feyron.site', url: 'https://feyron.site' },
         ],
     ]);
+
+    // Dispatch real-time OpenBot / Webhook notification
+    await sendOpenBotNotification('new_enquiry', {
+        id: enquiryId,
+        name: rawName,
+        email: rawEmail,
+        company: rawCompany || 'Not specified',
+        interest: interestLabel,
+        details: rawMessage,
+        source,
+        createdAt: new Date().toISOString(),
+    });
     const [internalOutcome, visitorOutcome] = await Promise.allSettled([
         internalPromise,
         visitorPromise,
@@ -1685,8 +1717,20 @@ export async function handleBookingSubmission(body) {
             { text: 'Open Meeting Room', url: meetingUrl },
             { text: 'Add to Google Calendar', url: gcalUrl },
         ],
-        [{ text: 'Open Team Dashboard', url: 'https://feyron.site/dashboard' }],
+        [{ text: 'Open Team Dashboard', url: 'https://feyron.site/admin' }],
     ]);
+
+    // Dispatch real-time OpenBot / Webhook notification
+    await sendOpenBotNotification('new_booking', {
+        id: bookingRecord.id,
+        name,
+        email,
+        date: formattedDate,
+        time: slotPart,
+        meetingUrl,
+        notes: notes || '',
+        createdAt: new Date().toISOString(),
+    });
     const [internalBookingOutcome, guestBookingOutcome] = await Promise.allSettled([
         internalPromise,
         guestPromise,

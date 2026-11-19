@@ -1,0 +1,75 @@
+{
+  "enquiries": [
+    {
+      "id": "enq-1794186270031-lcegc",
+      "name": "Elena Rostova",
+      "email": "vebtcard.base@gmail.com",
+      "company": "Rostova Capital",
+      "interest": "Products Waitlist",
+      "details": "Early access subscription for Feyron Products.",
+      "source": "products-waitlist",
+      "status": "New",
+      "internalNotes": "",
+      "createdAt": "2026-11-09T01:04:30.031Z"
+    },
+    {
+      "id": "enq-1794186268477-5bv4q",
+      "name": "Marcus Brody",
+      "email": "vebtcard.base@gmail.com",
+      "company": "Brody Logistics",
+      "interest": "Payment & Fintech Integration",
+      "details": "Need multi-currency checkout (Stripe & Paystack) with automated split ledgers.",
+      "source": "contact-page",
+      "status": "New",
+      "internalNotes": "",
+      "createdAt": "2026-11-09T01:04:28.478Z"
+    },
+    {
+      "id": "enq-1794186266920-g963z",
+      "name": "Sarah Connor",
+      "email": "vebtcard.base@gmail.com",
+      "company": "Skyward Health",
+      "interest": "Software & Platform Development",
+      "details": "Looking to build a HIPAA-compliant patient consultation portal and mobile web app.",
+      "source": "contact-page",
+      "status": "New",
+      "internalNotes": "",
+      "createdAt": "2026-11-09T01:04:26.920Z"
+    },
+    {
+      "id": "enq-1794186264739-76rm5",
+      "name": "Alex Vance",
+      "email": "vebtcard.base@gmail.com",
+      "company": "Vance Dynamics",
+      "interest": "AI Automation & Custom Workflow Agent",
+      "details": "We want to automate multi-agent customer onboarding and document parsing.",
+      "source": "contact-page",
+      "status": "New",
+      "internalNotes": "",
+      "createdAt": "2026-11-09T01:04:24.739Z"
+    }
+  ],
+  "bookings": [
+    {
+      "id": "bk-1794186271754-4ur6k",
+      "name": "David Sterling",
+      "email": "vebtcard.base@gmail.com",
+      "notes": "Discussing AI workflow automation for our 20-person operations team.",
+      "date": "2026-11-12",
+      "time": "14:00",
+      "endTime": "14:20",
+      "formattedDate": "Thursday, 12 Nov 2026",
+      "clientTimezone": "Africa/Lagos",
+      "clientTimeLabel": "",
+      "meetingUrl": "https://meet.jit.si/Feyron-20261112-1400-david-sterling",
+      "gcalUrl": "https://calendar.google.com/calendar/render?action=TEMPLATE&text=Call+%E2%80%94+David+Sterling+%C3%97+Feyron&dates=20261112T140000%2F20261112T142000&ctz=Africa%2FLagos&location=https%3A%2F%2Fmeet.jit.si%2FFeyron-20261112-1400-david-sterling&add=vebtcard.base%40gmail.com%2Chello%40feyron.site&details=20-minute+Feyron+Workflow+Audit+%26+Discovery+Call%0AJoin+Video+Session%3A+https%3A%2F%2Fmeet.jit.si%2FFeyron-20261112-1400-david-sterling%0AGuest%3A+David+Sterling+%28vebtcard.base%40gmail.com%29%0ANotes%3A+Discussing+AI+workflow+automation+for+our+20-person+operations+team.%0Ahttps%3A%2F%2Ffeyron.site+%7C+hello%40feyron.site",
+      "outlookUrl": "https://outlook.live.com/calendar/0/deeplink/compose?path=%2Fcalendar%2Faction%2Fcompose&rru=addevent&subject=Call+%E2%80%94+David+Sterling+%C3%97+Feyron&startdt=2026-11-12T13%3A00%3A00Z&enddt=2026-11-12T13%3A20%3A00Z&location=https%3A%2F%2Fmeet.jit.si%2FFeyron-20261112-1400-david-sterling&body=20-minute+Feyron+Workflow+Audit+%26+Discovery+Call%0AJoin+Video+Session%3A+https%3A%2F%2Fmeet.jit.si%2FFeyron-20261112-1400-david-sterling%0AGuest%3A+David+Sterling+%28vebtcard.base%40gmail.com%29%0ANotes%3A+Discussing+AI+workflow+automation+for+our+20-person+operations+team.%0Ahttps%3A%2F%2Ffeyron.site+%7C+hello%40feyron.site",
+      "status": "Audit Scheduled",
+      "reminderSent": false,
+      "internalNotes": "",
+      "createdAt": "2026-11-09T01:04:31.754Z"
+    }
+  ],
+  "blockedDates": [],
+  "blockedSlots": {}
+}

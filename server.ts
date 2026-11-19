@@ -13,6 +13,7 @@ import {
   verifyDashboardAuth,
 } from './api/_emailService.js';
 import agentHandler from './api/agent.js';
+import botHandler from './api/bot.js';
 
 dotenv.config();
 
@@ -114,6 +115,16 @@ async function startServer() {
       await agentHandler(req, res);
     } catch (err: any) {
       console.error('API /api/agent error:', err);
+      res.status(500).json({ ok: false, error: err.message });
+    }
+  });
+
+  // OpenBot & Telegram Bot Gateway
+  app.all('/api/bot', async (req, res) => {
+    try {
+      await botHandler(req, res);
+    } catch (err: any) {
+      console.error('API /api/bot error:', err);
       res.status(500).json({ ok: false, error: err.message });
     }
   });
