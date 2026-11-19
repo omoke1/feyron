@@ -3,6 +3,11 @@ import {
   sendEmailViaResend,
   sendTelegramNotification,
 } from './_emailService.js';
+import {
+  scrapeCompanyWithFirecrawl,
+  mapWebsiteWithFirecrawl,
+  isFirecrawlAvailable,
+} from './_firecrawlService.js';
 
 // Model candidate hierarchy for resilient execution
 const GEMINI_MODELS = [
@@ -105,6 +110,7 @@ export default async function handler(req, res) {
       wat_day: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][day],
       in_send_window: inWindow,
       gemini_available: Boolean(process.env.GEMINI_API_KEY || process.env.API_KEY),
+      firecrawl_available: isFirecrawlAvailable(),
     });
   }
 
@@ -197,11 +203,30 @@ Strict Rules for draft_body:
 3. Zero emojis. Zero buzzwords (do NOT say 'revolutionize', 'supercharge', 'game-changing', 'transformative').
 4. Signed: Fredrick Omoke, Feyron AI Productivity & Technology.`;
 
+      let firecrawlIntelligence = '';
+      if (customCompanies && (customCompanies.includes('.') || customCompanies.includes('/'))) {
+        const targetDomain = customCompanies.split(',')[0].trim();
+        try {
+          const crawlData = await scrapeCompanyWithFirecrawl(targetDomain);
+          if (crawlData.ok && crawlData.markdown) {
+            firecrawlIntelligence = `\n\nFIRECRAWL EXTRACTED LIVE INTELLIGENCE FOR ${targetDomain}:
+Website Title: ${crawlData.title}
+Meta Description: ${crawlData.description}
+Detected Emails: ${(crawlData.emails || []).join(', ') || 'None found'}
+Detected Friction Signals: ${(crawlData.signals || []).join('; ') || 'Standard contact form'}
+Clean Markdown Excerpt:
+${crawlData.markdown.slice(0, 2500)}`;
+          }
+        } catch (crawlErr) {
+          console.warn('Firecrawl pre-scout enrichment skipped:', crawlErr.message);
+        }
+      }
+
       const userMessage = `Sector: ${sector}
 Location: ${location}
 Keywords: ${keywords || 'operational bottleneck, manual workflow, dispatch, client portal'}
 Custom Target Companies / Domains: ${customCompanies || 'None provided'}
-Target Lead Count: ${Math.min(Math.max(Number(count) || 3, 1), 5)}
+Target Lead Count: ${Math.min(Math.max(Number(count) || 3, 1), 5)}${firecrawlIntelligence}
 
 Generate ${count} high-priority commercial leads for Feyron with complete signals, hypotheses, and Touch 1 drafts.`;
 
@@ -337,6 +362,26 @@ Generate ${count} high-priority commercial leads for Feyron with complete signal
           ? 'WAT send window open. Autonomous follow-ups and queue active.'
           : 'WAT send window closed. Cold outbound held until next business window (Mon-Fri 08:30 WAT).',
       });
+    }
+
+    // 5. Firecrawl URL Scrape Action
+    if (action === 'firecrawl_scrape') {
+      const { url } = payload || {};
+      if (!url) {
+        return res.status(400).json({ ok: false, error: 'Target URL is required.' });
+      }
+      const scrapeData = await scrapeCompanyWithFirecrawl(url);
+      return res.status(scrapeData.ok ? 200 : 502).json(scrapeData);
+    }
+
+    // 6. Firecrawl Site Map Action
+    if (action === 'firecrawl_map') {
+      const { url } = payload || {};
+      if (!url) {
+        return res.status(400).json({ ok: false, error: 'Target URL is required.' });
+      }
+      const mapData = await mapWebsiteWithFirecrawl(url);
+      return res.status(mapData.ok ? 200 : 502).json(mapData);
     }
 
     return res.status(400).json({ ok: false, error: `Unknown action: ${action}` });

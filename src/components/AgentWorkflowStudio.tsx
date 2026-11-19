@@ -45,6 +45,12 @@ export function AgentWorkflowStudio({ passcode, showToast }: AgentWorkflowStudio
   const [csvInput, setCsvInput] = useState('');
   const [showCsvBox, setShowCsvBox] = useState(false);
 
+  // Firecrawl Deep URL Scraper States
+  const [firecrawlUrl, setFirecrawlUrl] = useState('');
+  const [isFirecrawling, setIsFirecrawling] = useState(false);
+  const [firecrawlData, setFirecrawlData] = useState<any | null>(null);
+  const [showFirecrawlBox, setShowFirecrawlBox] = useState(false);
+
   // Update WAT clock every 10 seconds
   useEffect(() => {
     const unsub = pipelineEngine.subscribe((newState) => {
@@ -191,6 +197,64 @@ export function AgentWorkflowStudio({ passcode, showToast }: AgentWorkflowStudio
       setCsvInput('');
       setShowCsvBox(false);
     }
+  };
+
+  const handleFirecrawlScrape = async () => {
+    if (!firecrawlUrl.trim()) {
+      showToast('Please enter a website URL to scrape with Firecrawl.');
+      return;
+    }
+    setIsFirecrawling(true);
+    try {
+      const res = await fetch('/api/agent', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-feyron-passcode': passcode,
+        },
+        body: JSON.stringify({
+          action: 'firecrawl_scrape',
+          payload: { url: firecrawlUrl },
+        }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setFirecrawlData(data);
+        showToast(`Firecrawl successfully scraped ${data.url}!`);
+      } else {
+        showToast(data.error || 'Failed to scrape URL with Firecrawl.');
+      }
+    } catch (e: any) {
+      showToast(`Firecrawl error: ${e.message}`);
+    } finally {
+      setIsFirecrawling(false);
+    }
+  };
+
+  const handleConvertFirecrawlToLead = () => {
+    if (!firecrawlData) return;
+    const company = firecrawlData.title?.split(/[-|·]/)[0]?.trim() || firecrawlUrl.replace(/https?:\/\/(www\.)?/, '').split('/')[0];
+    const newLead = {
+      company_name: company,
+      industry: scoutSector,
+      location: scoutLocation,
+      website_or_source: firecrawlData.url,
+      contact_name: 'Decision Maker',
+      contact_title: 'Head of Operations',
+      verified_channel: firecrawlData.emails?.[0] || 'operations@feyron.site',
+      icp_score: 94,
+      notes: `Scraped by Firecrawl: ${firecrawlData.description || 'Verified enterprise site'}`,
+      signals_observed: firecrawlData.signals && firecrawlData.signals.length > 0 ? firecrawlData.signals : ['Manual customer intake workflows observed on public website.'],
+      hypotheses: ['Operational delays handling customer requests without automated dispatch.'],
+      recommended_package: 'CORE_SYSTEM',
+      draft_subject: `Automating operational intake and dispatch at ${company}`,
+      draft_body: `Dear Operations Lead,\n\nI reviewed ${company}'s public client portal and noticed opportunities to eliminate manual coordination delays.\n\nAt Feyron, we engineer automated enterprise workflows that route incoming client requests directly into core systems without spreadsheet lag or phone calls.\n\nWould you be open to a 20-minute discussion this Thursday at 14:00 WAT to see how this works?\n\nKind regards,\nFredrick Omoke\nFeyron AI Productivity & Technology`,
+    };
+    pipelineEngine.ingestScoutedProspect(newLead);
+    showToast(`Converted ${company} into queued lead via Firecrawl!`);
+    setFirecrawlData(null);
+    setFirecrawlUrl('');
+    setShowFirecrawlBox(false);
   };
 
   return (
@@ -748,6 +812,23 @@ export function AgentWorkflowStudio({ passcode, showToast }: AgentWorkflowStudio
             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
               <button
                 type="button"
+                onClick={() => setShowFirecrawlBox(!showFirecrawlBox)}
+                style={{
+                  cursor: 'pointer',
+                  border: '1.5px solid var(--ink, #1E1E1E)',
+                  borderRadius: '100px',
+                  padding: '6px 14px',
+                  fontFamily: "'Geist Mono', monospace",
+                  fontSize: '11px',
+                  fontWeight: 700,
+                  background: showFirecrawlBox ? 'var(--accent, #D4F534)' : '#FAF9F5',
+                  color: 'var(--ink, #1E1E1E)',
+                }}
+              >
+                {showFirecrawlBox ? 'Close Firecrawl Inspector' : 'Firecrawl URL Inspector'}
+              </button>
+              <button
+                type="button"
                 onClick={() => setShowCsvBox(!showCsvBox)}
                 style={{
                   cursor: 'pointer',
@@ -765,6 +846,151 @@ export function AgentWorkflowStudio({ passcode, showToast }: AgentWorkflowStudio
               </button>
             </div>
           </div>
+
+          {showFirecrawlBox && (
+            <div
+              style={{
+                border: '2px solid var(--ink, #1E1E1E)',
+                borderRadius: '14px',
+                padding: '18px',
+                background: '#FAF9F5',
+                display: 'grid',
+                gap: '12px',
+                boxShadow: '3px 3px 0 rgba(30,30,30,0.85)',
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: '16px', fontWeight: 800 }}>
+                  Firecrawl Deep URL Web Scraper &amp; Signal Extractor
+                </div>
+                <span
+                  style={{
+                    fontFamily: "'Geist Mono', monospace",
+                    fontSize: '10px',
+                    fontWeight: 700,
+                    background: 'var(--accent, #D4F534)',
+                    color: 'var(--ink, #1E1E1E)',
+                    padding: '2px 8px',
+                    borderRadius: '100px',
+                    border: '1px solid var(--ink, #1E1E1E)',
+                  }}
+                >
+                  Firecrawl v4
+                </span>
+              </div>
+              <p style={{ margin: 0, fontFamily: "'Geist Mono', monospace", fontSize: '11.5px', color: '#555' }}>
+                Enter any target company website URL. Firecrawl crawls the page, cleans it into LLM-ready markdown, detects contact emails, and flags operational bottlenecks.
+              </p>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                <input
+                  type="text"
+                  value={firecrawlUrl}
+                  onChange={(e) => setFirecrawlUrl(e.target.value)}
+                  placeholder="e.g. https://apexhaulage.example.ng or company domain"
+                  style={{
+                    flex: '1 1 280px',
+                    padding: '9px 12px',
+                    borderRadius: '8px',
+                    border: '1.5px solid var(--ink, #1E1E1E)',
+                    fontFamily: "'Geist Mono', monospace",
+                    fontSize: '12px',
+                    background: '#fff',
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={handleFirecrawlScrape}
+                  disabled={isFirecrawling}
+                  style={{
+                    cursor: isFirecrawling ? 'wait' : 'pointer',
+                    background: isFirecrawling ? '#ccc' : 'var(--ink, #1E1E1E)',
+                    color: 'var(--accent, #D4F534)',
+                    border: '1.5px solid var(--ink, #1E1E1E)',
+                    borderRadius: '8px',
+                    padding: '9px 18px',
+                    fontFamily: "'Geist Mono', monospace",
+                    fontSize: '11px',
+                    fontWeight: 800,
+                    textTransform: 'uppercase',
+                  }}
+                >
+                  {isFirecrawling ? 'Firecrawling...' : 'Scrape Website'}
+                </button>
+              </div>
+
+              {firecrawlData && (
+                <div style={{ background: '#fff', border: '1.5px solid var(--ink, #1E1E1E)', borderRadius: '10px', padding: '14px', display: 'grid', gap: '10px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '8px' }}>
+                    <div>
+                      <div style={{ fontFamily: "'Bricolage Grotesque', sans-serif", fontSize: '15px', fontWeight: 800 }}>
+                        {firecrawlData.title || firecrawlData.url}
+                      </div>
+                      <div style={{ fontFamily: "'Geist Mono', monospace", fontSize: '11px', color: '#666' }}>
+                        {firecrawlData.url} · Engine: {firecrawlData.engine}
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={handleConvertFirecrawlToLead}
+                      style={{
+                        cursor: 'pointer',
+                        background: 'var(--accent, #D4F534)',
+                        color: 'var(--ink, #1E1E1E)',
+                        border: '1.5px solid var(--ink, #1E1E1E)',
+                        borderRadius: '6px',
+                        padding: '6px 12px',
+                        fontFamily: "'Geist Mono', monospace",
+                        fontSize: '11px',
+                        fontWeight: 800,
+                      }}
+                    >
+                      Convert to Queued Lead →
+                    </button>
+                  </div>
+
+                  {firecrawlData.emails && firecrawlData.emails.length > 0 && (
+                    <div style={{ fontFamily: "'Geist Mono', monospace", fontSize: '11px' }}>
+                      <span style={{ fontWeight: 700 }}>Discovered Contact Emails: </span>
+                      {firecrawlData.emails.join(', ')}
+                    </div>
+                  )}
+
+                  {firecrawlData.signals && firecrawlData.signals.length > 0 && (
+                    <div style={{ fontFamily: "'Geist Mono', monospace", fontSize: '11px' }}>
+                      <span style={{ fontWeight: 700, color: '#B71C1C' }}>Detected Friction Points: </span>
+                      <ul style={{ margin: '4px 0 0 0', paddingLeft: '16px' }}>
+                        {firecrawlData.signals.map((sig: string, sIdx: number) => (
+                          <li key={sIdx}>{sig}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  <div>
+                    <div style={{ fontFamily: "'Geist Mono', monospace", fontSize: '10px', textTransform: 'uppercase', color: '#666', fontWeight: 700, marginBottom: '4px' }}>
+                      Clean Markdown Excerpt:
+                    </div>
+                    <div
+                      style={{
+                        fontFamily: "'Geist Mono', monospace",
+                        fontSize: '10.5px',
+                        color: '#333',
+                        background: '#FAF9F5',
+                        padding: '10px',
+                        borderRadius: '6px',
+                        border: '1px solid #eee',
+                        maxHeight: '130px',
+                        overflowY: 'auto',
+                        whiteSpace: 'pre-wrap',
+                      }}
+                    >
+                      {firecrawlData.markdown?.slice(0, 1500)}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           {showCsvBox && (
             <div
